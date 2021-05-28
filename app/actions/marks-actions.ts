@@ -1,7 +1,7 @@
 import { ActionTypeEnum, AppThunk } from ".";
 // import { post, getWithAuth, postWithAuth, setToken } from "./api";
-import { Mark } from "../store/types";
-
+import { Mark, POI } from "../store/types";
+import { Point } from 'geojson';
 
 export const loadMarksAction = (): AppThunk => {
   return async (dispatch) => {
@@ -31,5 +31,11 @@ export const addMarkAction = (mark: Mark): AppThunk => {
 export const removeMarkAction = (id: string): AppThunk => {
   return async (dispatch) => {
       dispatch({ type: ActionTypeEnum.RemoveMark, payload: id });
+  };
+};
+export const importPoisAction = (pois: POI[]): AppThunk => {
+  return async (dispatch) => {
+    const marks = pois.map(({id,name, point})=>({id, name, geometry: {type: 'Point', coordinates:[point.lng,point.lat]}}))
+      dispatch({ type: ActionTypeEnum.ImportPois, payload: marks });
   };
 };

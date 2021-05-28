@@ -3,7 +3,7 @@ import Config from 'react-native-config'
 import { connect, ConnectedProps } from "react-redux";
 import { Mark, State } from '../store/types'
 import { selectMarks } from '../reducers/marks'
-import { addMarkAction, removeMarkAction } from '../actions/marks-actions'
+import { addMarkAction, removeMarkAction, importPoisAction } from '../actions/marks-actions'
 import { View, Text } from "react-native";
 import { Slider } from 'react-native-elements';
 import styled from 'styled-components/native'
@@ -11,6 +11,7 @@ import MapboxGL from "@react-native-mapbox-gl/maps";
 import { featureCollection, feature } from '@turf/helpers';
 import EditMark from '../components/EditMark'
 import RemoveMark from '../components/RemoveMark'
+import ImportFile from '../components/ImportFile'
 
 MapboxGL.setAccessToken(Config.MAPBOX_PUB_KEY);
 
@@ -57,7 +58,8 @@ const mapStateToProps = (state: State) => ({
 });
 const mapDispatchToProps = {
     addMark: addMarkAction,
-    removeMark: removeMarkAction
+    removeMark: removeMarkAction,
+    importPois: importPoisAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector>
@@ -115,7 +117,7 @@ class Map extends Component<Props> {
     }
 
     render() {
-        const { marks } = this.props
+        const { marks, importPois } = this.props
         const { mark, showEdit, showRemove } = this.state
         const features = marks.map((mark) => {
             const aFeature = feature(mark.geometry);
@@ -159,6 +161,7 @@ class Map extends Component<Props> {
                 </SliderContainer>
                 {showEdit && mark && <EditMark mark={mark} save={this.onSave} cancel={this.onCancel} remove={mark.id ? this.onShowRemove : undefined} />}
                 {showRemove && mark && <RemoveMark mark={mark} remove={this.onRemove} cancel={this.onCancel} />}
+                <ImportFile onData={pois=>importPois(pois)}/>
             </Container>
         );
     }

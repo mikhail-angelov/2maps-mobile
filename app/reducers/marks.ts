@@ -17,6 +17,10 @@ export default createReducer<MarksState>(initialState, {
     ...state,
     marks: state.marks.filter(item => item.id !== id),
   }),
+  [ActionTypeEnum.ImportPois]: (marks) => (state) => ({
+    ...state,
+    marks: [...state.marks, ...marks],
+  }),
 });
 export const selectMarksState = (state: State) => state.marks;
 export const selectMarks = createSelector(

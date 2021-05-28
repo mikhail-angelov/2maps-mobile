@@ -16,4 +16,5 @@ export enum ActionTypeEnum {
   MarksFailure = "marks/MARKS_FAILURE",
   AddMark = "marks/ADD_MARK",
   RemoveMark = "marks/REMOVE_MARK",
+  ImportPois = "marks/IMPORT_POIS",
 }
