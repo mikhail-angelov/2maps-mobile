@@ -2,7 +2,7 @@ import React, { FC, useState } from "react";
 import styled from 'styled-components/native'
 import { View, Text } from "react-native";
 import {Button} from 'react-native-elements';
-import { Mark } from '../store/types'
+import { Feature, Point } from '@turf/helpers';
 
 
 const Container = styled(View)`
@@ -25,8 +25,8 @@ const FormContainer = styled(View)`
     bottom:0;
     left:0;
     right:0;
-    width: 400px;
-    height: 300px;
+    min-width: 50px;
+    height: 200px;
 `
 const ButtonsContainer = styled(View)`
     flex-direction: row;
@@ -38,11 +38,11 @@ const StyledText = styled(Text)`
     margin: 20px;
 `
 const StyledButton = styled(Button)`
-    width: 300px;
+    min-width: 50px;
 `
 
 interface Props {
-    mark: Mark;
+    mark: Feature<Point>;
     remove: () => void;
     cancel: () => void;
 }
@@ -51,7 +51,7 @@ const RemoveMark: FC<Props> = ({ mark, remove, cancel }) => {
     
     return <Container>
         <FormContainer>
-            <StyledText>Remove: {mark.name}?</StyledText>
+            <StyledText>Remove: {mark.properties?.name}?</StyledText>
             <ButtonsContainer>
                 <StyledButton onPress={() => remove()} title="Remove" buttonStyle={{width:150}} />
                 <StyledButton onPress={() => cancel()} title="Cancel" type="clear" buttonStyle={{width:150}}/>

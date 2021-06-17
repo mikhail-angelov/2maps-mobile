@@ -1,10 +1,10 @@
 
-import { Geometry } from 'geojson';
+import { Point } from 'geojson';
 
 export interface Mark {
-  id: string;
+  id: string | number;
   name: string;
-  geometry: Geometry;
+  geometry: Point;
 }
 
 export interface POI {
