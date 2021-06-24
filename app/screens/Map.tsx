@@ -1,60 +1,32 @@
 import React, { Component } from "react";
 import Config from 'react-native-config'
 import { connect, ConnectedProps } from "react-redux";
-import { find } from 'lodash'
-import { State } from '../store/types'
+import { find, set } from 'lodash'
+import { State, Mark } from '../store/types'
 import { selectMarks } from '../reducers/marks'
-import { addMarkAction, removeMarkAction, importPoisAction, exportPoisAction, featureToMark, markToFeature } from '../actions/marks-actions'
-import { selectActiveTrack, selectSelectedTrack, selectCompass, selectLocation, selectTracks } from '../reducers/tracker'
-import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
+import { addMarkAction, updateMarkAction, removeMarkAction, importPoisAction, exportPoisAction, removeAllPoisAction, featureToMark, markToFeature } from '../actions/marks-actions'
+import { selectActiveTrack, selectSelectedTrack, selectLocation, selectTracks } from '../reducers/tracker'
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { Slider } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import styled from 'styled-components/native'
 import MapboxGL, { CircleLayerStyle, LineLayerStyle, SymbolLayerStyle } from "@react-native-mapbox-gl/maps";
 import { featureCollection, Feature, Point, BBox, Position, lineString, point } from '@turf/helpers';
 import EditMark from '../components/EditMark'
-import RemoveMark from '../components/RemoveMark'
-import MenuList, { MENU } from '../components/MenuList'
 import NavigationPanel from '../components/NavigationPanel'
 import Tracks from '../components/Tracks'
 import Prompt from '../components/Prompt'
+import Markers from '../components/Markers'
 import { addPointAction, addTrackAction, selectTrackAction, startTrackingAction, stopTrackingAction } from "../actions/tracker-actions";
+import { setCenterAction, setOpacityAction, setZoomAction } from "../actions/map-actions";
+import { selectCenter, selectOpacity, selectZoom } from '../reducers/map'
 import { bboxToTiles } from '../utils/bbox'
 
 MapboxGL.setAccessToken(Config.MAPBOX_PUB_KEY);
 
-const CENTER_COORD = [44.320691, 56.090846];
 const MAPBOX_VECTOR_TILE_SIZE = 512;
 
 const ANNOTATION_SIZE = 245;
-
-const styles = StyleSheet.create({
-    annotationContainer: {
-        alignItems: 'center',
-        backgroundColor: 'white',
-        borderColor: 'rgba(0, 0, 0, 0.45)',
-        borderRadius: ANNOTATION_SIZE / 2,
-        borderWidth: StyleSheet.hairlineWidth,
-        height: ANNOTATION_SIZE,
-        justifyContent: 'center',
-        overflow: 'hidden',
-        width: ANNOTATION_SIZE,
-        fontSize: 20,
-    },
-    touchableContainer: { borderColor: 'black', borderWidth: 1.0, width: 60, backgroundColor: 'white', },
-    touchable: {
-        // backgroundColor: 'blue',
-        // width: 40,
-        height: 50,
-        borderRadius: 20,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    touchableText: {
-        color: 'white',
-        fontWeight: 'bold',
-    },
-});
 
 const rasterSourceProps = {
     id: 'stamenWatercolorSource',
@@ -116,12 +88,19 @@ const SelectedTrackStyle: LineLayerStyle = {
     lineOpacity: 0.84,
     lineColor: 'blue',
 }
-const CenterStyle: CircleLayerStyle = {
+const CurrentLocationStyle: CircleLayerStyle = {
     circleRadius: 10,
     circleColor: 'red',
     circleOpacity: 0.6,
     circleStrokeColor: 'white',
     circleStrokeWidth: 0.5,
+}
+const CenterStyle: CircleLayerStyle = {
+    circleRadius: 12,
+    circleColor: 'yellow',
+    circleOpacity: 0.7,
+    circleStrokeColor: 'black',
+    circleStrokeWidth: 1,
 }
 
 const MarkStyle: CircleLayerStyle = {
@@ -131,24 +110,20 @@ const MarkStyle: CircleLayerStyle = {
     circleStrokeColor: 'white',
     circleStrokeWidth: 0.5,
 }
-const BallonStyle: SymbolLayerStyle = {
-    // textField: ['get', 'description'],
-    textField: '{description}',
-    textSize: 12,
-    textPitchAlignment: 'map',
-    iconAllowOverlap: false,
-}
 
 const mapStateToProps = (state: State) => ({
     marks: selectMarks(state),
     tracks: selectTracks(state),
     activeTrack: selectActiveTrack(state),
     selectedTrack: selectSelectedTrack(state),
-    compass: selectCompass(state),
     location: selectLocation(state),
+    center: selectCenter(state),
+    opacity: selectOpacity(state),
+    zoom: selectZoom(state),
 });
 const mapDispatchToProps = {
     addMark: addMarkAction,
+    updateMark: updateMarkAction,
     removeMark: removeMarkAction,
     importPois: importPoisAction,
     exportPois: exportPoisAction,
@@ -157,6 +132,10 @@ const mapDispatchToProps = {
     stopTracking: stopTrackingAction,
     addPoint: addPointAction,
     addTrack: addTrackAction,
+    removeAllPois: removeAllPoisAction,
+    setCenter: setCenterAction,
+    setOpacity: setOpacityAction,
+    setZoom: setZoomAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector>
@@ -166,12 +145,11 @@ class Map extends Component<Props> {
     private map: MapboxGL.MapView | undefined
 
     state: {
-        opacity: number;
         showEdit: boolean;
-        showRemove: boolean;
         showMenu: boolean;
         showTracks: boolean;
         showTrackName: boolean;
+        showMarkers: boolean;
         tracking: boolean;
         loading: boolean;
         recording: boolean;
@@ -179,12 +157,11 @@ class Map extends Component<Props> {
         navigationMark?: Feature<Point>;
         newMark?: Feature<Point>
     } = {
-            opacity: 0.5,
             showEdit: false,
-            showRemove: false,
             showMenu: false,
             showTracks: false,
             showTrackName: false,
+            showMarkers: false,
             recording: false,
             tracking: false,
             loading: false,
@@ -195,55 +172,32 @@ class Map extends Component<Props> {
     }
     componentWillUnmount() {
     }
-    UNSAFE_componentWillUpdate(newProps: Props) {
+    UNSAFE_componentWillUpdate(newProps: Props, st: any) {
         const { tracking } = this.state
         const { location, addPoint } = this.props
         const { location: newLocation } = newProps
         if (tracking && location.coords.latitude !== newLocation.coords.latitude || location.coords.longitude !== newLocation.coords.longitude) {
             addPoint([newLocation.coords.longitude, newLocation.coords.latitude])
         }
-
     }
-    onHandleMenu = (item: MENU) => {
-        const { importPois, exportPois, selectTrack } = this.props
-        console.log('menu', item)
-        this.setState({ showMenu: false })
-        switch (item) {
-            case MENU.Import:
-                importPois();
-                break;
-            case MENU.Export:
-                exportPois();
-                break;
-            case MENU.ToggleTracking:
-                this.toggleTracking();
-                break;
-            case MENU.Tracks:
-                this.setState({ showTracks: true });
-                break;
-            case MENU.SelectTrack:
-                selectTrack(undefined)
-                break;
 
-        }
-    }
     onOpacityChange = (value: number) => {
-        this.setState({ opacity: value });
+        this.props.setOpacity(value);
     }
     onAddMark = async (e: any) => {
         const z = this.map?.getZoom()
         console.log('on new', e.geometry, z)
-        // this.setState({ showEdit: true, selected: undefined, newMark: feature(e.geometry) })
+        this.setState({ showEdit: true, selected: undefined, newMark: e })
     }
-    onOffline= async () => {
+    onOffline = async () => {
         const b = await this.map?.getVisibleBounds()
         if (!b) {
             return
         }
         const bb = [...b[1], ...b[0]] as BBox
         const tiles = bboxToTiles(bb)
-        const z = this.map?.getZoom()
-
+        const z = await this.map?.getZoom()
+        console.log('--', b, z, tiles.length)
         const pacName = 'test'
         const p = await MapboxGL.offlineManager.getPack(pacName)
         if (p) {
@@ -255,17 +209,17 @@ class Map extends Component<Props> {
             name: pacName,
             styleURL: MapboxGL.StyleURL.SatelliteStreet,
             bounds: b as [Position, Position],
-            minZoom: 1,
-            maxZoom: 20,
+            minZoom: 13,
+            maxZoom: 18,
         };
 
         MapboxGL.offlineManager.createPack(options, (offlineRegion, offlineRegionStatus) => {
             console.log('on load', offlineRegion, offlineRegionStatus)
-            if(offlineRegionStatus.state !== 1){
-                this.setState({loading: false})
+            if (offlineRegionStatus.state !== 1) {
+                this.setState({ loading: false })
             }
         });
-        this.setState({loading: true})
+        this.setState({ loading: true })
     }
     onMarkPress = ({ features }: any) => {
         const feature = features[0]
@@ -283,19 +237,17 @@ class Map extends Component<Props> {
         this.props.addMark(mark)
         this.setState({ showEdit: false })
     }
-    onSave = (feature: Feature<Point>, data: { name: string }) => {
+    onSave = (feature: Feature<Point>, data: { name: string; description: string }) => {
         if (!feature.properties?.id) {
             feature.properties = feature.properties || {}
             feature.properties.id = `${Date.now()}`
         }
         const mark = featureToMark(feature)
         mark.name = data.name
+        mark.description = data.description
         const newFeature = markToFeature(mark)
         this.setState({ showEdit: false, selected: newFeature })
-        this.props.addMark(mark)
-    }
-    onShowRemove = () => {
-        this.setState({ showEdit: false, showRemove: true })
+        this.props.updateMark(mark)
     }
     onNavigate = () => {
         if (!this.state.selected?.id) {
@@ -303,15 +255,12 @@ class Map extends Component<Props> {
         }
         this.setState({ showEdit: false, navigationMark: { ...this.state.selected }, tracking: true })
     }
-    onRemove = () => {
-        if (!this.state.selected?.id) {
-            return
-        }
-        this.props.removeMark(this.state.selected.id + '')
-        this.setState({ showRemove: false, selected: undefined })
+    onRemove = (id: string) => {
+        this.props.removeMark(id)
+        this.setState({ selected: undefined })
     }
     onCancel = () => {
-        this.setState({ showEdit: false, showRemove: false, newMark: undefined })
+        this.setState({ showEdit: false, newMark: undefined })
     }
     toggleTracking = () => {
         const { tracking } = this.state
@@ -336,7 +285,7 @@ class Map extends Component<Props> {
         this.setState({ showTrackName: false })
     }
     toggleNavigation = () => {
-        const { selected, navigationMark } = this.state
+        const { navigationMark } = this.state
         if (navigationMark) {
             this.setState({ navigationMark: undefined })
             return
@@ -353,42 +302,58 @@ class Map extends Component<Props> {
         const center = [location.coords.longitude, location.coords.latitude]
         this.camera?.moveTo(center, 500)
     }
+    updateCenter = async (e: Feature<Point>) => {
+        console.log('update center', this.props.center, e)
+        this.props.setCenter(e.geometry.coordinates)
+        const z = await this.map?.getZoom()
+        this.props.setZoom(z || 15)
+    }
+    selectMark = (mark: Mark) => {
+        const selected = markToFeature(mark)
+        this.setState({ showMarkers: false, selected })
+        this.camera?.moveTo(mark.geometry.coordinates, 500)
+    }
+    importPois = () => this.props.importPois()
+    exportPois = () => this.props.exportPois()
+    removeAllPois = () => this.props.removeAllPois()
+    onCloseMarkers = () => this.setState({ showMarkers: false })
 
     render() {
-        const { marks, compass, location, tracks, activeTrack, selectedTrack } = this.props
-        const { selected, showEdit, showRemove, navigationMark, tracking,loading, recording, newMark, showMenu, showTracks, showTrackName } = this.state
-        const center = [location.coords.longitude, location.coords.latitude]
+        const { marks, location, tracks, activeTrack, selectedTrack, opacity, center, zoom } = this.props
+        const { selected, showEdit, navigationMark, tracking, loading, recording, newMark, showMenu, showTracks, showTrackName, showMarkers } = this.state
         const marksCollection = featureCollection(marks.map(markToFeature))
 
         const route = activeTrack && activeTrack.track.length > 1 ? lineString(activeTrack.track) : null
         const selectedRoute = selectedTrack && selectedTrack.track.length > 1 ? lineString(selectedTrack.track) : null
 
+        // const currentLocation = [location.coords.longitude, location.coords.latitude]
+        // const currentLocationFeature = point(currentLocation)
+        // currentLocationFeature.id = 'currentLocationFeature'
         const centerFeature = point(center)
-        centerFeature.id = 'center'
+        console.log('render', zoom)
         return (
             <Container>
                 <StyledMap zoomEnabled compassEnabled
                     compassViewMargins={{ x: 0, y: 100 }}
                     styleURL={MapboxGL.StyleURL.SatelliteStreet}
                     onLongPress={this.onAddMark}
+                    onRegionDidChange={this.updateCenter}
                     ref={(m: MapboxGL.MapView) => (this.map = m)}
                 >
                     <MapboxGL.Camera
                         ref={(c: MapboxGL.Camera) => (this.camera = c)}
-                        zoomLevel={15}
-                        centerCoordinate={CENTER_COORD}
+                        zoomLevel={zoom}
+                        centerCoordinate={center}
                         followUserLocation={tracking}
-                        followZoomLevel={16}
-                        followPitch={45}
+                        followZoomLevel={zoom}
                         followHeading={0}
                         followUserMode='course'
-
                     />
                     <MapboxGL.RasterSource {...rasterSourceProps}>
                         <MapboxGL.RasterLayer
                             id="stamenWatercolorLayer"
                             sourceID="stamenWatercolorSource"
-                            style={{ rasterOpacity: this.state.opacity }}
+                            style={{ rasterOpacity: opacity }}
                         />
                     </MapboxGL.RasterSource>
 
@@ -399,6 +364,11 @@ class Map extends Component<Props> {
                         shape={marksCollection}>
                         <MapboxGL.CircleLayer id='marks' style={MarkStyle} minZoomLevel={1} />
                     </MapboxGL.ShapeSource>
+                    {center && <MapboxGL.ShapeSource
+                        id="markCenter"
+                        shape={centerFeature}>
+                        <MapboxGL.CircleLayer id='cent' style={CenterStyle} minZoomLevel={1} />
+                    </MapboxGL.ShapeSource>}
 
                     {selected && <MapboxGL.MarkerView
                         id="sel"
@@ -420,14 +390,14 @@ class Map extends Component<Props> {
                             <MapboxGL.Callout title={`${center}`} />
                         </TouchableOpacity>
                     </MapboxGL.MarkerView> */}
-                    <MapboxGL.ShapeSource
+                    {/* <MapboxGL.ShapeSource
                         id="centerSource"
-                        shape={centerFeature}
-                        onPress={() => this.camera?.moveTo(centerFeature.geometry.coordinates, 500)}
+                        shape={currentLocationFeature}
+                        onPress={() => this.camera?.moveTo(currentLocationFeature.geometry.coordinates, 500)}
                     >
-                        <MapboxGL.CircleLayer id='center' style={CenterStyle} minZoomLevel={1} />
+                        <MapboxGL.CircleLayer id='center' style={CurrentLocationStyle} minZoomLevel={1} />
                         {selected && <MapboxGL.Callout title={selected.properties?.name} ></MapboxGL.Callout>}
-                    </MapboxGL.ShapeSource>
+                    </MapboxGL.ShapeSource> */}
                     {route && <MapboxGL.ShapeSource id='track' shape={route}>
                         <MapboxGL.LineLayer id='lineLayer' style={TrackStyle} minZoomLevel={1} />
                     </MapboxGL.ShapeSource>}
@@ -437,7 +407,7 @@ class Map extends Component<Props> {
                 </StyledMap>
                 <SliderContainer>
                     <StyledSlider
-                        value={this.state.opacity}
+                        value={opacity}
                         onValueChange={this.onOpacityChange}
                         thumbTintColor="#4264fb"
                         thumbTouchSize={{ width: 44, height: 44 }}
@@ -446,19 +416,19 @@ class Map extends Component<Props> {
                     />
                 </SliderContainer>
                 <Buttons>
-                    <MenuButton name="dehaze" color="black" backgroundColor="#fff5" onPress={() => this.setState({ showMenu: true })} />
+                    <MenuButton name="insights" color="black" backgroundColor="#fff5" onPress={() => this.setState({ showTracks: true })} />
+                    <View style={{ height: 40 }} />
+                    <MenuButton name="location-pin" color="black" backgroundColor="#fff5" onPress={() => this.setState({ showMarkers: true })} />
                     <View style={{ height: 40 }} />
                     <MenuButton name="gps-fixed" color={tracking ? "red" : "black"} backgroundColor="#fff5" onPress={this.toggleTracking} />
                     <View style={{ height: 40 }} />
-                    <MenuButton name="gps-fixed" color="black" backgroundColor="#fff5" onPress={this.onCenter} />
-                    <View style={{ height: 40 }} />
-                    <MenuButton name={loading?"hourglass-bottom":"save"} color="black" backgroundColor="#fff5" onPress={this.onOffline} />
+                    {/* <MenuButton name={loading ? "hourglass-bottom" : "save"} color="black" backgroundColor="#fff5" onPress={this.onOffline} /> */}
                 </Buttons>
                 {showEdit && selected && <EditMark
                     mark={selected}
                     save={(data) => this.onSave(selected, data)}
                     cancel={this.onCancel}
-                    remove={this.onShowRemove}
+                    remove={this.onRemove}
                     navigate={this.onNavigate}
                 />}
                 {showEdit && newMark && <EditMark
@@ -466,15 +436,53 @@ class Map extends Component<Props> {
                     save={(data) => this.onCreate(newMark, data)}
                     cancel={this.onCancel}
                 />}
-                {showRemove && selected && <RemoveMark mark={selected} remove={() => this.onRemove()} cancel={this.onCancel} />}
 
-                {navigationMark && <NavigationPanel location={location} compass={compass} target={navigationMark.geometry.coordinates} close={() => this.setState({ navigationMark: undefined })} />}
-                {showMenu && <MenuList handle={this.onHandleMenu} isRecording={recording} isTracking={tracking} />}
-                {showTracks && <Tracks select={this.onSelectTrack} tracks={tracks} close={() => this.setState({ showTracks: false })} />}
+                {navigationMark && <NavigationPanel target={navigationMark.geometry.coordinates} close={() => this.setState({ navigationMark: undefined })} />}
+                {showTracks && <Tracks
+                    select={this.onSelectTrack}
+                    toggleTracking={this.toggleTracking}
+                    unSelect={this.toggleNavigation}
+                    isTracking={tracking} tracks={tracks} close={() => this.setState({ showTracks: false })} />}
                 {showTrackName && <Prompt visible alertSubject="Enter track name" promptText="" successfulAnswer={this.onNameTrack} cancelAnswer={this.onCancelNameTrack} />}
+                {showMarkers && center && <Markers
+                    markers={marks}
+                    center={center}
+                    select={this.selectMark}
+                    importMarks={this.importPois}
+                    exportMarks={this.exportPois}
+                    removeAll={this.removeAllPois}
+                    close={this.onCloseMarkers} />}
             </Container>
         );
     }
 }
 
 export default connector(Map)
+
+const styles = StyleSheet.create({
+    annotationContainer: {
+        alignItems: 'center',
+        backgroundColor: 'white',
+        borderColor: 'rgba(0, 0, 0, 0.45)',
+        borderRadius: ANNOTATION_SIZE / 2,
+        borderWidth: StyleSheet.hairlineWidth,
+        height: ANNOTATION_SIZE,
+        justifyContent: 'center',
+        overflow: 'hidden',
+        width: ANNOTATION_SIZE,
+        fontSize: 20,
+    },
+    touchableContainer: { borderColor: 'black', borderWidth: 1.0, width: 60, backgroundColor: 'white', },
+    touchable: {
+        // backgroundColor: 'blue',
+        // width: 40,
+        height: 50,
+        borderRadius: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    touchableText: {
+        color: 'white',
+        fontWeight: 'bold',
+    },
+});

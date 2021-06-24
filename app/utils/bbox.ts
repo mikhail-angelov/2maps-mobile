@@ -7,8 +7,8 @@ import {flatten} from 'lodash'
 
 // TODO - move this to an appropriate config file
 const tileLimits = {
-  min_zoom: 1,
-  max_zoom: 19
+  min_zoom: 18,
+  max_zoom: 18,
 }
 
 /**

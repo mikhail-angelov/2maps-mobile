@@ -35,7 +35,7 @@ const Tracker: React.FC<Props> = ({ setCompass, setLocation }) => {
       console.log('location!!', location);
 
       sub = await Location.watchPositionAsync({timeInterval: 200, distanceInterval: 10}, (newLocation) => {
-        console.log('location', newLocation)
+        console.log('+location', newLocation)
         setLocation(newLocation)
       })
 

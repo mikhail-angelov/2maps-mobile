@@ -1,13 +1,14 @@
 import React from "react";
+import { connect, ConnectedProps } from "react-redux";
 import styled from 'styled-components/native'
 import { View, Text, Image } from "react-native";
 import { Button } from 'react-native-elements';
 import { Position } from '@turf/helpers';
 import distance from '@turf/distance';
 import bearing from '@turf/bearing';
-import { ThreeAxisMeasurement } from 'expo-sensors';
-import { LocationObject } from 'expo-location';
+import { State } from '../store/types'
 import { compassAngle } from '../actions/tracker-actions'
+import { selectCompass, selectLocation } from '../reducers/tracker'
 
 const redArrowIcon = require('../assets/arrow.png')
 const compassIcon = require('../assets/compass.png')
@@ -66,12 +67,17 @@ const Arrow = styled(Image)`
     transform: ${(props: { angle: number }) => `rotate(${props.angle}deg)`};
 `
 
-interface Props {
+interface OwnProps {
     target: Position;
-    location: LocationObject;
-    compass: ThreeAxisMeasurement;
     close: () => void;
 }
+const mapStateToProps = (state: State) => ({
+    location: selectLocation(state),
+    compass: selectCompass(state),
+});
+
+const connector = connect(mapStateToProps)
+type Props = ConnectedProps<typeof connector> & OwnProps
 
 const NavigationPanel: React.FC<Props> = ({ location, target, compass, close }) => {
     const heading = compassAngle(compass)
@@ -96,4 +102,4 @@ const NavigationPanel: React.FC<Props> = ({ location, target, compass, close }) 
     </Container>
 }
 
-export default NavigationPanel
+export default connector(NavigationPanel)

@@ -4,12 +4,14 @@ import { Point } from 'geojson';
 export interface Mark {
   id: string | number;
   name: string;
+  description: string;
   geometry: Point;
 }
 
 export interface POI {
   id: string;
   name: string;
+  description: string;
   point: {
     lat: number;
     lng: number

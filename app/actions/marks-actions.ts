@@ -5,13 +5,14 @@ import { Mark, POI } from "../store/types";
 import { feature, Feature, Point } from '@turf/helpers';
 import DocumentPicker from 'react-native-document-picker';
 import RNFS from 'react-native-fs'
-import {selectMarks, } from '../reducers/marks'
+import { selectMarks, } from '../reducers/marks'
 
 export const markToFeature = (mark: Mark): Feature<Point> => {
   const aFeature = feature(mark.geometry);
   aFeature.id = mark.id;
   aFeature.properties = {
-    description: `<strong>${mark.name}</strong>`,
+    description: `<strong>${mark.description || mark.name}</strong>`,
+    description_orig: mark.description,
     name: mark.name,
     icon: '',
   };
@@ -22,6 +23,7 @@ export const featureToMark = (feature: Feature<Point>): Mark => {
     geometry: feature.geometry,
     id: feature.id || '',
     name: feature.properties?.name || '',
+    description: feature.properties?.description_orig || '',
   };
   return mark
 }
@@ -48,12 +50,22 @@ export const loadMarksAction = (): AppThunk => {
 
 export const addMarkAction = (mark: Mark): AppThunk => {
   return async (dispatch) => {
-    dispatch({ type: ActionTypeEnum.AddMark, payload: mark });
+    dispatch({ type: ActionTypeEnum.AddMark, payload: {...mark, id: `${Date.now()}`} });
+  };
+};
+export const updateMarkAction = (mark: Mark): AppThunk => {
+  return async (dispatch) => {
+    dispatch({ type: ActionTypeEnum.UpdateMark, payload: mark });
   };
 };
 export const removeMarkAction = (id: string): AppThunk => {
   return async (dispatch) => {
     dispatch({ type: ActionTypeEnum.RemoveMark, payload: id });
+  };
+};
+export const removeAllPoisAction = (): AppThunk => {
+  return async (dispatch) => {
+    dispatch({ type: ActionTypeEnum.RemoveAllMarks });
   };
 };
 export const importPoisAction = (): AppThunk => {
@@ -72,8 +84,7 @@ export const importPoisAction = (): AppThunk => {
       );
       const data = await RNFS.readFile(decodeURI(res.fileCopyUri), 'utf8')
       const pois = JSON.parse(data) as POI[]
-      console.log('-1-', pois)
-      const marks = pois.map(({ id, name, point }) => ({ id, name, geometry: { type: 'Point', coordinates: [point.lng, point.lat] } }))
+      const marks = pois.map(({ id, name = '', description = '', point }) => ({ id, name, description, geometry: { type: 'Point', coordinates: [point.lng, point.lat] } }))
       dispatch({ type: ActionTypeEnum.ImportPois, payload: marks });
     } catch (err) {
       if (DocumentPicker.isCancel(err)) {
@@ -87,15 +98,15 @@ export const importPoisAction = (): AppThunk => {
 export const exportPoisAction = (): AppThunk => {
   return async (dispatch, getState) => {
     const pois = selectMarks(getState())
-    let url =''
+    let url = ''
     try {
       const data = JSON.stringify(pois)
-      url =  RNFS.DocumentDirectoryPath + '/poi.json';
+      url = RNFS.DocumentDirectoryPath + '/poi.json';
       console.log('writing to:', url, '\n')
       await RNFS.writeFile(decodeURI(url), data, 'utf8')
       Alert.alert('Markers are saved', `to ${url}`)
     } catch (err) {
-      console.log('Error write to:', url, '\n',err)
+      console.log('Error write to:', url, '\n', err)
       Alert.alert('Oops', `do not manage to save it ${url}`)
       if (DocumentPicker.isCancel(err)) {
         // User cancelled the picker, exit any dialogs or menus and move on

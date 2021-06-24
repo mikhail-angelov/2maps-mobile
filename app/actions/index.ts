@@ -15,7 +15,9 @@ export enum ActionTypeEnum {
   MarksSuccess = "marks/MARKS_SUCCESS",
   MarksFailure = "marks/MARKS_FAILURE",
   AddMark = "marks/ADD_MARK",
+  UpdateMark = "marks/UPDATE_MARK",
   RemoveMark = "marks/REMOVE_MARK",
+  RemoveAllMarks = "marks/REMOVE_ALL_MARKS",
   ImportPois = "marks/IMPORT_POIS",
   //tracker
   SetCompass = 'tracker/SET_COMPASS',
@@ -27,4 +29,8 @@ export enum ActionTypeEnum {
   StartTracking = 'tracker/START_TRACKING',
   EndTracking = 'tracker/END_TRACKING',
   AddPoint = 'tracker/ADD_POINT',
+  //map
+  SetCenter='map/SET_CENTER',
+  SetOpacity='map/SET_OPACITY',
+  SetZoom='map/SET_ZOOM',
 }
