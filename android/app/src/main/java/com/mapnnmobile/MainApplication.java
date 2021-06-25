@@ -1,7 +1,6 @@
 package com.mapnnmobile;
 
 import com.mapnnmobile.generated.BasePackageList;
-import com.mapnnmobile.FullScreenPackage;
 
 import android.app.Application;
 import android.content.Context;
@@ -42,7 +41,6 @@ public class MainApplication extends Application implements ReactApplication {
             new ModuleRegistryAdapter(mModuleRegistryProvider)
           );
           packages.addAll(unimodules);
-          packages.add(new FullScreenPackage());
 
           return packages;
         }
