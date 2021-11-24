@@ -1,11 +1,14 @@
 import React, { FC } from "react";
-import { View, FlatList, StyleSheet } from "react-native";
+import { View, FlatList, StyleSheet, Modal } from "react-native";
+import { connect, ConnectedProps } from "react-redux";
 import { ListItem } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import distance from '@turf/distance';
 import { orderBy } from 'lodash'
 import dayjs from 'dayjs'
-import { Track } from '../store/types'
+import { State } from '../store/types'
+import { selectIsTracking, selectTracks } from '../reducers/tracker'
+import { addPointAction, addTrackAction, selectTrackAction, startTrackingAction, stopTrackingAction, getLocation } from "../actions/tracker-actions";
 
 export enum MENU {
     Cancel,
@@ -21,16 +24,32 @@ interface Item {
     subtitle: string;
 }
 
-interface Props {
-    tracks: Track[];
-    isTracking: boolean;
-    select: (id: string) => void;
-    toggleTracking: () => void;
-    unSelect: () => void;
-    close: () => void;
-}
+const mapStateToProps = (state: State) => ({
+    tracks: selectTracks(state),
+    isTracking: selectIsTracking(state),
+});
+const mapDispatchToProps = {
+    selectTrack: selectTrackAction,
+    startTracking: startTrackingAction,
+    stopTracking: stopTrackingAction,
+};
+const connector = connect(mapStateToProps, mapDispatchToProps)
+type Props = ConnectedProps<typeof connector> & { close: () => void }
 
-const Tracks: FC<Props> = ({ tracks, isTracking, toggleTracking, unSelect, select, close }) => {
+
+
+const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, selectTrack, close }) => {
+    const toggleTracking = () => {
+        if (isTracking) {
+            stopTracking()
+        } else {
+            startTracking()
+        }
+    }
+    const onSelectTrack = (id: string) => {
+        const track = tracks.find((item) => item.id === id)
+        selectTrack(track)
+    }
     const list: Item[] = orderBy(tracks, 'start', 'desc').map(({ id, name, start, end, track }) => {
         const l = distance(track[0], track[track.length - 1]).toFixed(3)
         const subtitle = `T: ${dayjs(end - start).format('HH:mm')}, L: ${l} km.`
@@ -43,7 +62,7 @@ const Tracks: FC<Props> = ({ tracks, isTracking, toggleTracking, unSelect, selec
 
     const keyExtractor = (item: Item) => item.id
     const renderItem = ({ item }: { item: Item }) => (
-        <ListItem bottomDivider onPress={() => select(item.id)}>
+        <ListItem bottomDivider onPress={() => onSelectTrack(item.id)}>
             <Icon name='map' />
             <ListItem.Content>
                 <ListItem.Title>{item.title}</ListItem.Title>
@@ -51,10 +70,11 @@ const Tracks: FC<Props> = ({ tracks, isTracking, toggleTracking, unSelect, selec
             </ListItem.Content>
         </ListItem>
     )
-    return <View style={styles.container}>
+
+    return <Modal style={styles.container} visible onRequestClose={close}>
         <View style={styles.buttons}>
             <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name={isTracking ? 'gps-not-fixed' : 'gps-fixed'} onPress={toggleTracking} />
-            <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="share" onPress={unSelect} />
+            <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="share" onPress={() => selectTrack(undefined)} />
             <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="close" onPress={close} />
         </View>
         <View style={styles.scroll}>
@@ -65,10 +85,10 @@ const Tracks: FC<Props> = ({ tracks, isTracking, toggleTracking, unSelect, selec
                 contentContainerStyle={{ paddingBottom: 30 }}
             />
         </View>
-    </View>
+    </Modal>
 }
 
-export default Tracks
+export default connector(Tracks)
 
 
 const styles = StyleSheet.create({
@@ -80,12 +100,13 @@ const styles = StyleSheet.create({
     },
     scroll: {
         height: '90%',
+        backgroundColor: '#fff',
     },
     buttons: {
         flexDirection: 'row',
         justifyContent: "flex-end",
         padding: 10,
-        backgroundColor: '#ccc',
+        backgroundColor: '#303846',
     },
     titleButton: {
         textAlign: 'center',

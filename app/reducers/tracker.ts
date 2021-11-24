@@ -1,4 +1,5 @@
 import { createSelector } from "reselect";
+import MapboxGL from "@react-native-mapbox-gl/maps";
 import { TrackerState, State, Track } from "../store/types";
 import { ActionTypeEnum } from "../actions";
 import { createReducer } from "./reducer-utils";
@@ -20,48 +21,54 @@ const initialState: TrackerState = Object.freeze({
   },
   compass: { x: 0, y: 0, z: 0 },
   tracks: [],
+  tracking: false,
 });
 
 export default createReducer<TrackerState>(initialState, {
-  [ActionTypeEnum.SetCompass]: (compass) => (state) => ({
+  [ActionTypeEnum.SetCompass]: (compass: any) => (state:TrackerState) => ({
     ...state,
     compass,
   }),
-  [ActionTypeEnum.SetLocation]: (location) => (state) => ({
-    ...state,
-    location,
-  }),
-  [ActionTypeEnum.SetTracks]: (tracks: Track[]) => (state) => ({
+  [ActionTypeEnum.SetLocation]: (location: MapboxGL.Location) => (state:TrackerState) =>{
+    console.log('set location', location);
+    return {
+      ...state,
+      location,
+    }
+    },
+  [ActionTypeEnum.SetTracks]: (tracks: Track[]) => (state:TrackerState) => ({
     ...state,
     tracks,
   }),
-  [ActionTypeEnum.AddTrack]: (track: Track) => (state) => ({
+  [ActionTypeEnum.AddTrack]: (track: Track) => (state:TrackerState) => ({
     ...state,
     tracks: [...state.tracks, track],
   }),
-  [ActionTypeEnum.RemoveTrack]: (trackId: string) => (state) => ({
+  [ActionTypeEnum.RemoveTrack]: (trackId: string) => (state:TrackerState) => ({
     ...state,
     tracks: state.tracks.filter(item => item.id !== trackId),
   }),
-  [ActionTypeEnum.SetSelectedTrack]: (selectedTrack) => (state) => ({
+  [ActionTypeEnum.SetSelectedTrack]: (selectedTrack?:Track) => (state:TrackerState) => ({
     ...state,
     selectedTrack,
   }),
-  [ActionTypeEnum.StartTracking]: (activeTrack: Track) => (state) => ({
+  [ActionTypeEnum.StartTracking]: (activeTrack: Track) => (state:TrackerState) => ({
     ...state,
     activeTrack,
+    tracking: true,
   }),
-  [ActionTypeEnum.EndTracking]: () => (state) => ({
+  [ActionTypeEnum.EndTracking]: () => (state:TrackerState) => ({
     ...state,
     activeTrack: undefined,
+    tracking: false,
   }),
-  [ActionTypeEnum.AddPoint]: (point) => (state) => {
+  [ActionTypeEnum.AddPoint]: (location: MapboxGL.Location) => (state:TrackerState) => {
     if (!state.activeTrack) {
       return state
     }
     return {
       ...state,
-      activeTrack: { ...state.activeTrack, track: [...state.activeTrack.track, point], end: Date.now() },
+      activeTrack: { ...state.activeTrack, track: [...state.activeTrack.track, [location.coords.longitude, location.coords.latitude]], end: Date.now() },
     }
   },
 });
@@ -81,6 +88,10 @@ export const selectTracks = createSelector(
 export const selectActiveTrack = createSelector(
   selectTrackerState,
   (state) => state.activeTrack
+);
+export const selectIsTracking = createSelector(
+  selectTrackerState,
+  (state) => state.tracking
 );
 export const selectSelectedTrack = createSelector(
   selectTrackerState,

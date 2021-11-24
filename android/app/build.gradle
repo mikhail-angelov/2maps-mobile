@@ -141,8 +141,9 @@ android {
         applicationId "com.mapnnmobile"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
-        versionName "2.0"
+        missingDimensionStrategy 'react-native-camera', 'general'
+        versionCode 3
+        versionName "1.0"
     }
     splits {
         abi {
@@ -228,6 +229,12 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    //local http server
+    implementation 'org.nanohttpd:nanohttpd:2.3.1'
+
+    //local gson
+    implementation "com.google.code.gson:gson:2.8.6"
 }
 
 // Run this once to be able to run the application with BUCK

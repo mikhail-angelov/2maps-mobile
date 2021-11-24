@@ -2,25 +2,23 @@ import React, { FC, useState, useCallback } from "react";
 import { View, Linking, TextInput, Text, Alert, Modal, Pressable, StyleSheet, TouchableWithoutFeedback } from "react-native";
 import { Button } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { Feature, Point } from '@turf/helpers';
-
+import { Mark } from '../store/types'
 
 interface Props {
-    mark: Feature<Point>;
+    mark: Mark;
     save: (data: { name: string, description: string }) => void;
     remove?: (id: string) => void;
-    navigate?: () => void;
     cancel: () => void;
 }
 
-const EditMark: FC<Props> = ({ mark, save, cancel, remove, navigate }) => {
-    const [name, setName] = useState<string>(mark.properties?.name || '')
-    const [description, setDescription] = useState<string>(mark.properties?.description_orig || '')
+const EditMark: FC<Props> = ({ mark, save, cancel, remove }) => {
+    const [name, setName] = useState<string>(mark?.name || '')
+    const [description, setDescription] = useState<string>(mark?.description || '')
     const [isEdit, setIsEdit] = useState(!mark.id)
     console.log('ed', description)
     const openLink = useCallback(async () => {
         const { coordinates } = mark.geometry
-        const url = `http://osmand.net/go?lat=${coordinates[1]}&lon=${coordinates[0]}&z=16&name=${mark.properties?.name || ''}`
+        const url = `http://osmand.net/go?lat=${coordinates[1]}&lon=${coordinates[0]}&z=16&name=${mark?.name || ''}`
         const supported = await Linking.canOpenURL(url);
 
         if (supported) {
@@ -31,7 +29,7 @@ const EditMark: FC<Props> = ({ mark, save, cancel, remove, navigate }) => {
     }, [mark]);
 
     const onRemove = () => {
-        if(!remove){
+        if (!remove) {
             return
         }
         Alert.alert(
@@ -39,7 +37,7 @@ const EditMark: FC<Props> = ({ mark, save, cancel, remove, navigate }) => {
             `Are you sure to remove ${name} marker?`,
             [
                 { text: "No", style: "cancel" },
-                { text: "Yes", onPress: ()=>remove(mark.id?.toString()||'') }
+                { text: "Yes", onPress: () => remove(mark.id?.toString() || '') }
             ]
         );
     }
@@ -58,13 +56,15 @@ const EditMark: FC<Props> = ({ mark, save, cancel, remove, navigate }) => {
 
             <View style={styles.modalView}>
 
-                {isEdit ? <View style={styles.content}><TextInput
-                    style={styles.modalInput}
-                    onChangeText={(value) => setName(value)}
-                    placeholder="name"
-                    value={name}
-                />
-
+                {isEdit ? <View style={styles.content}>
+                    <Text>Name:</Text>
+                    <TextInput
+                        style={styles.modalInput}
+                        onChangeText={(value) => setName(value)}
+                        placeholder="name"
+                        value={name}
+                    />
+                    <Text>Description:</Text>
                     <TextInput
                         style={styles.modalInput}
                         onChangeText={(value) => setDescription(value)}
@@ -82,14 +82,14 @@ const EditMark: FC<Props> = ({ mark, save, cancel, remove, navigate }) => {
                         <Button buttonStyle={styles.btn} type="clear" onPress={() => save({ name, description })} icon={<Icon name="save" size={26} color="grey" />} />
                     </> : <Button buttonStyle={styles.btn} type="clear" onPress={() => setIsEdit(true)} icon={<Icon name="edit" size={26} color="grey" />} />}
                     <Button buttonStyle={styles.btn} type="clear" onPress={openLink} icon={<Icon name="link" size={26} color="grey" />} />
-                    {navigate && <Button buttonStyle={styles.btn} type='clear' onPress={navigate} icon={<Icon name="compass" size={26} color="grey" />} />}
+                    {/* {navigate && <Button buttonStyle={styles.btn} type='clear' onPress={navigate} icon={<Icon name="compass" size={26} color="grey" />} />} */}
                     {remove && <Button buttonStyle={styles.btn} type='clear' onPress={onRemove} icon={<Icon name="trash" size={26} color="grey" />} />}
                 </View>
                 <Pressable
                     style={[styles.button, styles.buttonClose]}
                     onPress={cancel}
                 >
-                    <Text style={styles.textStyle}>Close</Text>
+                    <Text style={styles.textStyle}>✕</Text>
                 </Pressable>
             </View>
         </View>
@@ -115,10 +115,12 @@ const styles = StyleSheet.create({
         marginTop: 22
     },
     modalView: {
+        position: 'relative',
         margin: 20,
         backgroundColor: "white",
         borderRadius: 20,
         padding: 35,
+        paddingTop: 64,
         alignItems: "flex-start",
         shadowColor: "#000",
         shadowOffset: {
@@ -128,7 +130,8 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
-        maxWidth: '50%',
+        maxWidth: '80%',
+        minWidth: '80%',
     },
     content: {
         minWidth: '100%',
@@ -158,6 +161,10 @@ const styles = StyleSheet.create({
     },
     buttonClose: {
         backgroundColor: "#2196F3",
+        position: "absolute",
+        top: 20,
+        right: 20,
+        width: 40,
     },
     textStyle: {
         color: "white",

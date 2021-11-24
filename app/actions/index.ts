@@ -10,11 +10,25 @@ export type AppThunk<ReturnType = void> = ThunkAction<
 >;
 
 export enum ActionTypeEnum {
+  // auth
+  AuthError = 'auth/ERROR',
+  LoginRequest = "auth/LOGIN_REQUEST",
+  LoginSuccess = "auth/LOGIN_SUCCESS",
+  LoginFailure = "auth/LOGIN_FAILURE",
+  LogoutRequest = "auth/LOGOUT_REQUEST",
+  LogoutSuccess = "auth/LOGOUT_SUCCESS",
+  LogoutFailure = "auth/LOGOUT_FAILURE",
+  SignUpRequest = "auth/SIGN_UP_REQUEST",
+  SignUpSuccess = "auth/SIGN_UP_SUCCESS",
+  SignUpFailure = "auth/SIGN_UP_FAILURE",
+
   // marks
   MarksRequest = "marks/MARKS_REQUEST",
   MarksSuccess = "marks/MARKS_SUCCESS",
   MarksFailure = "marks/MARKS_FAILURE",
   AddMark = "marks/ADD_MARK",
+  EditMark = "marks/EDIT_MARK",
+  SaveMark = "marks/SAVE_MARK",
   UpdateMark = "marks/UPDATE_MARK",
   RemoveMark = "marks/REMOVE_MARK",
   RemoveAllMarks = "marks/REMOVE_ALL_MARKS",
@@ -30,7 +44,17 @@ export enum ActionTypeEnum {
   EndTracking = 'tracker/END_TRACKING',
   AddPoint = 'tracker/ADD_POINT',
   //map
-  SetCenter='map/SET_CENTER',
-  SetOpacity='map/SET_OPACITY',
-  SetZoom='map/SET_ZOOM',
+  SetCenter = 'map/SET_CENTER',
+  SetOpacity = 'map/SET_OPACITY',
+  SetZoom = 'map/SET_ZOOM',
+  SetStyleUrl = 'map/SET_STYLE_URL',
+  SetPrimary = 'map/SET_PRIMARY',
+  SetSecondary= 'map/SET_SECONDARY',
+  GetMapList = 'map/GET_MAP_LIST',
+  GetMapListSuccess = 'map/GET_MAP_LIST_SUCCESS',
+  GetMapListFailure = 'map/GET_MAP_LIST_FAILED',
+  //wiki
+  WikiRequest = 'wiki/REQUEST',
+  WikiSuccess = 'wiki/REQUEST_SUCCESS',
+  WikiFailure = 'wiki/REQUEST_FAILURE',
 }

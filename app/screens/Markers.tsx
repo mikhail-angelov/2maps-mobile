@@ -1,19 +1,20 @@
 import React, { FC, useMemo } from "react";
-import { View, FlatList, StyleSheet, Alert } from "react-native";
+import { View, FlatList, StyleSheet, Alert, Modal } from "react-native";
+import { connect, ConnectedProps } from "react-redux";
 import { ListItem } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Position } from '@turf/helpers';
 import distance from '@turf/distance';
 import { orderBy } from 'lodash'
-import { Mark } from '../store/types'
+import { State, Mark } from '../store/types'
+import { selectIsAuthenticated } from '../reducers/auth'
+import { selectMarks } from '../reducers/marks'
+import { importPoisAction, exportPoisAction, removeAllPoisAction, syncMarksAction } from '../actions/marks-actions'
 
-interface Props {
-    markers: Mark[];
+
+interface OwnProps {
     center: Position;
     close: () => void;
-    importMarks: () => void;
-    exportMarks: () => void;
-    removeAll: () => void;
     select: (item: Mark) => void;
 }
 interface Item {
@@ -22,21 +23,34 @@ interface Item {
     mark: Mark;
 }
 
-const Markers: FC<Props> = ({ markers, center, close, select, importMarks, exportMarks, removeAll }) => {
+const mapStateToProps = (state: State) => ({
+    markers: selectMarks(state),
+    isAuthenticated: selectIsAuthenticated(state),
+});
+const mapDispatchToProps = {
+    importPois: importPoisAction,
+    exportPois: exportPoisAction,
+    removeAllPois: removeAllPoisAction,
+    syncMarks: syncMarksAction,
+};
+const connector = connect(mapStateToProps, mapDispatchToProps)
+type Props = ConnectedProps<typeof connector> & OwnProps
+
+const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, importPois, exportPois, removeAllPois, syncMarks }) => {
     const onRemoveAll = () => {
         Alert.alert(
             "Warning!",
             "Are you sure to remove all your markers?",
             [
                 { text: "No", style: "cancel" },
-                { text: "Yes", onPress: removeAll }
+                { text: "Yes", onPress: removeAllPois }
             ]
         );
     }
     const list: Item[] = orderBy(markers, mark => distance(mark.geometry.coordinates, center, { units: 'kilometers' }))
         .map(mark => ({
             title: mark.name,
-            subtitle: `${distance(mark.geometry.coordinates, center, { units: 'kilometers' }).toFixed(2)} km, ${mark.description||''}`,
+            subtitle: `${distance(mark.geometry.coordinates, center, { units: 'kilometers' }).toFixed(2)} km, ${mark.description || ''}`,
             mark,
         }))
     const keyExtractor = (item: Item, index: number) => index.toString()
@@ -50,10 +64,11 @@ const Markers: FC<Props> = ({ markers, center, close, select, importMarks, expor
         </ListItem>
     )
     const memoizedValue = useMemo(() => renderItem, [markers]);
-    return <View style={styles.container}>
+    return <Modal style={styles.container} visible onRequestClose={close}>
         <View style={styles.buttons}>
-            <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-download" onPress={exportMarks} />
-            <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="import-export" onPress={importMarks} />
+            <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-download" onPress={exportPois} />
+            <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-upload" onPress={importPois} />
+            {isAuthenticated && <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="import-export" onPress={syncMarks} />}
             <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="delete" onPress={onRemoveAll} />
             <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="close" onPress={close} />
         </View>
@@ -65,10 +80,10 @@ const Markers: FC<Props> = ({ markers, center, close, select, importMarks, expor
                 contentContainerStyle={{ paddingBottom: 30 }}
             />
         </View>
-    </View>
+    </Modal>
 }
 
-export default Markers
+export default connector(Markers)
 
 const styles = StyleSheet.create({
     container: {
@@ -84,7 +99,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: "flex-end",
         padding: 10,
-        backgroundColor: '#ccc',
+        backgroundColor: '#303846',
     },
     titleButton: {
         textAlign: 'center',

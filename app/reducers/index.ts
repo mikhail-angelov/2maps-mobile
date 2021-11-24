@@ -5,6 +5,8 @@ import { reducer as network } from 'react-native-offline';
 import marks from "./marks";
 import tracker from "./tracker";
 import map from "./map";
+import wiki from "./wiki";
+import auth from "./auth";
 
 const marksPersistConfig = {
   key: 'marks',
@@ -21,11 +23,21 @@ const mapPersistConfig = {
   key: 'map',
   storage: AsyncStorage,
 }
+const wikiPersistConfig = {
+  key: 'wiki',
+  storage: AsyncStorage,
+}
+const authPersistConfig = {
+  key: 'auth',
+  storage: AsyncStorage,
+}
 
 const rootReducer = combineReducers({
   marks: persistReducer(marksPersistConfig, marks),
   tracker: persistReducer(trackerPersistConfig, tracker),
   map: persistReducer(mapPersistConfig, map),
+  wiki: persistReducer(wikiPersistConfig, wiki),
+  auth: persistReducer(authPersistConfig, auth),
   network
 } as any);
 

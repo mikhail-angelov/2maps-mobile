@@ -1,11 +1,15 @@
 import { ActionTypeEnum, AppThunk } from ".";
 import { Alert } from "react-native";
-// import { post, getWithAuth, postWithAuth, setToken } from "./api";
+import { postLarge, HOST } from "./api";
 import { Mark, POI } from "../store/types";
 import { feature, Feature, Point } from '@turf/helpers';
 import DocumentPicker from 'react-native-document-picker';
 import RNFS from 'react-native-fs'
-import { selectMarks, } from '../reducers/marks'
+import { nanoid } from 'nanoid'
+import { selectMarks } from '../reducers/marks'
+import { selectToken } from '../reducers/auth'
+
+const MARKS_URL = `${HOST}/marks/m`
 
 export const markToFeature = (mark: Mark): Feature<Point> => {
   const aFeature = feature(mark.geometry);
@@ -15,15 +19,17 @@ export const markToFeature = (mark: Mark): Feature<Point> => {
     description_orig: mark.description,
     name: mark.name,
     icon: '',
+    timestamp: mark.timestamp|| Date.now()
   };
   return aFeature
 }
 export const featureToMark = (feature: Feature<Point>): Mark => {
   const mark: Mark = {
     geometry: feature.geometry,
-    id: feature.id || '',
+    id: feature.id?String(feature.id): '',
     name: feature.properties?.name || '',
     description: feature.properties?.description_orig || '',
+    timestamp: feature.properties?.timestamp || Date.now()
   };
   return mark
 }
@@ -48,21 +54,10 @@ export const loadMarksAction = (): AppThunk => {
   };
 };
 
-export const addMarkAction = (mark: Mark): AppThunk => {
-  return async (dispatch) => {
-    dispatch({ type: ActionTypeEnum.AddMark, payload: {...mark, id: `${Date.now()}`} });
-  };
-};
-export const updateMarkAction = (mark: Mark): AppThunk => {
-  return async (dispatch) => {
-    dispatch({ type: ActionTypeEnum.UpdateMark, payload: mark });
-  };
-};
-export const removeMarkAction = (id: string): AppThunk => {
-  return async (dispatch) => {
-    dispatch({ type: ActionTypeEnum.RemoveMark, payload: id });
-  };
-};
+export const editMarkAction = (mark?: Mark) =>({ type: ActionTypeEnum.EditMark, payload: mark });
+export const saveMarkAction = (mark: Mark) =>({ type: ActionTypeEnum.SaveMark, payload: {...mark, timestamp: Date.now()} });
+export const removeMarkAction = (id: string)  => ({ type: ActionTypeEnum.RemoveMark, payload: id });
+
 export const removeAllPoisAction = (): AppThunk => {
   return async (dispatch) => {
     dispatch({ type: ActionTypeEnum.RemoveAllMarks });
@@ -84,9 +79,11 @@ export const importPoisAction = (): AppThunk => {
       );
       const data = await RNFS.readFile(decodeURI(res.fileCopyUri), 'utf8')
       const pois = JSON.parse(data) as POI[]
-      const marks = pois.map(({ id, name = '', description = '', point }) => ({ id, name, description, geometry: { type: 'Point', coordinates: [point.lng, point.lat] } }))
+      const marks = pois.map(({ id, name = '', description = '', point, timestamp }) => {
+        return { id: id || nanoid(), name, description, timestamp, geometry: { type: 'Point', coordinates: [point.lng, point.lat] } }
+      })
       dispatch({ type: ActionTypeEnum.ImportPois, payload: marks });
-    } catch (err) {
+    } catch (err: any) {
       if (DocumentPicker.isCancel(err)) {
         // User cancelled the picker, exit any dialogs or menus and move on
       } else {
@@ -105,7 +102,7 @@ export const exportPoisAction = (): AppThunk => {
       console.log('writing to:', url, '\n')
       await RNFS.writeFile(decodeURI(url), data, 'utf8')
       Alert.alert('Markers are saved', `to ${url}`)
-    } catch (err) {
+    } catch (err: any) {
       console.log('Error write to:', url, '\n', err)
       Alert.alert('Oops', `do not manage to save it ${url}`)
       if (DocumentPicker.isCancel(err)) {
@@ -113,6 +110,29 @@ export const exportPoisAction = (): AppThunk => {
       } else {
         throw err;
       }
+    }
+  };
+};
+
+export const syncMarksAction = (): AppThunk => {
+  return async (dispatch, getState) => {
+    const pois = selectMarks(getState())
+    const token = selectToken(getState())
+    try{
+      const items = pois.map(({ id, name, description, geometry, timestamp }) => ({ id, name, description, lat: geometry.coordinates[1], lng: geometry.coordinates[0], timestamp }))
+      const res = await postLarge({url:`${MARKS_URL}/sync`, data: items, token})
+      console.log('sync', res.data)
+      
+      const marks: Mark[] = res.data.map(({ id, name = '', description = '', lat, lng, timestamp }: any) => {
+        return { id: id || nanoid(), name, description, timestamp, geometry: { type: 'Point', coordinates: [lng, lat] } }
+      })
+      dispatch({ type: ActionTypeEnum.ImportPois, payload: marks });
+
+
+      Alert.alert('Markers are synced', `Yo!`)
+    } catch (err) {
+      console.log('Error write to:', err)
+      Alert.alert('Oops', `do not manage to sync`)
     }
   };
 };

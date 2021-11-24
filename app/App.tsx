@@ -7,7 +7,7 @@ import SplashScreen from  "react-native-splash-screen";
 import { useKeepAwake } from 'expo-keep-awake';
 import createStore from './store'
 import Tracker from './Tracker'
-import Map from './screens/Map'
+import Main from './screens/Main'
 
 const { store, persistor } = createStore()
 
@@ -26,7 +26,7 @@ const App = () => {
       <PersistGate loading={null} persistor={persistor}>
         <ReduxNetworkProvider>
           <Tracker/>
-          <Map />
+          <Main />
         </ReduxNetworkProvider>
       </PersistGate>
     </Provider>

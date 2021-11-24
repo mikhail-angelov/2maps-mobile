@@ -1,5 +1,5 @@
 import { createSelector } from "reselect";
-import { MarksState, State } from "../store/types";
+import { MarksState, State, Mark } from "../store/types";
 import { ActionTypeEnum } from "../actions";
 import { createReducer } from "./reducer-utils";
 
@@ -9,23 +9,33 @@ const initialState: MarksState = Object.freeze({
 });
 
 export default createReducer<MarksState>(initialState, {
-  [ActionTypeEnum.AddMark]: (mark) => (state) => ({
+  [ActionTypeEnum.EditMark]: (editMark?: Mark) => (state: MarksState) => ({
+    ...state,
+    editMark,
+  }),
+  [ActionTypeEnum.SaveMark]: (mark: Mark) => (state: MarksState) => ({
+    ...state,
+    editMark: undefined,
+    marks: mark.id?state.marks.map(item=>item.id===mark.id?mark:item):[...state.marks, mark],
+  }),
+  [ActionTypeEnum.AddMark]: (mark: Mark) => (state: MarksState) => ({
     ...state,
     marks: [...state.marks, mark],
   }),
-  [ActionTypeEnum.UpdateMark]: (mark) => (state) => ({
+  [ActionTypeEnum.UpdateMark]: (mark:Mark) => (state: MarksState) => ({
     ...state,
     marks: state.marks.map(item=>item.id===mark.id?mark:item),
   }),
-  [ActionTypeEnum.RemoveMark]: (id) => (state) => ({
+  [ActionTypeEnum.RemoveMark]: (id:string) => (state: MarksState) => ({
     ...state,
-    marks: state.marks.filter(item => item.id !== id),
+    marks: state.marks.map((item: Mark) => item.id === id?{...item, deleted: true,timestamp:Date.now() }:item),
+    editMark: undefined,
   }),
-  [ActionTypeEnum.RemoveAllMarks]: () => (state) => ({
+  [ActionTypeEnum.RemoveAllMarks]: () => (state: MarksState) => ({
     ...state,
     marks: [],
   }),
-  [ActionTypeEnum.ImportPois]: (marks) => (state) => ({
+  [ActionTypeEnum.ImportPois]: (marks:Mark[]) => (state: MarksState) => ({
     ...state,
     marks: [...state.marks, ...marks],
   }),
@@ -34,4 +44,8 @@ export const selectMarksState = (state: State) => state.marks;
 export const selectMarks = createSelector(
   selectMarksState,
   (state) => state.marks
+);
+export const selectEditedMark = createSelector(
+  selectMarksState,
+  (state) => state.editMark
 );

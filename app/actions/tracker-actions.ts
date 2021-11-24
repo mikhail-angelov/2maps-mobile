@@ -1,4 +1,5 @@
 import { ActionTypeEnum, AppThunk } from ".";
+import MapboxGL from "@react-native-mapbox-gl/maps";
 import { Alert } from "react-native";
 import { LocationObject, hasServicesEnabledAsync, requestForegroundPermissionsAsync, getLastKnownPositionAsync } from 'expo-location';
 import { ThreeAxisMeasurement } from 'expo-sensors';
@@ -37,9 +38,7 @@ export const compassAngle = (magnetometer: ThreeAxisMeasurement) => {
 export const setCompassAction = (compass: ThreeAxisMeasurement) => {
   return { type: ActionTypeEnum.SetCompass, payload: compass }
 };
-export const setLocationAction = (location: LocationObject) => {
-  return { type: ActionTypeEnum.SetLocation, payload: location }
-};
+export const setLocationAction = (location: MapboxGL.Location) => ({ type: ActionTypeEnum.SetLocation, payload: location });
 export const setTracksAction = (tracks: Track[]) => {
   return { type: ActionTypeEnum.SetTracks, payload: tracks }
 };
@@ -72,9 +71,7 @@ export const startTrackingAction = (): AppThunk => {
   };
 };
 
-export const addPointAction = (point: Position) => {
-  return { type: ActionTypeEnum.AddPoint, payload: point }
-};
+export const addPointAction = (location: MapboxGL.Location) => ({ type: ActionTypeEnum.AddPoint, payload: location });
 export const stopTrackingAction = (): AppThunk => {
   return async (dispatch) => {
     console.log('-stopTrackingAction-')
