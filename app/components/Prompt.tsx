@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import {
     KeyboardAvoidingView,
+    Modal,
     Platform,
     StyleSheet,
     Text,
@@ -8,13 +9,13 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import ModalLayout from './Modal'
 const onIos = Platform.OS === 'ios';
 
 interface Props {
     alertWrapperStyle?: any;
     cancelButtonText?: string;
     confirmButtonText?: string;
+    modalStyle?: any;
     placeholderText?: string;
     alertSubject: string;
     promptText: string;
@@ -68,6 +69,7 @@ export default class AlertPrompt extends Component<Props> {
             alertWrapperStyle,
             cancelButtonText,
             confirmButtonText,
+            modalStyle,
             placeholderText,
             topAreaStyle,
             successfulAnswer,
@@ -86,7 +88,12 @@ export default class AlertPrompt extends Component<Props> {
 
 
         return (
-            <ModalLayout visible={visible}>
+            <Modal
+                visible={visible}
+                style={[styles.modal, modalStyle]}
+                animationType='fade'
+                transparent
+            >
                 <KeyboardAvoidingView behavior="padding" enabled style={styles.container}>
                     <View style={[conditionalStyle.alertWrapper, alertWrapperStyle]}>
                         <View style={[styles.topArea, topAreaStyle]}>
@@ -134,7 +141,7 @@ export default class AlertPrompt extends Component<Props> {
                         </View>
                     </View>
                 </KeyboardAvoidingView>
-            </ModalLayout>
+            </Modal>
 
         )
     }
@@ -143,6 +150,13 @@ export default class AlertPrompt extends Component<Props> {
 
 const styles = StyleSheet.create({
     //global containers
+    modal: {
+        flex: 1,
+        flexDirection: 'column',
+        backgroundColor: 'rgba(52,73,94,0.6)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     container: {
         flex: 1,
         justifyContent: 'center',

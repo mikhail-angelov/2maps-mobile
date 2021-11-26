@@ -29,6 +29,7 @@ const Login: FC<Partial<Props> & { setSignUp: () => void }> = ({ error, login, s
         <View style={styles.formField}>
             <Text style={styles.label}>Email</Text>
             <TextInput
+                keyboardType="email-address"
                 style={styles.modalInput}
                 onChangeText={(value) => setEmail(value)}
                 placeholder="email"
@@ -55,7 +56,7 @@ const SignUp: FC<Partial<Props> & { back: () => void }> = ({ error, signUp, back
     const [name, setName] = useState<string>('')
     const [email, setEmail] = useState<string>('')
     const [password, setPassword] = useState<string>('')
-    return <View  style={styles.content}>
+    return <View style={styles.content}>
         <Text style={styles.subTitle}>Sign Up</Text>
         <View style={styles.formField}>
             <Text style={styles.label}>Name</Text>
@@ -96,7 +97,7 @@ const Auth: FC<Props> = ({ isAuthenticated, isAuthInProgress, error, login, sign
     const [ui, setUi] = useState<string>('login')
     const authState = useRef(isAuthenticated);
     useEffect(() => {
-        console.log('isAuthenticated',isAuthenticated, authState.current)
+        console.log('isAuthenticated', isAuthenticated, authState.current)
         setAuthError('')
         if (isAuthenticated !== authState.current) {
             console.log('auth is changed')
@@ -115,61 +116,16 @@ const Auth: FC<Props> = ({ isAuthenticated, isAuthInProgress, error, login, sign
     }
 
     return <ModalLayout onRequestClose={close}>
-        <TouchableWithoutFeedback onPress={close}>
-            <View style={styles.modalOverlay} />
-        </TouchableWithoutFeedback>
-        <View style={styles.centeredView} >
-
-            <View style={styles.modalView}>
-                {content}
-                {isAuthInProgress && <View style={styles.spinner}>
-                    <Text>loading...</Text>
-                </View>}
-                <Pressable
-                    style={[styles.button, styles.buttonClose]}
-                    onPress={close}
-                >
-                    <Text style={styles.textStyle}>✕</Text>
-                </Pressable>
-            </View>
-        </View>
+        {content}
+        {isAuthInProgress && <View style={styles.spinner}>
+            <Text>loading...</Text>
+        </View>}
+        
     </ModalLayout>
 }
 
 
 const styles = StyleSheet.create({
-    modalOverlay: {
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: 'rgba(0,0,0,0.5)'
-    },
-    centeredView: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        marginTop: 22
-    },
-    modalView: {
-        position: 'relative',
-        margin: 20,
-        backgroundColor: "white",
-        borderRadius: 20,
-        padding: 35,
-        alignItems: "flex-start",
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-        maxWidth: '80%',
-        minWidth: '80%',
-    },
     content: {
         width: '100%',
     },
@@ -177,7 +133,7 @@ const styles = StyleSheet.create({
         color: 'red',
     },
     label: {
-        marginBottom:10,
+        marginBottom: 10,
     },
     spinner: {
         position: "absolute",
@@ -199,32 +155,15 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginBottom: 20,
     },
-    button: {
-        borderRadius: 20,
-        padding: 10,
-        elevation: 2
-    },
     btn: {
         // paddingHorizontal: 20,
     },
     buttonOpen: {
         backgroundColor: "#F194FF",
     },
-    buttonClose: {
-        backgroundColor: "#2196F3",
-        position: "absolute",
-        top: 20,
-        right: 20,
-        width: 40,
-    },
-    textStyle: {
-        color: "white",
-        fontWeight: "bold",
-        textAlign: "center"
-    },
-    formField:{
-        flexDirection:'column',
-        display:'flex',
+    formField: {
+        flexDirection: 'column',
+        display: 'flex',
     },
     subTitle: {
         marginVertical: 10,
