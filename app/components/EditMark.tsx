@@ -1,8 +1,9 @@
 import React, { FC, useState, useCallback } from "react";
-import { View, Linking, TextInput, Text, Alert, Modal, Pressable, StyleSheet, TouchableWithoutFeedback } from "react-native";
+import { View, Linking, TextInput, Text, Alert, Pressable, StyleSheet, TouchableWithoutFeedback } from "react-native";
 import { Button } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Mark } from '../store/types'
+import ModalLayout from './Modal'
 
 interface Props {
     mark: Mark;
@@ -42,12 +43,7 @@ const EditMark: FC<Props> = ({ mark, save, cancel, remove }) => {
         );
     }
 
-    return <Modal
-        animationType="fade"
-        transparent={true}
-        visible
-        onRequestClose={cancel}
-    >
+    return <ModalLayout onRequestClose={cancel}>
         <TouchableWithoutFeedback onPress={cancel}>
             <View style={styles.modalOverlay} />
         </TouchableWithoutFeedback>
@@ -93,7 +89,7 @@ const EditMark: FC<Props> = ({ mark, save, cancel, remove }) => {
                 </Pressable>
             </View>
         </View>
-    </Modal>
+    </ModalLayout>
 
 
 }

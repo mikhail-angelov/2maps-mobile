@@ -1,11 +1,12 @@
 import React, { FC, useState, useRef, useEffect } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { State } from '../store/types'
-import { View, TextInput, Text, Modal, Pressable, StyleSheet, TouchableWithoutFeedback } from "react-native";
+import { View, TextInput, Text, Pressable, StyleSheet, TouchableWithoutFeedback } from "react-native";
 import { Button } from 'react-native-elements';
 import { selectIsAuthenticated, selectIsAuthInProgress, selectError } from "../reducers/auth";
 import { loginAction, signUpAction, setAuthErrorAction } from "../actions/auth-actions";
 import Settings from './Settings'
+import ModalLayout from './Modal'
 
 const mapStateToProps = (state: State) => ({
     isAuthenticated: selectIsAuthenticated(state),
@@ -106,19 +107,14 @@ const Auth: FC<Props> = ({ isAuthenticated, isAuthInProgress, error, login, sign
 
     let content = <View />
     if (isAuthenticated) {
-        content = <Settings close={close}/>
+        content = <Settings close={close} />
     } else if (ui === 'login') {
         content = <Login error={error} login={login} setSignUp={() => setUi('signUp')} />
     } else if (ui === 'signUp') {
         content = <SignUp error={error} signUp={signUp} back={() => setUi('login')} />
     }
 
-    return <Modal
-        animationType="fade"
-        transparent={true}
-        visible
-        onRequestClose={close}
-    >
+    return <ModalLayout onRequestClose={close}>
         <TouchableWithoutFeedback onPress={close}>
             <View style={styles.modalOverlay} />
         </TouchableWithoutFeedback>
@@ -137,7 +133,7 @@ const Auth: FC<Props> = ({ isAuthenticated, isAuthInProgress, error, login, sign
                 </Pressable>
             </View>
         </View>
-    </Modal>
+    </ModalLayout>
 }
 
 
