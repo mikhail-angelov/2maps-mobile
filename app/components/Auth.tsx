@@ -6,7 +6,7 @@ import { Button } from 'react-native-elements';
 import { selectIsAuthenticated, selectIsAuthInProgress, selectError } from "../reducers/auth";
 import { loginAction, signUpAction, setAuthErrorAction } from "../actions/auth-actions";
 import Settings from './Settings'
-import ModalLayout from './Modal'
+import MapModal from './Modal'
 
 const mapStateToProps = (state: State) => ({
     isAuthenticated: selectIsAuthenticated(state),
@@ -115,13 +115,13 @@ const Auth: FC<Props> = ({ isAuthenticated, isAuthInProgress, error, login, sign
         content = <SignUp error={error} signUp={signUp} back={() => setUi('login')} />
     }
 
-    return <ModalLayout onRequestClose={close}>
+    return <MapModal onRequestClose={close}>
         {content}
         {isAuthInProgress && <View style={styles.spinner}>
             <Text>loading...</Text>
         </View>}
         
-    </ModalLayout>
+    </MapModal>
 }
 
 

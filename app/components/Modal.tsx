@@ -5,7 +5,7 @@ interface OwnProps {
 }
 type Props = OwnProps & ModalProps
 
-const ModalLayout: FC<Props> = ({ children, ...props }: Props) => {
+const MapModal: FC<Props> = ({ children, ...props }: Props) => {
     const { onRequestClose: onClose } = props
     return (
         <Modal
@@ -78,4 +78,4 @@ const styles = StyleSheet.create({
         textAlign: "center"
     },
 })
-export default ModalLayout
+export default MapModal

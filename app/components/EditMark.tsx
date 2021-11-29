@@ -3,7 +3,7 @@ import { View, Linking, TextInput, Text, Alert, Pressable, StyleSheet } from "re
 import { Button } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Mark } from '../store/types'
-import ModalLayout from './Modal'
+import MapModal from './Modal'
 
 interface Props {
     mark: Mark;
@@ -43,7 +43,7 @@ const EditMark: FC<Props> = ({ mark, save, cancel, remove }) => {
         );
     }
 
-    return <ModalLayout onRequestClose={cancel}>
+    return <MapModal onRequestClose={cancel}>
         {isEdit ? <View style={styles.content}>
             <Text>Name:</Text>
             <TextInput
@@ -73,7 +73,7 @@ const EditMark: FC<Props> = ({ mark, save, cancel, remove }) => {
             {/* {navigate && <Button buttonStyle={styles.btn} type='clear' onPress={navigate} icon={<Icon name="compass" size={26} color="grey" />} />} */}
             {remove && <Button buttonStyle={styles.btn} type='clear' onPress={onRemove} icon={<Icon name="trash" size={26} color="grey" />} />}
         </View>
-    </ModalLayout>
+    </MapModal>
 
 
 }
@@ -81,6 +81,7 @@ const EditMark: FC<Props> = ({ mark, save, cancel, remove }) => {
 
 const styles = StyleSheet.create({
     content: {
+        marginTop: 30,
         minWidth: '100%',
     },
     row: {
