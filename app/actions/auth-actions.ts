@@ -103,7 +103,7 @@ export const passwordResetAction = (data: PasswordReset): AppThunk => {
   return async (dispatch) => {
     try {
       dispatch({ type: ActionTypeEnum.PasswordResetRequest });
-      await post<AuthParams>({ url: `${AUTH_URL}/password-reset`, data });
+      await post<AuthParams>({ url: `${AUTH_URL}/forget`, data });
       dispatch({
         type: ActionTypeEnum.PasswordResetSuccess,
       });
