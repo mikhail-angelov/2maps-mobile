@@ -88,7 +88,7 @@ const mapDispatchToProps = {
     setLocation: setLocationAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
-type Props = ConnectedProps<typeof connector>
+type Props = ConnectedProps<typeof connector> & {setMap: (map: MapboxGL.Camera|undefined) => void}
 
 class Map extends Component<Props> {
     private camera: MapboxGL.Camera | undefined
@@ -163,6 +163,13 @@ class Map extends Component<Props> {
     onBalloonClick = () => {
         this.setState({ selected: undefined })
     }
+    onSetMap = (map: MapboxGL.MapView) => {
+        this.map = map
+    }
+    onSetCamera = (camera: MapboxGL.Camera) => {
+        this.camera = camera
+        this.props.setMap(camera)
+    }
 
     render() {
         const { styleUrl, tracking, primaryMap, opacity, marks, center, zoom } = this.props
@@ -178,10 +185,10 @@ class Map extends Component<Props> {
             compassViewMargins={{ x: 0, y: 100 }}
             onLongPress={this.onAddMark}
             onRegionDidChange={this.updateCenter}
-            ref={(m: MapboxGL.MapView) => (this.map = m)}
+            ref={this.onSetMap}
         >
             <MapboxGL.Camera
-                ref={(c: MapboxGL.Camera) => (this.camera = c)}
+                ref={this.onSetCamera}
                 defaultSettings={{ centerCoordinate: center, zoomLevel: zoom }}
                 followUserLocation={tracking}
                 followZoomLevel={zoom}

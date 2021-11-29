@@ -25,44 +25,45 @@ const initialState: TrackerState = Object.freeze({
 });
 
 export default createReducer<TrackerState>(initialState, {
-  [ActionTypeEnum.SetCompass]: (compass: any) => (state:TrackerState) => ({
+  [ActionTypeEnum.SetCompass]: (compass: any) => (state: TrackerState) => ({
     ...state,
     compass,
   }),
-  [ActionTypeEnum.SetLocation]: (location: MapboxGL.Location) => (state:TrackerState) =>{
+  [ActionTypeEnum.SetLocation]: (location: MapboxGL.Location) => (state: TrackerState) => {
     console.log('set location', location);
     return {
       ...state,
       location,
     }
-    },
-  [ActionTypeEnum.SetTracks]: (tracks: Track[]) => (state:TrackerState) => ({
+  },
+  [ActionTypeEnum.SetTracks]: (tracks: Track[]) => (state: TrackerState) => ({
     ...state,
     tracks,
   }),
-  [ActionTypeEnum.AddTrack]: (track: Track) => (state:TrackerState) => ({
+  [ActionTypeEnum.AddTrack]: (track: Track) => (state: TrackerState) => ({
     ...state,
     tracks: [...state.tracks, track],
   }),
-  [ActionTypeEnum.RemoveTrack]: (trackId: string) => (state:TrackerState) => ({
+  [ActionTypeEnum.RemoveTrack]: (trackId: string) => (state: TrackerState) => ({
     ...state,
     tracks: state.tracks.filter(item => item.id !== trackId),
   }),
-  [ActionTypeEnum.SetSelectedTrack]: (selectedTrack?:Track) => (state:TrackerState) => ({
+  [ActionTypeEnum.SetSelectedTrack]: (selectedTrack?: Track) => (state: TrackerState) => ({
     ...state,
     selectedTrack,
   }),
-  [ActionTypeEnum.StartTracking]: (activeTrack: Track) => (state:TrackerState) => ({
+  [ActionTypeEnum.StartTracking]: (activeTrack: Track) => (state: TrackerState) => ({
     ...state,
     activeTrack,
     tracking: true,
   }),
-  [ActionTypeEnum.EndTracking]: () => (state:TrackerState) => ({
+  [ActionTypeEnum.EndTracking]: () => (state: TrackerState) => ({
     ...state,
+    tracks: state.activeTrack ? [...state.tracks, state.activeTrack] : state.tracks,
     activeTrack: undefined,
     tracking: false,
   }),
-  [ActionTypeEnum.AddPoint]: (location: MapboxGL.Location) => (state:TrackerState) => {
+  [ActionTypeEnum.AddPoint]: (location: MapboxGL.Location) => (state: TrackerState) => {
     if (!state.activeTrack) {
       return state
     }

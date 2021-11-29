@@ -1,6 +1,7 @@
 import { ActionTypeEnum, AppThunk } from ".";
 import { post, HOST } from "./api";
 import { selectToken } from '../reducers/auth'
+import { AuthParams } from '../store/types'
 
 const AUTH_URL = `${HOST}/auth/m`
 
@@ -23,7 +24,7 @@ export const loginAction = (data: Credentials): AppThunk => {
     try {
       dispatch({ type: ActionTypeEnum.LoginRequest });
       console.log('loginAction',data)
-      const response = await post({ url: `${AUTH_URL}/login`, data });
+      const response = await post<AuthParams>({ url: `${AUTH_URL}/login`, data });
       dispatch({
         type: ActionTypeEnum.LoginSuccess,
         payload: response.data,
@@ -62,7 +63,7 @@ export const checkAction = (): AppThunk => {
       if (!token) {
         throw 'logout'
       }
-      const response = await post({ url: `${AUTH_URL}/check`, data: {}, token });
+      const response = await post<AuthParams>({ url: `${AUTH_URL}/check`, data: {}, token });
       dispatch({
         type: ActionTypeEnum.LoginSuccess,
         payload: response.data,
@@ -79,7 +80,7 @@ export const signUpAction = (data: SignUp): AppThunk => {
   return async (dispatch) => {
     try {
       dispatch({ type: ActionTypeEnum.SignUpRequest });
-      const response = await post({ url: `${AUTH_URL}/sign-up`, data });
+      const response = await post<AuthParams>({ url: `${AUTH_URL}/sign-up`, data });
 
       dispatch({
         type: ActionTypeEnum.SignUpSuccess,

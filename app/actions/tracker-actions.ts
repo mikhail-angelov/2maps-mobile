@@ -75,9 +75,7 @@ export const addPointAction = (location: MapboxGL.Location) => ({ type: ActionTy
 export const stopTrackingAction = (): AppThunk => {
   return async (dispatch) => {
     console.log('-stopTrackingAction-')
-    Alert.prompt('Save track?', 'type a name', (res) => {
-      console.log('--', res)
-    }, 'plain-text')
+    //todo: render trackIcon to save it
     dispatch({ type: ActionTypeEnum.EndTracking })
   };
 }

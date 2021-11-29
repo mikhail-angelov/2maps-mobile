@@ -1,7 +1,7 @@
 import React, { FC, useState } from "react";
-import Config from 'react-native-config'
+import MapboxGL from "@react-native-mapbox-gl/maps";
 import { connect, ConnectedProps } from "react-redux";
-import { find, minBy } from 'lodash'
+import { minBy } from 'lodash'
 import distance from '@turf/distance';
 import { State, Mark } from '../store/types'
 import { selectMarks, selectEditedMark } from '../reducers/marks'
@@ -49,7 +49,7 @@ const StyledSlider = styled(Slider)`
 const Buttons = styled(View)`
     position: absolute;
     bottom:50px;
-    right:10px;
+    left:10px;
 `
 const MenuButton = styled(Icon.Button)` 
     background-color: #fff5;
@@ -89,7 +89,7 @@ const mapDispatchToProps = {
     saveMark: saveMarkAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
-type Props = ConnectedProps<typeof connector>
+type Props = ConnectedProps<typeof connector> & {map?: MapboxGL.Camera}
 
 
 
@@ -151,12 +151,7 @@ type Props = ConnectedProps<typeof connector>
 // onWikiPress = (f: Feature) => {
 //     console.log('on wiki', f)
 // }
-// onMarkPress = ({ features }: any) => {
-//     const feature = features[0]
-//     console.log('on press', feature.id, feature)
-//     this.setState({ selected: features[0], newMark: undefined })
-//     this.camera?.moveTo(feature.geometry.coordinates, 100)
-// }
+
 // onCreate = (feature: Feature<Point>, data: { name: string }) => {
 //     if (!feature.properties?.id) {
 //         feature.properties = feature.properties || {}
@@ -188,14 +183,7 @@ type Props = ConnectedProps<typeof connector>
 //     this.setState({ showEdit: false, newMark: undefined })
 // }
 
-// toCurrentLocation = async () => {
-//     const location = await getLocation()
-//     console.log('-toCurrentLocation-', location)
-//     if (!location) {
-//         return
-//     }
-//     this.camera?.moveTo([location.coords.longitude, location.coords.latitude], 100)
-// }
+
 // onNameTrack = (name: string) => {
 //     const { activeTrack, addTrack, stopTracking } = this.props
 //     if (activeTrack) {
@@ -232,13 +220,12 @@ const getClosestMark = (location: any, marks: Mark[]) => {
     }
     return `${closest.name} ${distance(closest.geometry.coordinates, location, { units: 'kilometers' }).toFixed(2)} km.`
 }
-const Overlay: FC<Props> = ({ marks, setOpacity, editedMark, opacity, center, zoom, location, isAuthenticated, editMark, saveMark, removeMark, tracking, activeTrack, startTracking, stopTracking, addTrack }) => {
+const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, center, zoom, location, isAuthenticated, editMark, saveMark, removeMark, tracking, activeTrack, startTracking, stopTracking, addTrack }) => {
     const [showMenu, setShowMenu] = useState(false)
     const [showAuth, setShowAuth] = useState(false)
     const [showSettings, setShowSettings] = useState(false)
     const [showMarkers, setShowMarkers] = useState(false)
     const [showTracks, setShowTracks] = useState(false)
-    const [showTrackName, setShowTrackName] = useState(false)
 
     const menuItemsNotAuth: MenuItem[] = [
         { title: 'Login', onPress: () => { setShowAuth(true); setShowMenu(false) } },
@@ -254,7 +241,6 @@ const Overlay: FC<Props> = ({ marks, setOpacity, editedMark, opacity, center, zo
         { title: 'Tracks', onPress: () => { setShowTracks(true); setShowMenu(false) } },
         { title: 'Cancel', containerStyle: { backgroundColor: 'blue' }, titleStyle: { color: 'white' }, onPress: () => setShowMenu(false), }
     ]
-    // const { selected, showEdit, navigationMark, newMark, showMenu, showTracks, showTrackName, showMarkers, showAuth, showMaps } = this.state
 
     if (!location?.coords) {
         console.log('no location', location)
@@ -274,7 +260,7 @@ const Overlay: FC<Props> = ({ marks, setOpacity, editedMark, opacity, center, zo
         if (!location) {
             return
         }
-        // this.camera?.moveTo([location.coords.longitude, location.coords.latitude], 100)
+        map?.moveTo([location.coords.longitude, location.coords.latitude], 100)
     }
     const toggleTracking = () => {
         if (tracking) {
@@ -286,19 +272,7 @@ const Overlay: FC<Props> = ({ marks, setOpacity, editedMark, opacity, center, zo
     const selectMark = (mark: Mark) => {
         const selected = markToFeature(mark)
         setShowMarkers(false)
-        // this.camera?.moveTo(mark.geometry.coordinates, 100)
-    }
-    const onNameTrack = (name: string) => {
-        if (activeTrack) {
-            const track = { ...activeTrack, name }
-            addTrack(track)
-        }
-        stopTracking()
-        setShowTrackName(false)
-    }
-    const onCancelNameTrack = () => {
-        stopTracking()
-        setShowTrackName(false)
+        map?.moveTo(mark.geometry.coordinates, 100)
     }
 
     console.log('render overlay', zoom, closest)
@@ -337,7 +311,6 @@ const Overlay: FC<Props> = ({ marks, setOpacity, editedMark, opacity, center, zo
             remove={() => editedMark.id ? removeMark(editedMark.id) : null}
         />}
         {showTracks && <Tracks close={() => setShowTracks(false)} />}
-        {showTrackName && <Prompt visible alertSubject="Enter track name" promptText="" successfulAnswer={onNameTrack} cancelAnswer={onCancelNameTrack} />}
         {showMarkers && center && <Markers center={center} select={selectMark} close={() => setShowMarkers(false)} />}
         {showAuth && <Auth close={() => setShowAuth(false)} />}
         {showSettings && <MapSettings close={() => setShowSettings(false)} />}

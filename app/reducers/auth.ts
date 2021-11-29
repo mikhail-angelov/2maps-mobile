@@ -1,5 +1,5 @@
 import { createSelector } from "reselect";
-import { AuthState, State } from "../store/types";
+import { AuthState, State, AuthParams } from "../store/types";
 import { ActionTypeEnum } from "../actions";
 import { createReducer } from "./reducer-utils";
 
@@ -19,7 +19,7 @@ export default createReducer<AuthState>(initialState, {
     isRequestInProgress: true,
     error: '',
   }),
-  [ActionTypeEnum.LoginSuccess]: ({ token, user }) => (state: AuthState) => ({
+  [ActionTypeEnum.LoginSuccess]: ({ token, user }:AuthParams) => (state: AuthState) => ({
     ...state,
     authenticated: true,
     token,
@@ -38,7 +38,7 @@ export default createReducer<AuthState>(initialState, {
     isRequestInProgress: true,
     error: '',
   }),
-  [ActionTypeEnum.SignUpSuccess]: ({ token, user }) => (state: AuthState) => ({
+  [ActionTypeEnum.SignUpSuccess]: ({ token, user }:AuthParams) => (state: AuthState) => ({
     ...state,
     authenticated: true,
     token,
