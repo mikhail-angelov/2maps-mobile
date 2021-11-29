@@ -4,12 +4,18 @@ import { MapState } from "./map";
 import { WikiState } from "./wiki";
 import { AuthState } from "./auth";
 
+type NetworkState = {
+  isConnected: boolean,
+  actionQueue: Array<any>,
+};
+
 export interface State {
   marks: MarksState;
   tracker: TrackerState;
   map: MapState;
   wiki: WikiState
   auth: AuthState
+  network: NetworkState
 }
 
 export * from "./marks";

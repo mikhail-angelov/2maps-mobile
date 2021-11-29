@@ -1,6 +1,7 @@
 import { ActionTypeEnum, AppThunk } from ".";
 import { post, HOST } from "./api";
-import { selectToken } from '../reducers/auth'
+import { AxiosResponse } from "axios";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AUTH_URL = `${HOST}/auth/m`
 
@@ -14,6 +15,41 @@ interface SignUp {
   password: string;
 }
 
+interface Auth {
+  token: string;
+  user: {id: string; email: string}
+}
+
+const setStorageToken = async (key: string, value: any) => {
+  try {
+    console.log('set store', key, value)
+    const jsonValue = JSON.stringify(value)
+    await AsyncStorage.setItem(key, jsonValue)
+  } catch (e) {
+    console.log('saving store error', e)
+  }
+}
+
+const getStorageData = async (key: string) => {
+  try {
+    const jsonValue = await AsyncStorage.getItem(key)
+    console.log('get store', key, jsonValue)
+    if(jsonValue !== null) {
+      return JSON.parse(jsonValue)
+    }
+  } catch(e) {
+    console.log('getting store error', e)
+  }
+}
+
+const removeStorageData = async (keys: string[]) => {
+  try {
+    await AsyncStorage.multiRemove(keys)
+  } catch(e) {
+    console.log('removing store error', e)
+  }
+}
+
 export const setAuthErrorAction = (error: string) => {
   return { type: ActionTypeEnum.AuthError, payload: error }
 };
@@ -23,11 +59,15 @@ export const loginAction = (data: Credentials): AppThunk => {
     try {
       dispatch({ type: ActionTypeEnum.LoginRequest });
       console.log('loginAction',data)
-      const response = await post({ url: `${AUTH_URL}/login`, data });
+      const response: AxiosResponse<Auth> = await post({ url: `${AUTH_URL}/login`, data });
       dispatch({
         type: ActionTypeEnum.LoginSuccess,
         payload: response.data,
       });
+      if (response.data.token && response.data.user) {
+        await setStorageToken('token', response.data.token)
+        await setStorageToken('user', response.data.user)
+      }
     } catch (e) {
       console.log("login error", JSON.stringify(e));
       dispatch({
@@ -46,6 +86,8 @@ export const logoutAction = (): AppThunk => {
       dispatch({
         type: ActionTypeEnum.LogoutSuccess,
       });
+
+      await removeStorageData(['token', 'user'])
     } catch (e) {
       console.log("logout error", e);
       dispatch({
@@ -58,14 +100,23 @@ export const logoutAction = (): AppThunk => {
 export const checkAction = (): AppThunk => {
   return async (dispatch, getState) => {
     try {
-      const token = selectToken(getState())
+      const token = await getStorageData('token')
       if (!token) {
         throw 'logout'
       }
-      const response = await post({ url: `${AUTH_URL}/check`, data: {}, token });
+      let payload
+      const isOnline = getState().network.isConnected
+      if (isOnline) {
+        const response = await post({ url: `${AUTH_URL}/check`, data: {}, token });
+        payload = response.data
+      }else{
+        const user = await getStorageData('user')
+        payload = {token, user}
+      }     
+
       dispatch({
         type: ActionTypeEnum.LoginSuccess,
-        payload: response.data,
+        payload,
       });
 
     } catch (e) {
@@ -85,6 +136,11 @@ export const signUpAction = (data: SignUp): AppThunk => {
         type: ActionTypeEnum.SignUpSuccess,
         payload: response.data,
       });
+
+      if (response.data.token && response.data.user) {
+        await setStorageToken('token', response.data.token)
+        await setStorageToken('user', response.data.user)
+      }
     } catch (e) {
       console.log("sign up error", e);
       dispatch({
