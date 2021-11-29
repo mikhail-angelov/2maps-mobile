@@ -51,10 +51,7 @@ const Buttons = styled(View)`
     bottom:50px;
     left:10px;
 `
-const MenuButton = styled(Icon.Button)` 
-    background-color: #fff5;
-    opacity: 0.5;
-`
+const MenuButton =  ({icon, onPress, color}: {icon: string, onPress:()=>void, color?:string})=>(<Icon.Button name={icon} color={color||"white"} backgroundColor="#00f5"  style={{width:40, height: 40, padding:0, justifyContent:'center'}} iconStyle={{marginLeft:10, width:20}} borderRadius={20} onPress={onPress} />)
 
 const mapStateToProps = (state: State) => ({
     marks: selectMarks(state),
@@ -290,11 +287,11 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         <Buttons>
             {/* <MenuButton name="insights" color="black" backgroundColor="#fff5" onPress={() => this.setState({ showTracks: true })} />
                     <View style={{ height: 40 }} /> */}
-            <MenuButton name="gps-fixed" color="black" backgroundColor="#fff5" onPress={toCurrentLocation} />
+            <MenuButton icon="gps-fixed"  onPress={toCurrentLocation} />
             <View style={{ height: 40 }} />
-            <MenuButton name="gps-fixed" color={tracking ? "red" : "black"} backgroundColor="#fff5" onPress={toggleTracking} />
+            <MenuButton icon="track-changes" color={tracking ? "red" : "white"} onPress={toggleTracking} />
             <View style={{ height: 40 }} />
-            <MenuButton name="app-settings-alt" color="black" backgroundColor="#fff5" onPress={() => setShowMenu(true)} />
+            <MenuButton icon="settings" onPress={() => setShowMenu(true)} />
         </Buttons>
         <View style={styles.closestMark}><Text style={styles.markLabel}>{closest}</Text></View>
         {showMenu && <BottomSheet isVisible={showMenu} containerStyle={{ backgroundColor: 'rgba(0.5, 0.25, 0, 0.2)' }} modalProps={{}}>
