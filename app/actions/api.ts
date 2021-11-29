@@ -16,10 +16,10 @@ export const get = ({ url, token }: {
   });
 }
 
-export const post = ({ url, token, data }: {
+export const post = <T = any>({ url, token, data }: {
   url: string; token?: string; data: any
 }) => {
-  return axios.post(url, data, {
+  return axios.post<T>(url, data, {
     headers: token ? {
       authorization: `bearer ${token}`,
     } : {},

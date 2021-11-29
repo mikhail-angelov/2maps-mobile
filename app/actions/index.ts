@@ -47,7 +47,6 @@ export enum ActionTypeEnum {
   SetCenter = 'map/SET_CENTER',
   SetOpacity = 'map/SET_OPACITY',
   SetZoom = 'map/SET_ZOOM',
-  SetStyleUrl = 'map/SET_STYLE_URL',
   SetPrimary = 'map/SET_PRIMARY',
   SetSecondary= 'map/SET_SECONDARY',
   GetMapList = 'map/GET_MAP_LIST',

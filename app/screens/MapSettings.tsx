@@ -5,64 +5,46 @@ import { Picker } from "@react-native-community/picker";
 import { connect, ConnectedProps } from "react-redux";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { State, MapInfo } from '../store/types'
-import { loadMapListAction, setPrimaryMapAction, setSecondaryMapAction, setStyleUrlAction } from '../actions/map-actions'
-import { selectPrimaryMap, selectSecondaryMap, selectMapList, selectMapIsLoading, selectStyleUrl, selectMapError } from '../reducers/map'
+import { loadMapListAction, setPrimaryMapAction, setSecondaryMapAction } from '../actions/map-actions'
+import { selectPrimaryMap, selectSecondaryMap, selectMapList, selectMapIsLoading, onLineMapList, selectMapError } from '../reducers/map'
 import { ItemValue } from "@react-native-community/picker/typings/Picker";
 
-const styleUrls = [
-    { label: 'Vector', value: MapboxGL.StyleURL.Street },
-    { label: 'Satellite', value: MapboxGL.StyleURL.Satellite },
-    { label: 'SatelliteStreet', value: MapboxGL.StyleURL.SatelliteStreet },
-    { label: 'Dark', value: MapboxGL.StyleURL.Dark },
-]
+
 const mapStateToProps = (state: State) => ({
     primaryMap: selectPrimaryMap(state),
     secondaryMap: selectSecondaryMap(state),
     list: selectMapList(state),
     isLoading: selectMapIsLoading(state),
-    styleUrl: selectStyleUrl(state),
 });
 const mapDispatchToProps = {
     loadMapList: loadMapListAction,
     setPrimaryMap: setPrimaryMapAction,
     setSecondaryMap: setSecondaryMapAction,
-    setStyleUrl: setStyleUrlAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
 
 
-const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, styleUrl, list, close, loadMapList, setPrimaryMap, setSecondaryMap, setStyleUrl }) => {
+const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, list, close, loadMapList, setPrimaryMap, setSecondaryMap }) => {
     useEffect(() => {
         loadMapList()
     }, [])
-    const onSetStyleUrl = (value: ItemValue) => {
-        console.log('---',value)
-        setStyleUrl(value as MapboxGL.StyleURL)
-    }
+    const primaryList = [...onLineMapList, ...list]
     const onSetPrimary = (value: ItemValue) => {
-        setPrimaryMap(list.find(x => x.name === value))
+        const map = primaryList.find((item) => item.name === value)
+        if(!map) return
+        setPrimaryMap(map)
     }
     const onSetSecondary = (value: ItemValue) => {
         setSecondaryMap(list.find(x => x.name === value))
     }
+
 
     return <Modal style={styles.container} visible onRequestClose={close}>
         <View style={styles.buttons}>
             <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="close" onPress={close} />
         </View>
         <View style={styles.scroll}>
-            <View style={styles.row}>
-                <Text style={styles.label}>Main Map style:</Text>
-                <Picker
-                    selectedValue={styleUrl}
-                    style={styles.picker}
-                    onValueChange={onSetStyleUrl}
-                    mode="dropdown"
-                >
-                    {styleUrls.map(({ label, value }) => (<Picker.Item key={label} label={label} value={value} />))}
-                </Picker>
-            </View>
             <View style={styles.row}>
                 <Text style={styles.label}>Primary Map:</Text>
                 <Picker
@@ -71,8 +53,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, styleUrl, list, clos
                     onValueChange={onSetPrimary}
                     mode="dropdown"
                 >
-                    <Picker.Item label="None" value={''} />
-                    {list.map(({ name }: MapInfo) => (<Picker.Item key={name} label={name} value={name} />))}
+                    {primaryList.map(({ name }: MapInfo) => (<Picker.Item key={name} label={name} value={name} />))}
                 </Picker>
             </View>
             <View style={styles.row}>
