@@ -14,6 +14,9 @@ interface SignUp {
   email: string;
   password: string;
 }
+interface PasswordReset {
+  email: string;
+}
 
 export const setAuthErrorAction = (error: string) => {
   return { type: ActionTypeEnum.AuthError, payload: error }
@@ -91,6 +94,24 @@ export const signUpAction = (data: SignUp): AppThunk => {
       dispatch({
         type: ActionTypeEnum.SignUpFailure,
         payload: "sign up failure",
+      });
+    }
+  };
+};
+
+export const passwordResetAction = (data: PasswordReset): AppThunk => {
+  return async (dispatch) => {
+    try {
+      dispatch({ type: ActionTypeEnum.PasswordResetRequest });
+      await post<AuthParams>({ url: `${AUTH_URL}/password-reset`, data });
+      dispatch({
+        type: ActionTypeEnum.PasswordResetSuccess,
+      });
+    } catch (e) {
+      console.log("password reset error", e);
+      dispatch({
+        type: ActionTypeEnum.PasswordResetFailure,
+        payload: "password reset failure",
       });
     }
   };

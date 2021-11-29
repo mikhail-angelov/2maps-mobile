@@ -73,6 +73,22 @@ export default createReducer<AuthState>(initialState, {
     user: undefined,
     isRequestInProgress: false,
   }),
+  [ActionTypeEnum.PasswordResetRequest]: () => (state: AuthState) => ({
+    ...state,
+    isRequestInProgress: true,
+    error: '',
+  }),
+  [ActionTypeEnum.PasswordResetSuccess]: () => (state: AuthState) => ({
+    ...state,
+    isRequestInProgress: false,
+    error: '',
+  }),
+  [ActionTypeEnum.PasswordResetFailure]: (error: string) => (state: AuthState) => ({
+    ...state,
+    error,
+    authenticated: false,
+    isRequestInProgress: false,
+  }),
 });
 export const selectAuthState = (state: State) => state.auth;
 export const selectIsAuthInProgress = createSelector(

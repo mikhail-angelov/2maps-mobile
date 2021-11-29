@@ -4,7 +4,7 @@ import { State } from '../store/types'
 import { View, TextInput, Text, Pressable, StyleSheet, TouchableWithoutFeedback } from "react-native";
 import { Button } from 'react-native-elements';
 import { selectIsAuthenticated, selectIsAuthInProgress, selectError } from "../reducers/auth";
-import { loginAction, signUpAction, setAuthErrorAction } from "../actions/auth-actions";
+import { loginAction, signUpAction, setAuthErrorAction, passwordResetAction } from "../actions/auth-actions";
 import Settings from './Settings'
 import MapModal from './Modal'
 
@@ -17,11 +17,12 @@ const mapDispatchToProps = {
     login: loginAction,
     signUp: signUpAction,
     setAuthError: setAuthErrorAction,
+    passwordReset: passwordResetAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
 
-const Login: FC<Partial<Props> & { setSignUp: () => void }> = ({ error, login, setSignUp }) => {
+const Login: FC<Partial<Props> & { setSignUp: () => void } & { setPasswordReset: () => void }> = ({ error, login, setSignUp, setPasswordReset }) => {
     const [email, setEmail] = useState<string>('')
     const [password, setPassword] = useState<string>('')
     return <View style={styles.content}>
@@ -37,7 +38,10 @@ const Login: FC<Partial<Props> & { setSignUp: () => void }> = ({ error, login, s
             />
         </View>
         <View style={styles.formField}>
-            <Text style={styles.label}>Password</Text>
+            <View style={[styles.passwordWrapper, styles.label]}>
+                <Text>Password</Text>
+                <Button titleStyle={styles.inlineBtn} type='clear' onPress={setPasswordReset} title="Forgot password?" />
+            </View>
             <TextInput
                 style={styles.modalInput}
                 onChangeText={(value) => setPassword(value)}
@@ -93,7 +97,7 @@ const SignUp: FC<Partial<Props> & { back: () => void }> = ({ error, signUp, back
     </View>
 }
 
-const Auth: FC<Props> = ({ isAuthenticated, isAuthInProgress, error, login, signUp, setAuthError, close }) => {
+const Auth: FC<Props> = ({ isAuthenticated, isAuthInProgress, error, login, signUp, setAuthError, close, passwordReset }) => {
     const [ui, setUi] = useState<string>('login')
     const authState = useRef(isAuthenticated);
     useEffect(() => {
@@ -110,9 +114,11 @@ const Auth: FC<Props> = ({ isAuthenticated, isAuthInProgress, error, login, sign
     if (isAuthenticated) {
         content = <Settings close={close} />
     } else if (ui === 'login') {
-        content = <Login error={error} login={login} setSignUp={() => setUi('signUp')} />
+        content = <Login error={error} login={login} setSignUp={() => setUi('signUp')} setPasswordReset={() => setUi('passwordReset')} />
     } else if (ui === 'signUp') {
         content = <SignUp error={error} signUp={signUp} back={() => setUi('login')} />
+    } else if (ui === 'passwordReset') {
+        content = <PasswordReset error={error} passwordReset={passwordReset} back={() => setUi('login')} setAuthError={setAuthError} />
     }
 
     return <MapModal onRequestClose={close}>
@@ -120,10 +126,38 @@ const Auth: FC<Props> = ({ isAuthenticated, isAuthInProgress, error, login, sign
         {isAuthInProgress && <View style={styles.spinner}>
             <Text>loading...</Text>
         </View>}
-        
+
     </MapModal>
 }
 
+const PasswordReset: FC<Partial<Props> & { back: () => void }> = ({ error, passwordReset, back, setAuthError }) => {
+    const [email, setEmail] = useState<string>('')
+    const onBack = () => {
+        setAuthError && setAuthError('')
+        back()
+    }
+    const onPasswordReset = () => {
+        passwordReset && passwordReset({ email })
+    }
+    return <View style={styles.content}>
+        <Text style={styles.subTitle}>Reset your password</Text>
+        <View style={styles.formField}>
+            <Text style={styles.label}>Enter your user account's verified email address and we will send you a password reset link</Text>
+            <TextInput
+                keyboardType="email-address"
+                style={styles.modalInput}
+                onChangeText={(value) => setEmail(value)}
+                placeholder="email"
+                value={email}
+            />
+        </View>
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+        <View style={styles.row}>
+            <Button buttonStyle={styles.btn} disabled={!email} onPress={onPasswordReset} title="Password Reset" />
+            <Button buttonStyle={styles.btn} type='clear' onPress={onBack} title="Back" />
+        </View>
+    </View>
+}
 
 const styles = StyleSheet.create({
     content: {
@@ -175,6 +209,15 @@ const styles = StyleSheet.create({
         borderColor: 'grey',
         marginBottom: 10,
         width: '100%',
+    },
+    passwordWrapper: {
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+    },
+    inlineBtn: {
+        fontSize: 14,
     }
 });
 
