@@ -14,7 +14,7 @@ export interface MapState {
   zoom: number;
   center: Position;
   styleUrl: MapboxGL.StyleURL;
-  primaryMap?: MapInfo;
+  primaryMap: MapInfo;
   secondaryMap?: MapInfo;
   list: MapInfo[];
   loading: boolean;

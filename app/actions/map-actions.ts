@@ -14,12 +14,8 @@ export const setOpacityAction = (opacity: number) => {
 export const setZoomAction = (zoom: number) => {
   return { type: ActionTypeEnum.SetZoom, payload: isNaN(+zoom)?12:+zoom }
 };
-export const setStyleUrlAction = (styleUrl: MapboxGL.StyleURL) => {
-  if(Object.values(MapboxGL.StyleURL).includes(styleUrl)) {
-    return { type: ActionTypeEnum.SetStyleUrl, payload: styleUrl }
-  }
-};
-export const setPrimaryMapAction = (map?: MapInfo) => {
+
+export const setPrimaryMapAction = (map: MapInfo) => {
   return { type: ActionTypeEnum.SetPrimary, payload: map }
 };
 export const setSecondaryMapAction = (map?: MapInfo) => {

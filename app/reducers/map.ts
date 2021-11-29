@@ -4,12 +4,18 @@ import { MapState, MapInfo, State } from "../store/types";
 import { ActionTypeEnum } from "../actions";
 import { createReducer } from "./reducer-utils";
 
+export const onLineMapList: MapInfo[] = [
+  { name: 'MapBox Vector(online)', url: MapboxGL.StyleURL.Street },
+  { name: 'MapBox Satellite(online)', url: MapboxGL.StyleURL.Satellite },
+  { name: 'MapBox SatelliteStreet()online', url: MapboxGL.StyleURL.SatelliteStreet },
+]
 const CENTER_COORD = [44.320691, 56.090846];
 
 const initialState: MapState = Object.freeze({
   opacity: 0.5,
   zoom: 16,
   center: CENTER_COORD,
+  primaryMap: onLineMapList[0],
   styleUrl: MapboxGL.StyleURL.Street,
   list: [],
   loading: false,
@@ -28,13 +34,9 @@ export default createReducer<MapState>(initialState, {
     ...state,
     opacity,
   }),
-  [ActionTypeEnum.SetPrimary]: (primaryMap?: MapInfo) => (state: MapState) => ({
+  [ActionTypeEnum.SetPrimary]: (primaryMap: MapInfo) => (state: MapState) => ({
     ...state,
     primaryMap,
-  }),
-  [ActionTypeEnum.SetStyleUrl]: (styleUrl: MapboxGL.StyleURL= MapboxGL.StyleURL.Street) => (state: MapState) => ({
-    ...state,
-    styleUrl,
   }),
   [ActionTypeEnum.SetSecondary]: (secondaryMap?: MapInfo) => (state: MapState) => ({
     ...state,
@@ -73,10 +75,6 @@ export const selectZoom = createSelector(
 export const selectPrimaryMap = createSelector(
   selectMapState,
   (state) => state.primaryMap
-);
-export const selectStyleUrl = createSelector(
-  selectMapState,
-  (state) => state.styleUrl
 );
 export const selectSecondaryMap = createSelector(
   selectMapState,

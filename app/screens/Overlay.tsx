@@ -13,7 +13,6 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import styled from 'styled-components/native'
 import EditMark from '../components/EditMark'
 import Tracks from './Tracks'
-import Prompt from '../components/Prompt'
 import Markers from './Markers'
 import Auth from '../components/Auth'
 import MapSettings from './MapSettings'
@@ -23,7 +22,7 @@ import { loadWikiAction } from "../actions/wiki-actions";
 import { selectWikiCollection } from "../reducers/wiki";
 import { selectIsAuthenticated } from "../reducers/auth";
 import { setCenterAction, setOpacityAction, setZoomAction } from "../actions/map-actions";
-import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecondaryMap, selectStyleUrl } from '../reducers/map'
+import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecondaryMap } from '../reducers/map'
 
 interface MenuItem {
     title: string;
@@ -66,7 +65,6 @@ const mapStateToProps = (state: State) => ({
     isAuthenticated: selectIsAuthenticated(state),
     primaryMap: selectPrimaryMap(state),
     secondaryMap: selectSecondaryMap(state),
-    styleUrl: selectStyleUrl(state),
     tracking: selectIsTracking(state),
     editedMark: selectEditedMark(state),
 });
@@ -87,128 +85,6 @@ const mapDispatchToProps = {
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & {map?: MapboxGL.Camera}
-
-
-
-// state: {
-//     showEdit: boolean;
-//     showMenu: boolean;
-//     showTracks: boolean;
-//     showTrackName: boolean;
-//     showMarkers: boolean;
-//     showAuth: boolean;
-//     showMaps: boolean;
-//     loading: boolean;
-//     recording: boolean;
-//     selected?: Feature<Point>;
-//     navigationMark?: Feature<Point>;
-//     newMark?: Feature<Point>
-// } = {
-//         showEdit: false,
-//         showMenu: false,
-//         showTracks: false,
-//         showTrackName: false,
-//         showMarkers: false,
-//         showAuth: false,
-//         showMaps: false,
-//         recording: false,
-//         loading: false,
-//     };
-
-// componentDidMount() {
-//     MapboxGL.setTelemetryEnabled(false);
-//     this.props.checkAuth()
-// }
-// componentWillUnmount() {
-// }
-// UNSAFE_componentWillUpdate(newProps: Props, st: any) {
-//     const { location, tracking, addPoint } = this.props
-//     const { location: newLocation } = newProps
-//     if (tracking && location.coords.latitude !== newLocation.coords.latitude || location.coords.longitude !== newLocation.coords.longitude) {
-//         addPoint([newLocation.coords.longitude, newLocation.coords.latitude])
-//     }
-// }
-
-
-// onAddMark = async (e: any) => {
-//     const z = this.map?.getZoom()
-//     console.log('on new', e.geometry, z)
-//     this.setState({ showEdit: true, selected: undefined, newMark: e })
-// }
-
-// onLoadWiki = async () => {
-//     const bounds = await this.map?.getVisibleBounds()
-//     const z = await this.map?.getZoom()
-//     console.log('--', z, bounds)
-//     if (!bounds || !z || z < 9) {
-//         return
-//     }
-//     this.props.loadWiki(bounds)
-// }
-// onWikiPress = (f: Feature) => {
-//     console.log('on wiki', f)
-// }
-
-// onCreate = (feature: Feature<Point>, data: { name: string }) => {
-//     if (!feature.properties?.id) {
-//         feature.properties = feature.properties || {}
-//         feature.properties.id = `${Date.now()}`
-//     }
-//     const mark = featureToMark(feature)
-//     mark.name = data.name
-//     this.props.addMark(mark)
-//     this.setState({ showEdit: false })
-// }
-// onSave = (feature: Feature<Point>, data: { name: string; description: string }) => {
-//     if (!feature.properties?.id) {
-//         feature.properties = feature.properties || {}
-//         feature.properties.id = `${Date.now()}`
-//     }
-//     const mark = featureToMark(feature)
-//     mark.name = data.name
-//     mark.description = data.description
-//     const newFeature = markToFeature(mark)
-//     this.setState({ showEdit: false, selected: newFeature })
-//     this.props.updateMark(mark)
-// }
-
-// onRemove = (id: string) => {
-//     this.props.removeMark(id)
-//     this.setState({ selected: undefined })
-// }
-// onCancel = () => {
-//     this.setState({ showEdit: false, newMark: undefined })
-// }
-
-
-// onNameTrack = (name: string) => {
-//     const { activeTrack, addTrack, stopTracking } = this.props
-//     if (activeTrack) {
-//         const track = { ...activeTrack, name }
-//         addTrack(track)
-//     }
-//     stopTracking()
-//     this.setState({ showTrackName: false })
-// }
-// onCancelNameTrack = () => {
-//     this.props.stopTracking()
-//     this.setState({ showTrackName: false })
-// }
-
-// updateCenter = async (e: Feature<Point>) => {
-//     console.log('update center', this.props.center, e)
-//     // this.props.setCenter(e.geometry.coordinates)
-//     // const z = await this.map?.getZoom()
-//     // this.props.setZoom(z || 15)
-// }
-// onUserLocationUpdate = (location:any) =>{
-//     console.log('update user location', location)
-// }
-
-// onNavigate = () => {
-//     console.log('on navigate')
-// }
-
 
 const getClosestMark = (location: any, marks: Mark[]) => {
     const closest = minBy(marks, mark => distance(mark.geometry.coordinates, location, { units: 'kilometers' }))

@@ -13,7 +13,7 @@ import { GeoJSON } from 'geojson';
 import { checkAction } from "../actions/auth-actions";
 import { setCenterAction, setZoomAction } from "../actions/map-actions";
 import { addPointAction, setLocationAction } from "../actions/tracker-actions";
-import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecondaryMap, selectStyleUrl } from '../reducers/map'
+import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecondaryMap } from '../reducers/map'
 import ActiveTrack from '../components/ActiveTrack'
 
 MapboxGL.setAccessToken(Config.MAPBOX_PUB_KEY || 'pk.eyJ1IjoibWlraGFpbGFuZ2Vsb3YiLCJhIjoiY2tpa2FnbnM5MDg5ejJ3bDQybWN3eWRsdSJ9.vK_kqebrJaO7MdIg4ilaFQ');
@@ -76,7 +76,6 @@ const mapStateToProps = (state: State) => ({
     zoom: selectZoom(state),
     primaryMap: selectPrimaryMap(state),
     secondaryMap: selectSecondaryMap(state),
-    styleUrl: selectStyleUrl(state),
     tracking: selectIsTracking(state),
 });
 const mapDispatchToProps = {
@@ -88,7 +87,7 @@ const mapDispatchToProps = {
     setLocation: setLocationAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
-type Props = ConnectedProps<typeof connector> & {setMap: (map: MapboxGL.Camera|undefined) => void}
+type Props = ConnectedProps<typeof connector> & { setMap: (map: MapboxGL.Camera | undefined) => void }
 
 class Map extends Component<Props> {
     private camera: MapboxGL.Camera | undefined
@@ -152,7 +151,7 @@ class Map extends Component<Props> {
     }
     onUserLocationUpdate = (location: MapboxGL.Location) => {
         console.log('update user location', location)
-        if(!location?.coords){
+        if (!location?.coords) {
             return
         }
         if (this.props.tracking) {
@@ -172,20 +171,46 @@ class Map extends Component<Props> {
     }
 
     render() {
-        const { styleUrl, tracking, primaryMap, opacity, marks, center, zoom } = this.props
+        const { tracking, primaryMap, secondaryMap, opacity, marks, center, zoom } = this.props
         const { selected } = this.state
-        const marksCollection = featureCollection(marks.filter(item=>!item.deleted).map(markToFeature))
+        const marksCollection = featureCollection(marks.filter(item => !item.deleted).map(markToFeature))
 
-        console.log('render map', zoom)
+        let styleURL = primaryMap.url
+        console.log('render map', zoom, styleURL)
+        if (!styleURL) {
+            //todo:  render invalid map setting view
+            return null
+        }
+        if (styleURL.startsWith('http://localhost')) {
+            // this custom raster map
+            styleURL = JSON.stringify({
+                "version": 8,
+                "sources": {
+                    "tile-source": {
+                        "type": "raster",
+                        "tiles": [primaryMap.url],
+                        "tileSize": 256
+                    }
+                },
+                "layers": [
+                    {
+                        "id": "base-tiles",
+                        "type": "raster",
+                        "source": "tile-source"
+                    }
+                ]
+            })
+        }
 
         return (<StyledMap
             zoomEnabled
             compassEnabled
-            styleURL={styleUrl}
+            styleURL={styleURL}
             compassViewMargins={{ x: 0, y: 100 }}
             onLongPress={this.onAddMark}
             onRegionDidChange={this.updateCenter}
             ref={this.onSetMap}
+            key={styleURL}
         >
             <MapboxGL.Camera
                 ref={this.onSetCamera}
@@ -196,7 +221,7 @@ class Map extends Component<Props> {
                 followUserMode='course'
             />
             <MapboxGL.UserLocation visible={true} onUpdate={this.onUserLocationUpdate} showsUserHeadingIndicator={tracking} minDisplacement={50} />
-            {primaryMap && <MapboxGL.RasterSource {...rasterSourceProps} tileUrlTemplates={[primaryMap.url]}>
+            {secondaryMap && <MapboxGL.RasterSource {...rasterSourceProps} tileUrlTemplates={[secondaryMap.url]}>
                 <MapboxGL.RasterLayer
                     id="stamenWatercolorLayer"
                     sourceID="stamenWatercolorSource"
