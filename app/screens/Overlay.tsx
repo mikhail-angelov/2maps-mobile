@@ -17,12 +17,13 @@ import Markers from './Markers'
 import Auth from '../components/Auth'
 import MapSettings from './MapSettings'
 import { addPointAction, addTrackAction, selectTrackAction, startTrackingAction, stopTrackingAction, getLocation } from "../actions/tracker-actions";
-import { checkAction } from "../actions/auth-actions";
+import { checkAction, removeResetTokenAction } from "../actions/auth-actions";
 import { loadWikiAction } from "../actions/wiki-actions";
 import { selectWikiCollection } from "../reducers/wiki";
-import { selectIsAuthenticated } from "../reducers/auth";
+import { selectIsAuthenticated, selectResetToken } from "../reducers/auth";
 import { setCenterAction, setOpacityAction, setZoomAction } from "../actions/map-actions";
 import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecondaryMap } from '../reducers/map'
+import ResetPassword from "../components/ResetPassword";
 
 interface MenuItem {
     title: string;
@@ -67,6 +68,7 @@ const mapStateToProps = (state: State) => ({
     secondaryMap: selectSecondaryMap(state),
     tracking: selectIsTracking(state),
     editedMark: selectEditedMark(state),
+    resetToken: selectResetToken(state),
 });
 const mapDispatchToProps = {
     removeMark: removeMarkAction,
@@ -82,9 +84,10 @@ const mapDispatchToProps = {
     checkAuth: checkAction,
     editMark: editMarkAction,
     saveMark: saveMarkAction,
+    removeResetToken: removeResetTokenAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
-type Props = ConnectedProps<typeof connector> & {map?: MapboxGL.Camera}
+type Props = ConnectedProps<typeof connector> & { map?: MapboxGL.Camera }
 
 const getClosestMark = (location: any, marks: Mark[]) => {
     const closest = minBy(marks, mark => distance(mark.geometry.coordinates, location, { units: 'kilometers' }))
@@ -93,7 +96,7 @@ const getClosestMark = (location: any, marks: Mark[]) => {
     }
     return `${closest.name} ${distance(closest.geometry.coordinates, location, { units: 'kilometers' }).toFixed(2)} km.`
 }
-const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, center, zoom, location, isAuthenticated, editMark, saveMark, removeMark, tracking, activeTrack, startTracking, stopTracking, addTrack }) => {
+const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, center, zoom, location, isAuthenticated, editMark, saveMark, removeMark, tracking, activeTrack, startTracking, stopTracking, addTrack, resetToken, removeResetToken }) => {
     const [showMenu, setShowMenu] = useState(false)
     const [showAuth, setShowAuth] = useState(false)
     const [showSettings, setShowSettings] = useState(false)
@@ -187,6 +190,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         {showMarkers && center && <Markers center={center} select={selectMark} close={() => setShowMarkers(false)} />}
         {showAuth && <Auth close={() => setShowAuth(false)} />}
         {showSettings && <MapSettings close={() => setShowSettings(false)} />}
+        {!!resetToken && <ResetPassword close={removeResetToken} />}
     </>
     );
 

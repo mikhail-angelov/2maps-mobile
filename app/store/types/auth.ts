@@ -16,4 +16,5 @@ export interface AuthState {
   isRequestInProgress: boolean;
   error?: string;
   user?: any;
+  resetToken: string;
 }

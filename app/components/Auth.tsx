@@ -1,7 +1,7 @@
 import React, { FC, useState, useRef, useEffect } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { State } from '../store/types'
-import { View, TextInput, Text, Pressable, StyleSheet, TouchableWithoutFeedback } from "react-native";
+import { View, TextInput, Text, Pressable, StyleSheet } from "react-native";
 import { Button } from 'react-native-elements';
 import { selectIsAuthenticated, selectIsAuthInProgress, selectError } from "../reducers/auth";
 import { loginAction, signUpAction, setAuthErrorAction, passwordResetAction } from "../actions/auth-actions";
