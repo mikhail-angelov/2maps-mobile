@@ -1,53 +1,40 @@
 package com.mapnnmobile;
 
-import fi.iki.elonen.NanoHTTPD;
+import android.content.Context;
+import android.os.Environment;
+import android.util.Log;
 
-import com.facebook.react.bridge.ReactContext;
-import com.facebook.react.bridge.Arguments;
-import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.google.gson.Gson;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.Iterator;
-import java.util.HashMap;
-import java.util.stream.Stream;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
-import android.os.Build;
-import android.os.Environment;
-import android.os.StrictMode;
-import android.util.Log;
-import android.content.Context;
-import com.google.gson.Gson;
-import androidx.core.app.ActivityCompat;
-
-import java.io.IOException;
+import fi.iki.elonen.NanoHTTPD;
 
 public class LocalHost extends NanoHTTPD {
 
     private static volatile LocalHost INSTANCE;
-    public static final String DATABASE_NAME = "mende.sqlitedb";
 
     private static final String TAG = "RNHttpServer";
     private Map<String, DB> maps;
+    private Context ctx;
 
     private LocalHost(Context context) {
         super("127.0.0.1", 5555);
+        ctx = context;
+        init(context);
+    }
+    private void init(Context context) {
         maps = new HashMap<>();
         //get list of maps
-        File mapDir = new File(context.getFilesDir() + "/map/");
+        File mapDir = context.getExternalFilesDir("/map");
         if (!mapDir.exists()) {
             //add dir
             mapDir.mkdirs();
-            return;
         }
         File[] files = mapDir.listFiles();
         for (File mapFile : files) {
@@ -65,7 +52,6 @@ public class LocalHost extends NanoHTTPD {
             Log.d(TAG, String.format("sd card dir is not exist: %s", Environment.getExternalStorageDirectory() + "/Download/map/"));
             //add dir
             mapDir.mkdirs();
-            return;
         }
         files = mapDir.listFiles();
         if (files == null) {
@@ -106,7 +92,7 @@ public class LocalHost extends NanoHTTPD {
 
         Log.d(TAG, "Server receiving request." + url);
         if (Method.GET.equals(method)&& parts.length>0 && "maps".equals(parts[1])) {
-            String res = new Gson().toJson(maps.keySet());
+            String res = new Gson().toJson(getMaps());
             return newFixedLengthResponse(Response.Status.OK, "application/json", res);
         }
         if (!Method.GET.equals(method) || parts.length != 6) {
@@ -136,6 +122,7 @@ public class LocalHost extends NanoHTTPD {
     }
 
     public Set<String> getMaps() {
+        init(ctx); //reload list
         return maps.keySet();
     }
 }

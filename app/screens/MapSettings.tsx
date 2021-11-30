@@ -5,9 +5,10 @@ import { Picker } from "@react-native-community/picker";
 import { connect, ConnectedProps } from "react-redux";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { State, MapInfo } from '../store/types'
-import { loadMapListAction, setPrimaryMapAction, setSecondaryMapAction } from '../actions/map-actions'
-import { selectPrimaryMap, selectSecondaryMap, selectMapList, selectMapIsLoading, onLineMapList, selectMapError } from '../reducers/map'
+import { gelLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction } from '../actions/map-actions'
+import { selectPrimaryMap, selectSecondaryMap, selectMapList, selectMapIsLoading, onLineMapList, selectAvailableMapList, selectMapError } from '../reducers/map'
 import { ItemValue } from "@react-native-community/picker/typings/Picker";
+import { Button } from "react-native-elements/dist/buttons/Button";
 
 
 const mapStateToProps = (state: State) => ({
@@ -15,28 +16,37 @@ const mapStateToProps = (state: State) => ({
     secondaryMap: selectSecondaryMap(state),
     list: selectMapList(state),
     isLoading: selectMapIsLoading(state),
+    availableMapList: selectAvailableMapList(state),
 });
 const mapDispatchToProps = {
-    loadMapList: loadMapListAction,
+    gelLocalMapList: gelLocalMapListAction,
     setPrimaryMap: setPrimaryMapAction,
     setSecondaryMap: setSecondaryMapAction,
+    loadMapList: loadMapListAction,
+    downloadMap: downloadMapAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
 
 
-const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, list, close, loadMapList, setPrimaryMap, setSecondaryMap }) => {
+const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, list, availableMapList, close, gelLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap }) => {
     useEffect(() => {
-        loadMapList()
+        gelLocalMapList()
+        // loadMapList()
     }, [])
+    const am = [...availableMapList, 'test42']
     const primaryList = [...onLineMapList, ...list]
     const onSetPrimary = (value: ItemValue) => {
         const map = primaryList.find((item) => item.name === value)
-        if(!map) return
+        if (!map) return
         setPrimaryMap(map)
     }
     const onSetSecondary = (value: ItemValue) => {
         setSecondaryMap(list.find(x => x.name === value))
+    }
+    const onDownload = (value: string) => {
+        console.log(value)
+        downloadMap(value)
     }
 
 
@@ -67,6 +77,9 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, list, close, loadMap
                     <Picker.Item label="None" value={''} />
                     {list.map(({ name }: MapInfo) => (<Picker.Item key={name} label={name} value={name} />))}
                 </Picker>
+            </View>
+            <View style={styles.availableMaps}>
+                {am.map((name: string) => (<View key={name} style={styles.row}><Text>{name}</Text><Button type='clear' onPress={() => onDownload(name)} title="download"/></View>))}
             </View>
         </View>
     </Modal>
@@ -116,5 +129,14 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 18,
+    },
+    availableMaps: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        backgroundColor: "#fff",
+        margin: 10,
+        padding: 10,
+        height: 200,
+        overflow: 'scroll',
     }
 });

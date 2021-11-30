@@ -1,18 +1,19 @@
-import MapboxGL from "@react-native-mapbox-gl/maps";
 import { ActionTypeEnum, AppThunk } from ".";
 import { Position } from 'geojson';
+import { NativeModules } from "react-native";
 import { MapInfo } from "../store/types";
-import {getLocal} from './api'
+import { getLocal, get, HOST, HOST_LOCAL } from './api'
+import { selectToken } from '../reducers/auth'
 
 export const setCenterAction = (center: Position) => {
   //todo: validate params
   return { type: ActionTypeEnum.SetCenter, payload: center }
 };
 export const setOpacityAction = (opacity: number) => {
-  return { type: ActionTypeEnum.SetOpacity, payload: isNaN(+opacity)?1:opacity }
+  return { type: ActionTypeEnum.SetOpacity, payload: isNaN(+opacity) ? 1 : opacity }
 };
 export const setZoomAction = (zoom: number) => {
-  return { type: ActionTypeEnum.SetZoom, payload: isNaN(+zoom)?12:+zoom }
+  return { type: ActionTypeEnum.SetZoom, payload: isNaN(+zoom) ? 12 : +zoom }
 };
 
 export const setPrimaryMapAction = (map: MapInfo) => {
@@ -21,20 +22,97 @@ export const setPrimaryMapAction = (map: MapInfo) => {
 export const setSecondaryMapAction = (map?: MapInfo) => {
   return { type: ActionTypeEnum.SetSecondary, payload: map }
 };
-export const loadMapListAction = (): AppThunk => {
+export const gelLocalMapListAction = (): AppThunk => {
   return async (dispatch) => {
     try {
-      console.log('load maps'); 
-      dispatch({ type: ActionTypeEnum.GetMapList});
+      console.log('get maps');
+      dispatch({ type: ActionTypeEnum.GetMapList });
       const res = await getLocal('maps');
-      console.log('load maps', res.data);
-      const list = res.data.map((name:string) => ({name, url: `http://localhost:5555/map/${name}/{z}/{x}/{y}.png`}));
+      console.log('get maps', res.data);
+      const list = res.data.map((name: string) => ({ name, url: `${HOST_LOCAL}/map/${name}/{z}/{x}/{y}.png` }));
       dispatch({ type: ActionTypeEnum.GetMapListSuccess, payload: list });
     } catch (err) {
       console.log("error", err);
       dispatch({
         type: ActionTypeEnum.GetMapListFailure,
         payload: "get map list failure",
+      });
+    }
+  };
+};
+export const loadMapListAction = (): AppThunk => {
+  return async (dispatch, getState) => {
+    try {
+      console.log('load maps');
+      const token = selectToken(getState())
+      dispatch({ type: ActionTypeEnum.LoadMapList });
+      const res = await get({ url: `${HOST}/api/maps`, token });
+      console.log('load maps', res.data);
+      dispatch({ type: ActionTypeEnum.LoadMapListSuccess, payload: res.data });
+    } catch (err) {
+      console.log("error", err);
+      dispatch({
+        type: ActionTypeEnum.LoadMapListFailure,
+        payload: "get map list failure",
+      });
+    }
+  };
+};
+
+const getRequestConfig = (config: any, url:string) => Object.assign({}, {
+  downloadTitle: 'File Download',
+  downloadDescription: url,
+  saveAsName: 'Downloaded File - ' + new Date(),
+  allowedInRoaming: true,
+  allowedInMetered: true,
+  showInDownloads: true,
+  external: false,
+  path: "Download/"
+}, config);
+
+const download = (url = '', headers = {}, config = {}) => {
+  const downloadRequestConfig = getRequestConfig(config, url);
+  return new Promise((resolve, reject) => {
+    NativeModules.MapsModule.download(url, headers, downloadRequestConfig, (err:any, data:any) => {
+      if (err) {
+        return reject(err);
+      }
+      return resolve(data);
+    });
+  });
+};
+
+export const downloadMapAction = (name:string): AppThunk => {
+  return async (dispatch, getState) => {
+    try {
+      console.log('download map ', name);
+      const token = selectToken(getState())
+      dispatch({ type: ActionTypeEnum.DownloadMap });
+      const url = `https://storage.yandexcloud.net/hr-project/RSS_Sign-512.png`;
+      const headers = { Authorization: `Bearer ${token}` };
+      const config = {
+        downloadTitle: "Title that should appear in Native Download manager",
+        downloadDescription:
+          "Description that should appear in Native Download manager",
+        saveAsName: `${name}.sqlitedb`,
+        allowedInRoaming: true,
+        allowedInMetered: true,
+        showInDownloads: true,
+        external: true, //when false basically means use the default Download path (version ^1.3)
+        path: "any" //if "external" is true then use this path (version ^1.3)
+      };
+      
+      // const response = await downloadManager.download(url, headers , config)
+      const response = await download(url, headers, config);
+
+
+      console.log('download map', response);
+      dispatch({ type: ActionTypeEnum.DownloadMapSuccess, payload: response });
+    } catch (err) {
+      console.log("download map failure", err);
+      dispatch({
+        type: ActionTypeEnum.DownloadMapFailure,
+        payload: "download map failure",
       });
     }
   };
