@@ -5,14 +5,21 @@ import { AuthParams } from '../store/types'
 
 const AUTH_URL = `${HOST}/auth/m`
 
-interface Credentials {
+export interface Credentials {
   email: string;
   password: string;
 }
-interface SignUp {
+export interface SignUp {
   name: string;
   email: string;
   password: string;
+}
+export interface PasswordReset {
+  email: string;
+}
+interface changePassword {
+  password: string;
+  resetToken: string;
 }
 
 export const setAuthErrorAction = (error: string) => {
@@ -95,3 +102,42 @@ export const signUpAction = (data: SignUp): AppThunk => {
     }
   };
 };
+
+export const passwordResetAction = (data: PasswordReset): AppThunk => {
+  return async (dispatch) => {
+    try {
+      dispatch({ type: ActionTypeEnum.PasswordResetRequest });
+      await post<AuthParams>({ url: `${AUTH_URL}/forget`, data });
+      dispatch({
+        type: ActionTypeEnum.PasswordResetSuccess,
+      });
+    } catch (e) {
+      console.log("password reset error", e);
+      dispatch({
+        type: ActionTypeEnum.PasswordResetFailure,
+        payload: "password reset failure",
+      });
+    }
+  };
+};
+
+export const changePasswordAction = (data: changePassword): AppThunk => {
+  return async (dispatch) => {
+    try {
+      dispatch({ type: ActionTypeEnum.ChangePasswordRequest });
+      const response = await post<AuthParams>({ url: `${AUTH_URL}/reset-password`, data });
+      dispatch({
+        type: ActionTypeEnum.ChangePasswordSuccess,
+        payload: response.data,
+      });
+    } catch (e) {
+      console.log("password change error", e);
+      dispatch({
+        type: ActionTypeEnum.ChangePasswordFailure,
+        payload: "password change failure",
+      });
+    }
+  };
+};
+
+export const storeResetTokenAction = (resetToken: string) => ({ type: ActionTypeEnum.StoreResetToken, payload: resetToken })

@@ -21,7 +21,13 @@ export enum ActionTypeEnum {
   SignUpRequest = "auth/SIGN_UP_REQUEST",
   SignUpSuccess = "auth/SIGN_UP_SUCCESS",
   SignUpFailure = "auth/SIGN_UP_FAILURE",
-
+  PasswordResetRequest = "auth/PASSWORD_RESET_REQUEST",
+  PasswordResetSuccess = "auth/PASSWORD_RESET_SUCCESS",
+  PasswordResetFailure = "auth/PASSWORD_RESET_FAILURE",
+  StoreResetToken = "auth/STORE_RESET_TOKEN",
+  ChangePasswordRequest = "auth/CHANGE_PASSWORD_REQUEST",
+  ChangePasswordSuccess = "auth/CHANGE_PASSWORD_SUCCESS",
+  ChangePasswordFailure = "auth/CHANGE_PASSWORD_FAILURE",
   // marks
   MarksRequest = "marks/MARKS_REQUEST",
   MarksSuccess = "marks/MARKS_SUCCESS",

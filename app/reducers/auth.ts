@@ -6,7 +6,8 @@ import { createReducer } from "./reducer-utils";
 const initialState: AuthState = Object.freeze({
   authenticated: false,
   isRequestInProgress: false,
-  token: ''
+  token: '',
+  resetToken: '',
 });
 
 export default createReducer<AuthState>(initialState, {
@@ -73,6 +74,47 @@ export default createReducer<AuthState>(initialState, {
     user: undefined,
     isRequestInProgress: false,
   }),
+  [ActionTypeEnum.PasswordResetRequest]: () => (state: AuthState) => ({
+    ...state,
+    isRequestInProgress: true,
+    error: '',
+  }),
+  [ActionTypeEnum.PasswordResetSuccess]: () => (state: AuthState) => ({
+    ...state,
+    isRequestInProgress: false,
+    error: '',
+  }),
+  [ActionTypeEnum.PasswordResetFailure]: (error: string) => (state: AuthState) => ({
+    ...state,
+    error,
+    authenticated: false,
+    isRequestInProgress: false,
+  }),
+  [ActionTypeEnum.StoreResetToken]: (resetToken: string) => (state: AuthState) => ({
+    ...state,
+    resetToken,
+    error: '',
+  }),
+  [ActionTypeEnum.ChangePasswordRequest]: () => (state: AuthState) => ({
+    ...state,
+    isRequestInProgress: true,
+    error: '',
+  }),
+  [ActionTypeEnum.ChangePasswordSuccess]: ({ token, user }: AuthParams) => (state: AuthState) => ({
+    ...state,
+    authenticated: true,
+    token,
+    user,
+    error: '',
+    resetToken: '',
+    isRequestInProgress: false,
+  }),
+  [ActionTypeEnum.ChangePasswordFailure]: (error: string) => (state: AuthState) => ({
+    ...state,
+    error,
+    authenticated: false,
+    isRequestInProgress: false,
+  }),
 });
 export const selectAuthState = (state: State) => state.auth;
 export const selectIsAuthInProgress = createSelector(
@@ -94,4 +136,8 @@ export const selectUser = createSelector(
 export const selectError = createSelector(
   selectAuthState,
   (state) => state.error
+);
+export const selectResetToken = createSelector(
+  selectAuthState,
+  (state) => state.resetToken
 );
