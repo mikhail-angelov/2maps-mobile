@@ -57,7 +57,7 @@ const Login: FC<LoginProps> = ({ error, login, setSignUp, setPasswordReset }) =>
         </View>
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <View style={styles.row}>
-            <Button buttonStyle={styles.btn} disabled={!email || !password} onPress={() => login && login({ email, password })} title="Login" />
+            <Button buttonStyle={styles.btn} disabled={!email || !password} onPress={() => login({ email, password })} title="Login" />
             <Button buttonStyle={styles.btn} type='clear' onPress={setSignUp} title="Sign Up" />
         </View>
     </View>
@@ -76,7 +76,7 @@ const SignUp: FC<SignUpProps> = ({ error, signUp, back, isAuthInProgress }) => {
 
     const onSignUp = () => {
         inProcess.current = true
-        signUp && signUp({ name, email, password })
+        signUp({ name, email, password })
     }
     useEffect(() => {
         if (!isAuthInProgress && !error && inProcess.current) {
@@ -164,16 +164,16 @@ const PasswordReset: FC<PasswordResetProps> = ({ error, passwordReset, back, set
     const [email, setEmail] = useState<string>('')
     const inProcess = useRef(false)
     const onBack = () => {
-        setAuthError && setAuthError('')
+        setAuthError('')
         back()
     }
     const onPasswordReset = () => {
         inProcess.current = true
-        passwordReset && passwordReset({ email })
+        passwordReset({ email })
     }
     useEffect(() => {
         if (!isAuthInProgress && !error && inProcess.current) {
-            back && back()
+            back()
         }
     }, [isAuthInProgress])
     return <View style={styles.content}>

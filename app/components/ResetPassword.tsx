@@ -18,7 +18,7 @@ const mapDispatchToProps = {
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
 
-const PasswordReset: FC<Partial<Props>> = ({ error, changePassword, close, resetToken, isAuthInProgress }) => {
+const PasswordReset: FC<Props> = ({ error, changePassword, close, resetToken, isAuthInProgress }) => {
     const [password, setPassword] = useState<string>('')
     const inProcess = useRef(false)
     const onPassword = () => {
@@ -31,7 +31,7 @@ const PasswordReset: FC<Partial<Props>> = ({ error, changePassword, close, reset
     }
     useEffect(() => {
         if (!isAuthInProgress && !error && inProcess.current) {
-            close && close()
+            close()
         }
     }, [isAuthInProgress])
     useEffect(() => {
