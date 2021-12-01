@@ -56,10 +56,22 @@ const Login: FC<Partial<Props> & { setSignUp: () => void } & { setPasswordReset:
         </View>
     </View>
 }
-const SignUp: FC<Partial<Props> & { back: () => void }> = ({ error, signUp, back }) => {
+const SignUp: FC<Partial<Props> & { back: () => void }> = ({ error, signUp, back, isAuthInProgress }) => {
     const [name, setName] = useState<string>('')
     const [email, setEmail] = useState<string>('')
     const [password, setPassword] = useState<string>('')
+    const inProcess = useRef(false)
+
+    const onSignUp = () => {
+        inProcess.current = true
+        signUp && signUp({ name, email, password })
+    }
+    useEffect(() => {
+        if (!isAuthInProgress && !error && inProcess.current) {
+            back && back()
+        }
+    }, [isAuthInProgress])
+
     return <View style={styles.content}>
         <Text style={styles.subTitle}>Sign Up</Text>
         <View style={styles.formField}>
@@ -91,7 +103,7 @@ const SignUp: FC<Partial<Props> & { back: () => void }> = ({ error, signUp, back
         </View>
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <View style={styles.row}>
-            <Button buttonStyle={styles.btn} disabled={!name || !email || !password} onPress={() => signUp && signUp({ name, email, password })} title="Sign Up" />
+            <Button buttonStyle={styles.btn} disabled={!name || !email || !password} onPress={onSignUp} title="Sign Up" />
             <Button buttonStyle={styles.btn} type='clear' onPress={back} title="Back" />
         </View>
     </View>
@@ -116,9 +128,9 @@ const Auth: FC<Props> = ({ isAuthenticated, isAuthInProgress, error, login, sign
     } else if (ui === 'login') {
         content = <Login error={error} login={login} setSignUp={() => setUi('signUp')} setPasswordReset={() => setUi('passwordReset')} />
     } else if (ui === 'signUp') {
-        content = <SignUp error={error} signUp={signUp} back={() => setUi('login')} />
+        content = <SignUp error={error} signUp={signUp} back={() => setUi('login')} isAuthInProgress={isAuthInProgress} />
     } else if (ui === 'passwordReset') {
-        content = <PasswordReset error={error} passwordReset={passwordReset} back={() => setUi('login')} setAuthError={setAuthError} />
+        content = <PasswordReset error={error} passwordReset={passwordReset} back={() => setUi('login')} setAuthError={setAuthError} isAuthInProgress={isAuthInProgress} />
     }
 
     return <MapModal onRequestClose={close}>
@@ -130,15 +142,22 @@ const Auth: FC<Props> = ({ isAuthenticated, isAuthInProgress, error, login, sign
     </MapModal>
 }
 
-const PasswordReset: FC<Partial<Props> & { back: () => void }> = ({ error, passwordReset, back, setAuthError }) => {
+const PasswordReset: FC<Partial<Props> & { back: () => void }> = ({ error, passwordReset, back, setAuthError, isAuthInProgress }) => {
     const [email, setEmail] = useState<string>('')
+    const inProcess = useRef(false)
     const onBack = () => {
         setAuthError && setAuthError('')
         back()
     }
     const onPasswordReset = () => {
+        inProcess.current = true
         passwordReset && passwordReset({ email })
     }
+    useEffect(() => {
+        if (!isAuthInProgress && !error && inProcess.current) {
+            back && back()
+        }
+    }, [isAuthInProgress])
     return <View style={styles.content}>
         <Text style={styles.subTitle}>Reset your password</Text>
         <View style={styles.formField}>

@@ -1,15 +1,16 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { State } from '../store/types'
 import { View, TextInput, Text, StyleSheet } from "react-native";
 import { Button } from 'react-native-elements';
-import { selectError, selectResetToken } from "../reducers/auth";
+import { selectError, selectIsAuthInProgress, selectResetToken } from "../reducers/auth";
 import { changePasswordAction } from "../actions/auth-actions";
 import MapModal from "./Modal";
 
 const mapStateToProps = (state: State) => ({
     error: selectError(state),
     resetToken: selectResetToken(state),
+    isAuthInProgress: selectIsAuthInProgress(state),
 });
 const mapDispatchToProps = {
     changePassword: changePasswordAction,
@@ -17,14 +18,25 @@ const mapDispatchToProps = {
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
 
-const PasswordReset: FC<Partial<Props>> = ({ error, changePassword, close, resetToken }) => {
+const PasswordReset: FC<Partial<Props>> = ({ error, changePassword, close, resetToken, isAuthInProgress }) => {
     const [password, setPassword] = useState<string>('')
+    const inProcess = useRef(false)
     const onPassword = () => {
-        if (changePassword && resetToken) { changePassword({ password, resetToken }) }
+        if (changePassword && resetToken) {
+            inProcess.current = true
+            changePassword({
+                password, resetToken
+            })
+        }
     }
-    useEffect(()=>{
+    useEffect(() => {
+        if (!isAuthInProgress && !error && inProcess.current) {
+            close && close()
+        }
+    }, [isAuthInProgress])
+    useEffect(() => {
         setPassword('')
-    },[resetToken])
+    }, [resetToken])
     return <MapModal onRequestClose={close}>
         <View style={styles.content}>
             <Text style={styles.subTitle}>Change your password</Text>
