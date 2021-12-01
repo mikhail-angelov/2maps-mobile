@@ -1,12 +1,13 @@
 import React, { FC, useState, useRef, useEffect } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { State } from '../store/types'
-import { View, TextInput, Text, Pressable, StyleSheet } from "react-native";
+import { View, TextInput, Text, StyleSheet } from "react-native";
 import { Button } from 'react-native-elements';
 import { selectIsAuthenticated, selectIsAuthInProgress, selectError } from "../reducers/auth";
 import { loginAction, signUpAction, setAuthErrorAction, passwordResetAction } from "../actions/auth-actions";
 import Settings from './Settings'
 import MapModal from './Modal'
+import Spinner from "./Spinner";
 
 const mapStateToProps = (state: State) => ({
     isAuthenticated: selectIsAuthenticated(state),
@@ -147,10 +148,7 @@ const Auth: FC<Props> = ({ isAuthenticated, isAuthInProgress, error, login, sign
 
     return <MapModal onRequestClose={close}>
         {content}
-        {isAuthInProgress && <View style={styles.spinner}>
-            <Text>loading...</Text>
-        </View>}
-
+        <Spinner show={isAuthInProgress} />
     </MapModal>
 }
 interface PasswordResetProps {
@@ -205,14 +203,6 @@ const styles = StyleSheet.create({
     },
     label: {
         marginBottom: 10,
-    },
-    spinner: {
-        position: "absolute",
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: 'rgba(255,255,255,0.5)'
     },
     row: {
         flexDirection: 'row',

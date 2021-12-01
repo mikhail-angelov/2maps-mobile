@@ -6,6 +6,7 @@ import { Button } from 'react-native-elements';
 import { selectError, selectIsAuthInProgress, selectResetToken } from "../reducers/auth";
 import { changePasswordAction } from "../actions/auth-actions";
 import MapModal from "./Modal";
+import Spinner from "./Spinner";
 
 const mapStateToProps = (state: State) => ({
     error: selectError(state),
@@ -53,6 +54,7 @@ const PasswordReset: FC<Props> = ({ error, changePassword, close, resetToken, is
             <View style={styles.row}>
                 <Button buttonStyle={styles.btn} disabled={!password} onPress={onPassword} title="Submit" />
             </View>
+            <Spinner show={isAuthInProgress} />
         </View>
     </MapModal>
 }
