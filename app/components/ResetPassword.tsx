@@ -39,6 +39,7 @@ const PasswordReset: FC<Props> = ({ error, changePassword, close, resetToken, is
         setPassword('')
     }, [resetToken])
     return <MapModal onRequestClose={close}>
+        <Spinner show={isAuthInProgress} />
         <View style={styles.content}>
             <Text style={styles.subTitle}>Change your password</Text>
             <View style={styles.formField}>
@@ -54,7 +55,6 @@ const PasswordReset: FC<Props> = ({ error, changePassword, close, resetToken, is
             <View style={styles.row}>
                 <Button buttonStyle={styles.btn} disabled={!password} onPress={onPassword} title="Submit" />
             </View>
-            <Spinner show={isAuthInProgress} />
         </View>
     </MapModal>
 }

@@ -5,16 +5,16 @@ import { AuthParams } from '../store/types'
 
 const AUTH_URL = `${HOST}/auth/m`
 
-interface Credentials {
+export interface Credentials {
   email: string;
   password: string;
 }
-interface SignUp {
+export interface SignUp {
   name: string;
   email: string;
   password: string;
 }
-interface PasswordReset {
+export interface PasswordReset {
   email: string;
 }
 interface changePassword {

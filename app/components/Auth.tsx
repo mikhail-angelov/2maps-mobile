@@ -4,7 +4,7 @@ import { State } from '../store/types'
 import { View, TextInput, Text, StyleSheet } from "react-native";
 import { Button } from 'react-native-elements';
 import { selectIsAuthenticated, selectIsAuthInProgress, selectError } from "../reducers/auth";
-import { loginAction, signUpAction, setAuthErrorAction, passwordResetAction } from "../actions/auth-actions";
+import { loginAction, signUpAction, setAuthErrorAction, passwordResetAction, Credentials, SignUp as SignUpType, PasswordReset as PasswordResetType } from "../actions/auth-actions";
 import Settings from './Settings'
 import MapModal from './Modal'
 import Spinner from "./Spinner";
@@ -26,8 +26,8 @@ type Props = ConnectedProps<typeof connector> & { close: () => void }
 interface LoginProps {
     setSignUp: () => void;
     setPasswordReset: () => void;
-    error?: Props['error'];
-    login: Props['login'];
+    error?: string;
+    login: (data: Credentials) => void;
 }
 const Login: FC<LoginProps> = ({ error, login, setSignUp, setPasswordReset }) => {
     const [email, setEmail] = useState<string>('')
@@ -65,9 +65,9 @@ const Login: FC<LoginProps> = ({ error, login, setSignUp, setPasswordReset }) =>
 }
 interface SignUpProps {
     back: () => void;
-    signUp: Props['signUp'];
-    error?: Props['error'];
-    isAuthInProgress: Props['isAuthInProgress'];
+    signUp: (data: SignUpType) => void;
+    error?: string;
+    isAuthInProgress: boolean;
 }
 const SignUp: FC<SignUpProps> = ({ error, signUp, back, isAuthInProgress }) => {
     const [name, setName] = useState<string>('')
@@ -147,16 +147,16 @@ const Auth: FC<Props> = ({ isAuthenticated, isAuthInProgress, error, login, sign
     }
 
     return <MapModal onRequestClose={close}>
-        {content}
         <Spinner show={isAuthInProgress} />
+        {content}
     </MapModal>
 }
 interface PasswordResetProps {
     back: () => void;
-    passwordReset: Props['passwordReset'];
-    setAuthError: Props['setAuthError'];
-    error: Props['error'];
-    isAuthInProgress: Props['isAuthInProgress'];
+    passwordReset: (data: PasswordResetType) => void;
+    setAuthError: (error: string) => void;
+    error?: string;
+    isAuthInProgress: boolean;
 }
 const PasswordReset: FC<PasswordResetProps> = ({ error, passwordReset, back, setAuthError, isAuthInProgress }) => {
     const [email, setEmail] = useState<string>('')
