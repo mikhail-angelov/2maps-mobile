@@ -95,11 +95,6 @@ export default createReducer<AuthState>(initialState, {
     resetToken,
     error: '',
   }),
-  [ActionTypeEnum.RemoveResetToken]: () => (state: AuthState) => ({
-    ...state,
-    resetToken: '',
-    error: '',
-  }),
   [ActionTypeEnum.ChangePasswordRequest]: () => (state: AuthState) => ({
     ...state,
     isRequestInProgress: true,

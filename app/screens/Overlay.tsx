@@ -17,7 +17,7 @@ import Markers from './Markers'
 import Auth from '../components/Auth'
 import MapSettings from './MapSettings'
 import { addPointAction, addTrackAction, selectTrackAction, startTrackingAction, stopTrackingAction, getLocation } from "../actions/tracker-actions";
-import { checkAction, removeResetTokenAction } from "../actions/auth-actions";
+import { checkAction, storeResetTokenAction } from "../actions/auth-actions";
 import { loadWikiAction } from "../actions/wiki-actions";
 import { selectWikiCollection } from "../reducers/wiki";
 import { selectIsAuthenticated, selectResetToken } from "../reducers/auth";
@@ -84,7 +84,7 @@ const mapDispatchToProps = {
     checkAuth: checkAction,
     editMark: editMarkAction,
     saveMark: saveMarkAction,
-    removeResetToken: removeResetTokenAction,
+    storeResetToken: storeResetTokenAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { map?: MapboxGL.Camera }
@@ -96,7 +96,7 @@ const getClosestMark = (location: any, marks: Mark[]) => {
     }
     return `${closest.name} ${distance(closest.geometry.coordinates, location, { units: 'kilometers' }).toFixed(2)} km.`
 }
-const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, center, zoom, location, isAuthenticated, editMark, saveMark, removeMark, tracking, activeTrack, startTracking, stopTracking, addTrack, resetToken, removeResetToken }) => {
+const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, center, zoom, location, isAuthenticated, editMark, saveMark, removeMark, tracking, activeTrack, startTracking, stopTracking, addTrack, resetToken, storeResetToken }) => {
     const [showMenu, setShowMenu] = useState(false)
     const [showAuth, setShowAuth] = useState(false)
     const [showSettings, setShowSettings] = useState(false)
@@ -190,7 +190,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         {showMarkers && center && <Markers center={center} select={selectMark} close={() => setShowMarkers(false)} />}
         {showAuth && <Auth close={() => setShowAuth(false)} />}
         {showSettings && <MapSettings close={() => setShowSettings(false)} />}
-        {!!resetToken && <ResetPassword close={removeResetToken} />}
+        {!!resetToken && <ResetPassword close={()=> storeResetToken('')} />}
     </>
     );
 

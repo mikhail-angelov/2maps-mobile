@@ -140,9 +140,4 @@ export const changePasswordAction = (data: changePassword): AppThunk => {
   };
 };
 
-export const storeResetTokenAction = (resetToken: string): AppThunk => async (dispatch) => {
-  dispatch({ type: ActionTypeEnum.StoreResetToken, payload: resetToken })
-};
-export const removeResetTokenAction = (): AppThunk => async (dispatch) => {
-  dispatch({ type: ActionTypeEnum.RemoveResetToken })
-};
+export const storeResetTokenAction = (resetToken: string) => ({ type: ActionTypeEnum.StoreResetToken, payload: resetToken })

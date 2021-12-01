@@ -25,7 +25,6 @@ export enum ActionTypeEnum {
   PasswordResetSuccess = "auth/PASSWORD_RESET_SUCCESS",
   PasswordResetFailure = "auth/PASSWORD_RESET_FAILURE",
   StoreResetToken = "auth/STORE_RESET_TOKEN",
-  RemoveResetToken = "auth/REMOVE_RESET_TOKEN",
   ChangePasswordRequest = "auth/CHANGE_PASSWORD_REQUEST",
   ChangePasswordSuccess = "auth/CHANGE_PASSWORD_SUCCESS",
   ChangePasswordFailure = "auth/CHANGE_PASSWORD_FAILURE",

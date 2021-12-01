@@ -22,7 +22,13 @@ const mapDispatchToProps = {
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
 
-const Login: FC<Partial<Props> & { setSignUp: () => void } & { setPasswordReset: () => void }> = ({ error, login, setSignUp, setPasswordReset }) => {
+interface LoginProps {
+    setSignUp: () => void;
+    setPasswordReset: () => void;
+    error?: Props['error'];
+    login: Props['login'];
+}
+const Login: FC<LoginProps> = ({ error, login, setSignUp, setPasswordReset }) => {
     const [email, setEmail] = useState<string>('')
     const [password, setPassword] = useState<string>('')
     return <View style={styles.content}>
@@ -56,7 +62,13 @@ const Login: FC<Partial<Props> & { setSignUp: () => void } & { setPasswordReset:
         </View>
     </View>
 }
-const SignUp: FC<Partial<Props> & { back: () => void }> = ({ error, signUp, back, isAuthInProgress }) => {
+interface SignUpProps {
+    back: () => void;
+    signUp: Props['signUp'];
+    error?: Props['error'];
+    isAuthInProgress: Props['isAuthInProgress'];
+}
+const SignUp: FC<SignUpProps> = ({ error, signUp, back, isAuthInProgress }) => {
     const [name, setName] = useState<string>('')
     const [email, setEmail] = useState<string>('')
     const [password, setPassword] = useState<string>('')
@@ -141,8 +153,14 @@ const Auth: FC<Props> = ({ isAuthenticated, isAuthInProgress, error, login, sign
 
     </MapModal>
 }
-
-const PasswordReset: FC<Partial<Props> & { back: () => void }> = ({ error, passwordReset, back, setAuthError, isAuthInProgress }) => {
+interface PasswordResetProps {
+    back: () => void;
+    passwordReset: Props['passwordReset'];
+    setAuthError: Props['setAuthError'];
+    error: Props['error'];
+    isAuthInProgress: Props['isAuthInProgress'];
+}
+const PasswordReset: FC<PasswordResetProps> = ({ error, passwordReset, back, setAuthError, isAuthInProgress }) => {
     const [email, setEmail] = useState<string>('')
     const inProcess = useRef(false)
     const onBack = () => {
