@@ -19,7 +19,7 @@
     "@react-native-mapbox-gl/maps": "^8.2.0-beta2",
     "@turf/bbox-polygon": "^6.3.0",
     "@turf/buffer": "^6.3.0",
-    "axios": "^0.21.1",
+    "axios": "^0.21.4",
     "dayjs": "^1.10.5",
     "expo-keep-awake": "^9.1.2",
     "expo-location": "^12.0.4",

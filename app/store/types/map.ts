@@ -17,6 +17,7 @@ export interface MapState {
   primaryMap: MapInfo;
   secondaryMap?: MapInfo;
   list: MapInfo[];
+  availableMaps: string[];
   loading: boolean;
   error?: string;
 }

@@ -18,6 +18,7 @@ const initialState: MapState = Object.freeze({
   primaryMap: onLineMapList[0],
   styleUrl: MapboxGL.StyleURL.Street,
   list: [],
+  availableMaps:[],
   loading: false,
 });
 
@@ -58,6 +59,22 @@ export default createReducer<MapState>(initialState, {
     loading: false,
     error,
   }),
+  [ActionTypeEnum.LoadMapList]: () => (state: MapState) => ({
+    ...state,
+    loading: true,
+    error: undefined,
+  }),
+  [ActionTypeEnum.LoadMapListSuccess]: (list: string[]) => (state: MapState) => ({
+    ...state,
+    loading: false,
+    error: undefined,
+    availableMaps: list,
+  }),
+  [ActionTypeEnum.LoadMapListFailure]: (error: string) => (state: MapState) => ({
+    ...state,
+    loading: false,
+    error,
+  }),
 });
 export const selectMapState = (state: State) => state.map;
 export const selectOpacity = createSelector(
@@ -91,4 +108,8 @@ export const selectMapIsLoading = createSelector(
 export const selectMapError = createSelector(
   selectMapState,
   (state) => state.error
+);
+export const selectAvailableMapList = createSelector(
+  selectMapState,
+  (state) => state.availableMaps
 );
