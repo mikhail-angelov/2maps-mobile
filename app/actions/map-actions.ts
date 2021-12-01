@@ -46,7 +46,7 @@ export const loadMapListAction = (): AppThunk => {
       console.log('load maps');
       const token = selectToken(getState())
       dispatch({ type: ActionTypeEnum.LoadMapList });
-      const res = await get({ url: `${HOST}/api/maps`, token });
+      const res = await get({ url: `${HOST}/maps`, token });
       console.log('load maps', res.data);
       dispatch({ type: ActionTypeEnum.LoadMapListSuccess, payload: res.data });
     } catch (err) {
@@ -59,7 +59,7 @@ export const loadMapListAction = (): AppThunk => {
   };
 };
 
-const getRequestConfig = (config: any, url:string) => Object.assign({}, {
+const getRequestConfig = (config: any, url: string) => Object.assign({}, {
   downloadTitle: 'File Download',
   downloadDescription: url,
   saveAsName: 'Downloaded File - ' + new Date(),
@@ -73,7 +73,7 @@ const getRequestConfig = (config: any, url:string) => Object.assign({}, {
 const download = (url = '', headers = {}, config = {}) => {
   const downloadRequestConfig = getRequestConfig(config, url);
   return new Promise((resolve, reject) => {
-    NativeModules.MapsModule.download(url, headers, downloadRequestConfig, (err:any, data:any) => {
+    NativeModules.MapsModule.download(url, headers, downloadRequestConfig, (err: any, data: any) => {
       if (err) {
         return reject(err);
       }
@@ -82,26 +82,30 @@ const download = (url = '', headers = {}, config = {}) => {
   });
 };
 
-export const downloadMapAction = (name:string): AppThunk => {
+export const downloadMapAction = ({ id, name }: { id: string, name: string }): AppThunk => {
   return async (dispatch, getState) => {
     try {
-      console.log('download map ', name);
+      console.log('download map ', id);
       const token = selectToken(getState())
       dispatch({ type: ActionTypeEnum.DownloadMap });
-      const url = `https://storage.yandexcloud.net/hr-project/RSS_Sign-512.png`;
+      const res = await get({ url: `${HOST}/maps/${id}`, token });
+      if (!res.data?.url) {
+        throw new Error('no url')
+      }
+      const url = res.data.url;
       const headers = { Authorization: `Bearer ${token}` };
       const config = {
         downloadTitle: "Title that should appear in Native Download manager",
         downloadDescription:
           "Description that should appear in Native Download manager",
-        saveAsName: `${name}.sqlitedb`,
+        saveAsName: `${name}`,
         allowedInRoaming: true,
         allowedInMetered: true,
         showInDownloads: true,
         external: true, //when false basically means use the default Download path (version ^1.3)
         path: "any" //if "external" is true then use this path (version ^1.3)
       };
-      
+
       // const response = await downloadManager.download(url, headers , config)
       const response = await download(url, headers, config);
 
@@ -113,6 +117,23 @@ export const downloadMapAction = (name:string): AppThunk => {
       dispatch({
         type: ActionTypeEnum.DownloadMapFailure,
         payload: "download map failure",
+      });
+    }
+  };
+};
+
+export const removeLocalMapAction = (name: string): AppThunk => {
+  return async (dispatch, getState) => {
+    try {
+      console.log('remove map',name);
+      dispatch({ type: ActionTypeEnum.DeleteMap });
+      await NativeModules.MapsModule.removeMap(name);
+      dispatch({ type: ActionTypeEnum.DeleteMapSuccess, payload: name });
+    } catch (err) {
+      console.log("error", err);
+      dispatch({
+        type: ActionTypeEnum.DeleteMapFailure,
+        payload: "remove map failure",
       });
     }
   };

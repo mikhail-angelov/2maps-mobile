@@ -16,11 +16,13 @@ public class DB extends SQLiteOpenHelper {
     private static final String TAG = "DataBase";
     public static final int DATABASE_VERSION = 1;
     public final String name;
+    public final String path;
 
-    public DB(Context context, String dbFile, String name) {
+    public DB(Context context, String path, String name) {
         // 3rd argument to be passed is CursorFactory instance
-        super(context, dbFile, null, DATABASE_VERSION);
+        super(context, path, null, DATABASE_VERSION);
         this.name = name;
+        this.path = path;
     }
 
     public void onCreate(SQLiteDatabase db) {

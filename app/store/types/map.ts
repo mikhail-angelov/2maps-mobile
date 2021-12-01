@@ -9,6 +9,13 @@ export interface MapInfo {
   style?: string;
 }
 
+export interface MapFile {
+  id: string;
+  name: string;
+  url: string;
+  size: number;
+}
+
 export interface MapState {
   opacity: number;
   zoom: number;
@@ -17,7 +24,7 @@ export interface MapState {
   primaryMap: MapInfo;
   secondaryMap?: MapInfo;
   list: MapInfo[];
-  availableMaps: string[];
+  availableMaps: MapFile[];
   loading: boolean;
   error?: string;
 }

@@ -4,8 +4,8 @@ import MapboxGL from "@react-native-mapbox-gl/maps";
 import { Picker } from "@react-native-community/picker";
 import { connect, ConnectedProps } from "react-redux";
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { State, MapInfo } from '../store/types'
-import { gelLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction } from '../actions/map-actions'
+import { State, MapInfo, MapFile } from '../store/types'
+import { gelLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction, removeLocalMapAction } from '../actions/map-actions'
 import { selectPrimaryMap, selectSecondaryMap, selectMapList, selectMapIsLoading, onLineMapList, selectAvailableMapList, selectMapError } from '../reducers/map'
 import { ItemValue } from "@react-native-community/picker/typings/Picker";
 import { Button } from "react-native-elements/dist/buttons/Button";
@@ -24,17 +24,22 @@ const mapDispatchToProps = {
     setSecondaryMap: setSecondaryMapAction,
     loadMapList: loadMapListAction,
     downloadMap: downloadMapAction,
+    removeLocalMap: removeLocalMapAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
 
 
-const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, list, availableMapList, close, gelLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap }) => {
+const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, list, availableMapList, close, gelLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap }) => {
     useEffect(() => {
         gelLocalMapList()
-        // loadMapList()
+        loadMapList()
     }, [])
-    const am = [...availableMapList, 'test42']
+    const allMaps = [
+        ...list.map(({ name, url }: MapInfo) => ({ id: name, name: `${name} (${(0 / 1000000).toFixed(3)}M)`, file: url, loaded: true })),
+        ...availableMapList.filter(({ name }) => !list.find((item) => item.name === name)).map(({ id, name, url, size }) => {
+            return { id, name: `${name} (${(size / 1000000).toFixed(3)}M)`, file: url, loaded: false }
+        })]
     const primaryList = [...onLineMapList, ...list]
     const onSetPrimary = (value: ItemValue) => {
         const map = primaryList.find((item) => item.name === value)
@@ -44,11 +49,6 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, list, availableMapLi
     const onSetSecondary = (value: ItemValue) => {
         setSecondaryMap(list.find(x => x.name === value))
     }
-    const onDownload = (value: string) => {
-        console.log(value)
-        downloadMap(value)
-    }
-
 
     return <Modal style={styles.container} visible onRequestClose={close}>
         <View style={styles.buttons}>
@@ -79,7 +79,10 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, list, availableMapLi
                 </Picker>
             </View>
             <View style={styles.availableMaps}>
-                {am.map((name: string) => (<View key={name} style={styles.row}><Text>{name}</Text><Button type='clear' onPress={() => onDownload(name)} title="download"/></View>))}
+                {allMaps.map(({ id, name, file, loaded }) => (<View key={name} style={styles.row}>
+                    <Text>{name}</Text>
+                    {loaded ? <Button type='clear' onPress={() => removeLocalMap(id)} title="remove" /> : <Button type='clear' onPress={() => downloadMap({ id, name: file })} title="download" />}
+                </View>))}
             </View>
         </View>
     </Modal>

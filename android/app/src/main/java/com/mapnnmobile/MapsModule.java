@@ -86,6 +86,14 @@ public class MapsModule extends ReactContextBaseJavaModule {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @ReactMethod
+    public void removeMap(String name, Promise promise) {
+        Log.d(TAG, "removeMap " + name);
+        LocalHost.getInstance().removeMap(name);
+        promise.resolve("ok");
+    }
+
     //use it to notify
     private void sendEvent(ReactContext reactContext, String eventName, @Nullable WritableMap params) {
         reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);

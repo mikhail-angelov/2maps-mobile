@@ -1,6 +1,6 @@
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import { createSelector } from "reselect";
-import { MapState, MapInfo, State } from "../store/types";
+import { MapState, MapInfo, MapFile, State } from "../store/types";
 import { ActionTypeEnum } from "../actions";
 import { createReducer } from "./reducer-utils";
 
@@ -64,11 +64,11 @@ export default createReducer<MapState>(initialState, {
     loading: true,
     error: undefined,
   }),
-  [ActionTypeEnum.LoadMapListSuccess]: (list: string[]) => (state: MapState) => ({
+  [ActionTypeEnum.LoadMapListSuccess]: (availableMaps: MapFile[]) => (state: MapState) => ({
     ...state,
     loading: false,
     error: undefined,
-    availableMaps: list,
+    availableMaps,
   }),
   [ActionTypeEnum.LoadMapListFailure]: (error: string) => (state: MapState) => ({
     ...state,

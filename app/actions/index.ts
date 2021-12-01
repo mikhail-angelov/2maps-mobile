@@ -64,6 +64,9 @@ export enum ActionTypeEnum {
   DownloadMap = 'map/DOWNLOAD_MAP',
   DownloadMapSuccess = 'map/DOWNLOAD_MAP_SUCCESS',
   DownloadMapFailure = 'map/DOWNLOAD_MAP_FAILED',
+  DeleteMap = 'map/DELETE_MAP',
+  DeleteMapSuccess = 'map/DELETE_MAP_SUCCESS',
+  DeleteMapFailure = 'map/DELETE_MAP_FAILED',
   //wiki
   WikiRequest = 'wiki/REQUEST',
   WikiSuccess = 'wiki/REQUEST_SUCCESS',

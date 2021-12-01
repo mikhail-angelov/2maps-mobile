@@ -121,6 +121,18 @@ public class LocalHost extends NanoHTTPD {
         Log.d(TAG, "download file to map folder TBD." + url);
     }
 
+    public void removeMap(String name) {
+        Log.d(TAG, "remove map file" + name);
+        DB map = maps.get(name);
+        if (map != null) {
+            map.close();
+            maps.remove(name);
+            File mapFile = new File(map.path);
+            mapFile.delete();
+            Log.d(TAG, "removed map file" + map.path);
+        }
+    }
+
     public Set<String> getMaps() {
         init(ctx); //reload list
         return maps.keySet();
