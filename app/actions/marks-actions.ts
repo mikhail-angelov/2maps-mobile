@@ -5,7 +5,7 @@ import { Mark, POI } from "../store/types";
 import { feature, Feature, Point } from '@turf/helpers';
 import DocumentPicker from 'react-native-document-picker';
 import RNFS from 'react-native-fs'
-import { nanoid } from 'nanoid'
+import { nanoid } from 'nanoid/non-secure'
 import { selectMarks } from '../reducers/marks'
 import { selectToken } from '../reducers/auth'
 
@@ -18,6 +18,7 @@ export const markToFeature = (mark: Mark): Feature<Point> => {
     description: `<strong>${mark.description || mark.name}</strong>`,
     description_orig: mark.description,
     name: mark.name,
+    rate: mark.rate,
     icon: '',
     timestamp: mark.timestamp|| Date.now()
   };
@@ -29,6 +30,7 @@ export const featureToMark = (feature: Feature<Point>): Mark => {
     id: feature.id?String(feature.id): '',
     name: feature.properties?.name || '',
     description: feature.properties?.description_orig || '',
+    rate: feature.properties?.rate || 0,
     timestamp: feature.properties?.timestamp || Date.now()
   };
   return mark
@@ -119,12 +121,12 @@ export const syncMarksAction = (): AppThunk => {
     const pois = selectMarks(getState())
     const token = selectToken(getState())
     try{
-      const items = pois.map(({ id, name, description, geometry, timestamp }) => ({ id, name, description, lat: geometry.coordinates[1], lng: geometry.coordinates[0], timestamp }))
+      const items = pois.map(({ id, name, description, rate, geometry, timestamp }) => ({ id, name, description, rate, lat: geometry.coordinates[1], lng: geometry.coordinates[0], timestamp }))
       const res = await postLarge({url:`${MARKS_URL}/sync`, data: items, token})
       console.log('sync', res.data)
       
-      const marks: Mark[] = res.data.map(({ id, name = '', description = '', lat, lng, timestamp }: any) => {
-        return { id: id || nanoid(), name, description, timestamp, geometry: { type: 'Point', coordinates: [lng, lat] } }
+      const marks: Mark[] = res.data.map(({ id, name = '', description = '', rate = 0, lat, lng, timestamp }: any) => {
+        return { id: id || nanoid(), name, description, rate, timestamp, geometry: { type: 'Point', coordinates: [lng, lat] } }
       })
       dispatch({ type: ActionTypeEnum.ImportPois, payload: marks });
 
