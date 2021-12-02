@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +29,7 @@ public class LocalHost extends NanoHTTPD {
         ctx = context;
         init(context);
     }
+
     private void init(Context context) {
         maps = new HashMap<>();
         //get list of maps
@@ -91,30 +93,33 @@ public class LocalHost extends NanoHTTPD {
         String[] parts = url.split("/");
 
         Log.d(TAG, "Server receiving request." + url);
-        if (Method.GET.equals(method)&& parts.length>0 && "maps".equals(parts[1])) {
+        if (Method.GET.equals(method) && parts.length > 0 && "maps".equals(parts[1])) {
             String res = new Gson().toJson(getMaps());
             return newFixedLengthResponse(Response.Status.OK, "application/json", res);
         }
         if (!Method.GET.equals(method) || parts.length != 6) {
             return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "SERVER INTERNAL ERROR: invalid request: " + url);
         }
-        // /map/mende/{z}/{x}/{y}.jpg
-        String lastPart = parts[5].substring(0, parts[5].lastIndexOf('.'));
-        String path = parts[2];
-        DB db = maps.get(path);
-        if (!Method.GET.equals(method) || parts.length != 6 || db==null) {
-            Log.d(TAG, "invalid params" + path + " url "+ method+"-"+url);
-            return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "SERVER INTERNAL ERROR: invalid map: " + path);
-        }
-        byte[] data = db.getTile(parts[3], parts[4], lastPart);
-        if (data == null) {
-            Log.d(TAG, "no tile -" +parts[2]+ parts[3]+ parts[4]+ lastPart);
-//        return newFixedLengthResponse("Hello world:"+url+"z:"+parts[3]+"x:"+parts[4]+"y:"+lastPart);
+        try {
+            // /map/mende/{z}/{x}/{y}.jpg
+            String lastPart = parts[5].substring(0, parts[5].lastIndexOf('.'));
+            String path = parts[2];
+            DB db = maps.get(path);
+            if (!Method.GET.equals(method) || parts.length != 6 || db == null) {
+                Log.d(TAG, "invalid params" + path + " url " + method + "-" + url);
+                return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "SERVER INTERNAL ERROR: invalid map: " + path);
+            }
+            byte[] data = db.getTile(parts[3], parts[4], lastPart);
+            if (data == null) {
+                Log.d(TAG, "no tile -" + parts[2] + parts[3] + parts[4] + lastPart);
+                return newFixedLengthResponse(Response.Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "nod");
+            }
+            InputStream targetStream = new ByteArrayInputStream(data);
+            return newFixedLengthResponse(Response.Status.OK, "image/jpeg", targetStream, data.length);
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
             return newFixedLengthResponse(Response.Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "nod");
         }
-        InputStream targetStream = new ByteArrayInputStream(data);
-        Log.d(TAG, String.format("tile size - %d",data.length));
-        return newFixedLengthResponse(Response.Status.OK, "image/jpeg", targetStream, data.length);
     }
 
     public void addMap(String url) {
