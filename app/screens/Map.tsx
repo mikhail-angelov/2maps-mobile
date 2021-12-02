@@ -2,19 +2,19 @@ import React, { Component } from "react";
 import Config from 'react-native-config'
 import { connect, ConnectedProps } from "react-redux";
 import { State } from '../store/types'
-import { selectMarks } from '../reducers/marks'
-import { featureToMark, editMarkAction, markToFeature } from '../actions/marks-actions'
+import { featureToMark, editMarkAction } from '../actions/marks-actions'
 import { selectIsTracking } from '../reducers/tracker'
 import { StyleSheet, TouchableOpacity } from "react-native";
 import styled from 'styled-components/native'
 import MapboxGL, { CircleLayerStyle, LineLayerStyle, SymbolLayerStyle, RasterSourceProps, RegionPayload } from "@react-native-mapbox-gl/maps";
-import { featureCollection, Feature, Point } from '@turf/helpers';
+import { Feature, Point } from '@turf/helpers';
 import { GeoJSON } from 'geojson';
 import { checkAction } from "../actions/auth-actions";
 import { setCenterAction, setZoomAction } from "../actions/map-actions";
 import { addPointAction, setLocationAction } from "../actions/tracker-actions";
 import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecondaryMap } from '../reducers/map'
 import ActiveTrack from '../components/ActiveTrack'
+import MarksLocation from "../components/MarksLocation";
 
 MapboxGL.setAccessToken(Config.MAPBOX_PUB_KEY || 'pk.eyJ1IjoibWlraGFpbGFuZ2Vsb3YiLCJhIjoiY2tpa2FnbnM5MDg5ejJ3bDQybWN3eWRsdSJ9.vK_kqebrJaO7MdIg4ilaFQ');
 
@@ -49,14 +49,6 @@ const SelectedTrackStyle: LineLayerStyle = {
     lineColor: 'blue',
 }
 
-
-const MarkStyle: CircleLayerStyle = {
-    circleRadius: 12,
-    circleColor: 'blue',
-    circleOpacity: 0.6,
-    circleStrokeColor: 'white',
-    circleStrokeWidth: 0.5,
-}
 const WikiStyle: LineLayerStyle = {
     lineWidth: 2,
     lineColor: 'red',
@@ -70,7 +62,6 @@ const WikiStyleLabel: SymbolLayerStyle = {
 }
 
 const mapStateToProps = (state: State) => ({
-    marks: selectMarks(state),
     center: selectCenter(state),
     opacity: selectOpacity(state),
     zoom: selectZoom(state),
@@ -171,9 +162,8 @@ class Map extends Component<Props> {
     }
 
     render() {
-        const { tracking, primaryMap, secondaryMap, opacity, marks, center, zoom } = this.props
+        const { tracking, primaryMap, secondaryMap, opacity, center, zoom } = this.props
         const { selected } = this.state
-        const marksCollection = featureCollection(marks.filter(item => !item.deleted).map(markToFeature))
 
         let styleURL = primaryMap.url
         console.log('render map', zoom, styleURL)
@@ -234,15 +224,8 @@ class Map extends Component<Props> {
                     shape={wikiCollection}>
                     <MapboxGL.LineLayer id='w' style={WikiStyle} minZoomLevel={1} />
                     <MapboxGL.SymbolLayer id='wl' style={WikiStyleLabel} minZoomLevel={1} />
-                </MapboxGL.ShapeSource>} */}
-            <MapboxGL.ShapeSource
-                id="marksLocationSource"
-                hitbox={{ width: 20, height: 20 }}
-                onPress={this.onMarkPress}
-                shape={marksCollection}>
-                <MapboxGL.CircleLayer id='marks' style={MarkStyle} minZoomLevel={1} />
-            </MapboxGL.ShapeSource>
-
+                </MapboxGL.ShapeSource>} */}            
+            <MarksLocation onMarkPress={this.onMarkPress} />
             {selected && <MapboxGL.MarkerView
                 id="sel"
                 coordinate={selected.geometry.coordinates}
