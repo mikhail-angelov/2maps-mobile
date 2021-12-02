@@ -113,7 +113,8 @@ public class LocalHost extends NanoHTTPD {
             return newFixedLengthResponse(Response.Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "nod");
         }
         InputStream targetStream = new ByteArrayInputStream(data);
-        return newFixedLengthResponse(Response.Status.OK, "image/png", targetStream, data.length);
+        Log.d(TAG, String.format("tile size - %d",data.length));
+        return newFixedLengthResponse(Response.Status.OK, "image/jpeg", targetStream, data.length);
     }
 
     public void addMap(String url) {

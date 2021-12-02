@@ -109,9 +109,9 @@ export const downloadMapAction = ({ id, name }: { id: string, name: string }): A
       // const response = await downloadManager.download(url, headers , config)
       const response = await download(url, headers, config);
 
-
       console.log('download map', response);
       dispatch({ type: ActionTypeEnum.DownloadMapSuccess, payload: response });
+      dispatch(gelLocalMapListAction());
     } catch (err) {
       console.log("download map failure", err);
       dispatch({
@@ -129,6 +129,7 @@ export const removeLocalMapAction = (name: string): AppThunk => {
       dispatch({ type: ActionTypeEnum.DeleteMap });
       await NativeModules.MapsModule.removeMap(name);
       dispatch({ type: ActionTypeEnum.DeleteMapSuccess, payload: name });
+      dispatch(gelLocalMapListAction());
     } catch (err) {
       console.log("error", err);
       dispatch({

@@ -1,5 +1,5 @@
 import React, { FC, useEffect } from "react";
-import { View, Text, Modal, StyleSheet, } from "react-native";
+import { View, Text, Modal, StyleSheet, FlatList } from "react-native";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import { Picker } from "@react-native-community/picker";
 import { connect, ConnectedProps } from "react-redux";
@@ -9,7 +9,14 @@ import { gelLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, load
 import { selectPrimaryMap, selectSecondaryMap, selectMapList, selectMapIsLoading, onLineMapList, selectAvailableMapList, selectMapError } from '../reducers/map'
 import { ItemValue } from "@react-native-community/picker/typings/Picker";
 import { Button } from "react-native-elements/dist/buttons/Button";
+import Spinner from "../components/Spinner";
 
+interface MapItem {
+    id: string;
+    name: string;
+    file: string;
+    loaded: boolean;
+}
 
 const mapStateToProps = (state: State) => ({
     primaryMap: selectPrimaryMap(state),
@@ -30,12 +37,12 @@ const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
 
 
-const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, list, availableMapList, close, gelLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap }) => {
+const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, list, availableMapList, close, gelLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap }) => {
     useEffect(() => {
         gelLocalMapList()
         loadMapList()
     }, [])
-    const allMaps = [
+    const allMaps: MapItem[] = [
         ...list.map(({ name, url }: MapInfo) => ({ id: name, name: `${name} (${(0 / 1000000).toFixed(3)}M)`, file: url, loaded: true })),
         ...availableMapList.filter(({ name }) => !list.find((item) => item.name === name)).map(({ id, name, url, size }) => {
             return { id, name: `${name} (${(size / 1000000).toFixed(3)}M)`, file: url, loaded: false }
@@ -50,7 +57,15 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, list, availableMapLi
         setSecondaryMap(list.find(x => x.name === value))
     }
 
+    const renderItem = ({ item }: { item: MapItem }) => (
+        <View style={styles.row}>
+            <Text>{item.name}</Text>
+            {item.loaded ? <Button type='clear' onPress={() => removeLocalMap(item.id)} title="remove" /> : <Button type='clear' onPress={() => downloadMap({ id:item.id, name: item.file })} title="download" />}
+        </View>
+    );
+
     return <Modal style={styles.container} visible onRequestClose={close}>
+        <Spinner show={isLoading} />
         <View style={styles.buttons}>
             <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="close" onPress={close} />
         </View>
@@ -78,11 +93,13 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, list, availableMapLi
                     {list.map(({ name }: MapInfo) => (<Picker.Item key={name} label={name} value={name} />))}
                 </Picker>
             </View>
+
             <View style={styles.availableMaps}>
-                {allMaps.map(({ id, name, file, loaded }) => (<View key={name} style={styles.row}>
-                    <Text>{name}</Text>
-                    {loaded ? <Button type='clear' onPress={() => removeLocalMap(id)} title="remove" /> : <Button type='clear' onPress={() => downloadMap({ id, name: file })} title="download" />}
-                </View>))}
+                <FlatList
+                    data={allMaps}
+                    renderItem={renderItem}
+                    keyExtractor={(item: MapItem) => item.name}
+                />
             </View>
         </View>
     </Modal>
@@ -139,7 +156,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
         margin: 10,
         padding: 10,
-        height: 200,
+        height: 300,
         overflow: 'scroll',
     }
 });

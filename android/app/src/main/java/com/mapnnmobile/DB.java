@@ -45,10 +45,9 @@ public class DB extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
 
 //        z="7";x="636";y="321";
-        Integer zoom = 17 - Integer.parseInt(z);
         String selection = "z=? AND x=? AND y=?";
-        String[] selectionArgs = {String.valueOf(zoom), x, y};
-        Log.d(TAG, String.format("query %s: %s %s %s ", this.name, zoom, x, y));
+        String[] selectionArgs = {z, x, y};
+        Log.d(TAG, String.format("query %s: %s %s %s ", this.name, z, x, y));
         Cursor cursor = db.query(
                 "tiles",
                 null,
@@ -63,7 +62,7 @@ public class DB extends SQLiteOpenHelper {
             return cursor.getBlob(cursor.getColumnIndex("image"));
         }
 
-        Log.d(TAG, String.format("no record %s: %s %s %s", this.name, zoom, x, y));
+        Log.d(TAG, String.format("no record %s: %s %s %s", this.name, z, x, y));
         return null;
 
     }
