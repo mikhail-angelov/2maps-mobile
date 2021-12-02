@@ -5,6 +5,7 @@ export interface Mark {
   id?: string;
   name: string;
   description: string;
+  rate: number;
   timestamp: number;
   geometry: Point;
   deleted?: boolean;

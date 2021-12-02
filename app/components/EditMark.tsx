@@ -4,10 +4,11 @@ import { Button } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Mark } from '../store/types'
 import MapModal from './Modal'
+import { AirbnbRating } from 'react-native-elements';
 
 interface Props {
     mark: Mark;
-    save: (data: { name: string, description: string }) => void;
+    save: (data: { name: string, description: string, rate: number }) => void;
     remove?: (id: string) => void;
     cancel: () => void;
 }
@@ -15,6 +16,7 @@ interface Props {
 const EditMark: FC<Props> = ({ mark, save, cancel, remove }) => {
     const [name, setName] = useState<string>(mark?.name || '')
     const [description, setDescription] = useState<string>(mark?.description || '')
+    const [rate, setRate] = useState<number>(mark?.rate || 0)
     const [isEdit, setIsEdit] = useState(!mark.id)
     console.log('ed', description)
     const openLink = useCallback(async () => {
@@ -59,6 +61,13 @@ const EditMark: FC<Props> = ({ mark, save, cancel, remove }) => {
                 placeholder="description"
                 value={description}
             />
+            <Text>Rate:</Text>
+            <AirbnbRating 
+                showRating={false}
+                starStyle={{marginVertical: 10}}
+                onFinishRating={(value) => setRate(value)}
+                defaultRating={rate}
+            />
         </View>
             : <View style={styles.content}>
                 <Text>{name}</Text>
@@ -67,7 +76,7 @@ const EditMark: FC<Props> = ({ mark, save, cancel, remove }) => {
         <View style={styles.buttonsRow}>
             {isEdit ? <>
                 <Button buttonStyle={styles.btn} type="clear" onPress={() => setIsEdit(false)} icon={<Icon name="close" size={26} color="grey" />} />
-                <Button buttonStyle={styles.btn} type="clear" onPress={() => save({ name, description })} icon={<Icon name="save" size={26} color="grey" />} />
+                <Button buttonStyle={styles.btn} type="clear" onPress={() => save({ name, description, rate })} icon={<Icon name="save" size={26} color="grey" />} />
             </> : <Button buttonStyle={styles.btn} type="clear" onPress={() => setIsEdit(true)} icon={<Icon name="edit" size={26} color="grey" />} />}
             <Button buttonStyle={styles.btn} type="clear" onPress={openLink} icon={<Icon name="link" size={26} color="grey" />} />
             {/* {navigate && <Button buttonStyle={styles.btn} type='clear' onPress={navigate} icon={<Icon name="compass" size={26} color="grey" />} />} */}
@@ -94,6 +103,7 @@ const styles = StyleSheet.create({
     buttonsRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+        marginTop: 20,
         marginBottom: 20,
     },
     btn: {
