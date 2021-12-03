@@ -96,7 +96,7 @@ const getClosestMark = (location: any, marks: Mark[]) => {
     }
     return `${closest.name} ${distance(closest.geometry.coordinates, location, { units: 'kilometers' }).toFixed(2)} km.`
 }
-const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, center, zoom, location, isAuthenticated, editMark, saveMark, removeMark, tracking, activeTrack, startTracking, stopTracking, addTrack, resetToken, storeResetToken }) => {
+const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, center, zoom, location, isAuthenticated, editMark, saveMark, removeMark, tracking, activeTrack, startTracking, stopTracking, addTrack, resetToken, storeResetToken, selectedTrack, selectTrack }) => {
     const [showMenu, setShowMenu] = useState(false)
     const [showAuth, setShowAuth] = useState(false)
     const [showSettings, setShowSettings] = useState(false)
@@ -151,6 +151,10 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         map?.moveTo(mark.geometry.coordinates, 100)
     }
 
+    const onHideSelectedTrack = () => {
+        selectTrack(undefined)
+    }
+
     console.log('render overlay', zoom, closest)
     return (<>
         <SliderContainer>
@@ -166,6 +170,10 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         <Buttons>
             {/* <MenuButton name="insights" color="black" backgroundColor="#fff5" onPress={() => this.setState({ showTracks: true })} />
                     <View style={{ height: 40 }} /> */}
+            {selectedTrack && <>
+                <MenuButton icon="visibility-off" onPress={onHideSelectedTrack} />
+                <View style={{ height: 40 }} />
+            </>}
             <MenuButton icon="gps-fixed"  onPress={toCurrentLocation} />
             <View style={{ height: 40 }} />
             <MenuButton icon="track-changes" color={tracking ? "red" : "white"} onPress={toggleTracking} />

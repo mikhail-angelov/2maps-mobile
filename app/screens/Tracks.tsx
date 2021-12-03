@@ -49,6 +49,7 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
     const onSelectTrack = (id: string) => {
         const track = tracks.find((item) => item.id === id)
         selectTrack(track)
+        close()
     }
     const list: Item[] = orderBy(tracks, 'start', 'desc').map(({ id, name, start, end, track }) => {
         const l = distance(track[0], track[track.length - 1]).toFixed(3)
