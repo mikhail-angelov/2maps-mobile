@@ -63,13 +63,13 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
 
     const keyExtractor = (item: Item) => item.id
     const renderItem = ({ item }: { item: Item }) => (
-        <ListItem bottomDivider onPress={() => onSelectTrack(item.id)}>
+        <ListItem.Swipeable bottomDivider onPress={() => onSelectTrack(item.id)}>
             <Icon name='map' />
             <ListItem.Content>
                 <ListItem.Title>{item.title}</ListItem.Title>
                 <ListItem.Subtitle>{item.subtitle}</ListItem.Subtitle>
             </ListItem.Content>
-        </ListItem>
+        </ListItem.Swipeable>
     )
 
     return <Modal style={styles.container} visible onRequestClose={close}>
