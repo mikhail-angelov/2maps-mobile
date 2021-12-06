@@ -1,27 +1,8 @@
 import { ActionTypeEnum, AppThunk } from ".";
 import MapboxGL from "@react-native-mapbox-gl/maps";
-import { Alert } from "react-native";
-import { LocationObject, hasServicesEnabledAsync, requestForegroundPermissionsAsync, getLastKnownPositionAsync } from 'expo-location';
 import { ThreeAxisMeasurement } from 'expo-sensors';
 import { Track } from "../store/types";
-import { Position } from 'geojson';
-
-export const getLocation = async () => {
-  const isEnabled = await hasServicesEnabledAsync()
-  if (!isEnabled) {
-    Alert.alert('Oops', 'Location service is disabled')
-    return
-  }
-  let { status } = await requestForegroundPermissionsAsync();
-  if (status !== 'granted') {
-    Alert.alert('Oops', 'Permission to access location was denied')
-    return;
-  }
-
-  const location = await getLastKnownPositionAsync();
-  console.log('location!!', location);
-  return location
-}
+import { selectIsTracking, selectLocation } from '../reducers/tracker';
 
 export const compassAngle = (magnetometer: ThreeAxisMeasurement) => {
   let angle = 0.0
@@ -52,20 +33,15 @@ export const selectTrackAction = (track: Track | undefined) => {
   return { type: ActionTypeEnum.SetSelectedTrack, payload: track }
 };
 export const startTrackingAction = (): AppThunk => {
-  return async (dispatch) => {
-    console.log('-startTrackingAction-')
-    const location = await getLocation()
-    if (!location) {
-      console.log('-startTrackingAction-', location)
-      return
-    }
-    const point = [location.coords.longitude, location.coords.latitude]
+  return async (dispatch,  getState) => {
+    const location = selectLocation(getState())
+    const startPoint = [location.coords.longitude, location.coords.latitude]
     const track: Track = {
       id: `${Date.now()}`,
       start: Date.now(),
       end: Date.now(),
       name: '',
-      track: [point, point],
+      track: [startPoint, startPoint],
     }
     dispatch({ type: ActionTypeEnum.StartTracking, payload: track });
   };
@@ -74,8 +50,16 @@ export const startTrackingAction = (): AppThunk => {
 export const addPointAction = (location: MapboxGL.Location) => ({ type: ActionTypeEnum.AddPoint, payload: location });
 export const stopTrackingAction = (): AppThunk => {
   return async (dispatch) => {
-    console.log('-stopTrackingAction-')
     //todo: render trackIcon to save it
     dispatch({ type: ActionTypeEnum.EndTracking })
+  };
+}
+export const restartTrackingAction = (): AppThunk => {
+  return async (dispatch,  getState) => {
+    const tracking = selectIsTracking(getState())
+    if(tracking){
+      dispatch({ type: ActionTypeEnum.PauseTracking })
+      setTimeout(()=>dispatch({ type: ActionTypeEnum.ResumeTracking }), 10000)
+    }
   };
 }

@@ -63,6 +63,14 @@ export default createReducer<TrackerState>(initialState, {
     activeTrack: undefined,
     tracking: false,
   }),
+  [ActionTypeEnum.PauseTracking]: () => (state: TrackerState) => ({
+    ...state,
+    tracking: false,
+  }),
+  [ActionTypeEnum.ResumeTracking]: () => (state: TrackerState) => ({
+    ...state,
+    tracking: true,
+  }),
   [ActionTypeEnum.AddPoint]: (location: MapboxGL.Location) => (state: TrackerState) => {
     if (!state.activeTrack) {
       return state

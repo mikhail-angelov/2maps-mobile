@@ -8,7 +8,7 @@ import { orderBy } from 'lodash'
 import dayjs from 'dayjs'
 import { State } from '../store/types'
 import { selectIsTracking, selectTracks } from '../reducers/tracker'
-import { addPointAction, addTrackAction, selectTrackAction, startTrackingAction, stopTrackingAction, getLocation } from "../actions/tracker-actions";
+import { addPointAction, addTrackAction, selectTrackAction, startTrackingAction, stopTrackingAction } from "../actions/tracker-actions";
 
 export enum MENU {
     Cancel,

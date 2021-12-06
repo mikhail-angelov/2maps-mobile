@@ -48,6 +48,8 @@ export enum ActionTypeEnum {
   SetSelectedTrack = 'tracker/SET_SELECTED_TRACK',
   StartTracking = 'tracker/START_TRACKING',
   EndTracking = 'tracker/END_TRACKING',
+  PauseTracking = 'tracker/PAUSE_TRACKING',
+  ResumeTracking = 'tracker/RESUME_TRACKING',
   AddPoint = 'tracker/ADD_POINT',
   //map
   SetCenter = 'map/SET_CENTER',

@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { connect, ConnectedProps } from "react-redux";
-import { Magnetometer } from 'expo-sensors';
-import * as Location from 'expo-location';
 import { setCompassAction, setLocationAction } from './actions/tracker-actions'
 
 const mapDispatchToProps = {
