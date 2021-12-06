@@ -2,7 +2,7 @@ import { ActionTypeEnum, AppThunk } from ".";
 import { Position } from 'geojson';
 import { NativeModules } from "react-native";
 import { MapInfo } from "../store/types";
-import { getLocal, get, HOST, HOST_LOCAL } from './api'
+import { getLocal, get,post, HOST, HOST_LOCAL } from './api'
 import { selectToken } from '../reducers/auth'
 
 export const setCenterAction = (center: Position) => {
@@ -88,12 +88,12 @@ export const downloadMapAction = ({ id, name }: { id: string, name: string }): A
       console.log('download map ', id);
       const token = selectToken(getState())
       dispatch({ type: ActionTypeEnum.DownloadMap });
-      const res = await get({ url: `${HOST}/maps/${id}`, token });
+      const res = await post({ url: `${HOST}/maps/${id}`, token, data: { } });
+      console.log('map', res.data);
       if (!res.data?.url) {
         throw new Error('no url')
       }
       const url = res.data.url;
-      const headers = { Authorization: `Bearer ${token}` };
       const config = {
         downloadTitle: "Title that should appear in Native Download manager",
         downloadDescription:
@@ -107,7 +107,7 @@ export const downloadMapAction = ({ id, name }: { id: string, name: string }): A
       };
 
       // const response = await downloadManager.download(url, headers , config)
-      const response = await download(url, headers, config);
+      const response = await download(url, {}, config);
 
       console.log('download map', response);
       dispatch({ type: ActionTypeEnum.DownloadMapSuccess, payload: response });

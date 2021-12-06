@@ -6,9 +6,8 @@ import { featureToMark, editMarkAction } from '../actions/marks-actions'
 import { selectIsTracking } from '../reducers/tracker'
 import { StyleSheet, TouchableOpacity } from "react-native";
 import styled from 'styled-components/native'
-import MapboxGL, { CircleLayerStyle, LineLayerStyle, SymbolLayerStyle, RasterSourceProps, RegionPayload } from "@react-native-mapbox-gl/maps";
+import MapboxGL, { LineLayerStyle, SymbolLayerStyle, RasterSourceProps, RegionPayload } from "@react-native-mapbox-gl/maps";
 import { Feature, Point } from '@turf/helpers';
-import { GeoJSON } from 'geojson';
 import { checkAction } from "../actions/auth-actions";
 import { setCenterAction, setZoomAction } from "../actions/map-actions";
 import { addPointAction, setLocationAction } from "../actions/tracker-actions";
@@ -17,8 +16,6 @@ import ActiveTrack from '../components/ActiveTrack'
 import MarksLocation from "../components/MarksLocation";
 
 MapboxGL.setAccessToken(Config.MAPBOX_PUB_KEY || 'pk.eyJ1IjoibWlraGFpbGFuZ2Vsb3YiLCJhIjoiY2tpa2FnbnM5MDg5ejJ3bDQybWN3eWRsdSJ9.vK_kqebrJaO7MdIg4ilaFQ');
-
-const ANNOTATION_SIZE = 245;
 
 const rasterSourceProps: RasterSourceProps = {
     id: 'stamenWatercolorSource',
