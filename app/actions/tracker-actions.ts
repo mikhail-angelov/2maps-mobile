@@ -70,7 +70,7 @@ export const exportTrackAction = (trackId: string): AppThunk => {
         throw 'can not find track by id'
       }
       const compiledKml = compileKml(exportedTrack)
-      url = RNFS.DocumentDirectoryPath + `/${compiledKml.name}.kml`;
+      url = RNFS.DownloadDirectoryPath + `/${compiledKml.name}.kml`;
       console.log('writing kml to:', url, '\n')
       await RNFS.writeFile(decodeURI(url), compiledKml.data, 'utf8')
       Alert.alert('Track is saved', `to ${url}`)

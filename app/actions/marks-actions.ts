@@ -100,7 +100,7 @@ export const exportPoisAction = (): AppThunk => {
     let url = ''
     try {
       const data = JSON.stringify(pois)
-      url = RNFS.DocumentDirectoryPath + '/poi.json';
+      url = RNFS.DownloadDirectoryPath + '/poi.json';
       console.log('writing to:', url, '\n')
       await RNFS.writeFile(decodeURI(url), data, 'utf8')
       Alert.alert('Markers are saved', `to ${url}`)
