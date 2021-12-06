@@ -16,7 +16,7 @@ import Tracks from './Tracks'
 import Markers from './Markers'
 import Auth from '../components/Auth'
 import MapSettings from './MapSettings'
-import { addPointAction, addTrackAction, selectTrackAction, startTrackingAction, stopTrackingAction, getLocation } from "../actions/tracker-actions";
+import { addPointAction, addTrackAction, selectTrackAction, startTrackingAction, stopTrackingAction } from "../actions/tracker-actions";
 import { checkAction, storeResetTokenAction } from "../actions/auth-actions";
 import { loadWikiAction } from "../actions/wiki-actions";
 import { selectWikiCollection } from "../reducers/wiki";
@@ -131,7 +131,6 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         setOpacity(value);
     }
     const toCurrentLocation = async () => {
-        const location = await getLocation()
         console.log('-toCurrentLocation-', location)
         if (!location) {
             return

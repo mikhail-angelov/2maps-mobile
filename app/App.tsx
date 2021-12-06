@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
-import { NativeModules, StatusBar, Platform } from 'react-native';
+import { StatusBar, Platform } from 'react-native';
 import { ReduxNetworkProvider } from 'react-native-offline'
 import SplashScreen from  "react-native-splash-screen";
 import { useKeepAwake } from 'expo-keep-awake';
