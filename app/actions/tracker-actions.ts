@@ -3,6 +3,11 @@ import MapboxGL from "@react-native-mapbox-gl/maps";
 import { ThreeAxisMeasurement } from 'expo-sensors';
 import { Track } from "../store/types";
 import { selectIsTracking, selectLocation } from '../reducers/tracker';
+import { selectTracks } from "../reducers/tracker";
+import RNFS from 'react-native-fs'
+import DocumentPicker from 'react-native-document-picker';
+import { compileKml } from "../utils/kml";
+import { Alert } from "react-native";
 
 export const compassAngle = (magnetometer: ThreeAxisMeasurement) => {
   let angle = 0.0
@@ -54,6 +59,32 @@ export const stopTrackingAction = (): AppThunk => {
     dispatch({ type: ActionTypeEnum.EndTracking })
   };
 }
+
+export const exportTrackAction = (trackId: string): AppThunk => {
+  return async (dispatch, getState) => {
+    const tracks = selectTracks(getState())
+    const exportedTrack = tracks.find(item => item.id === trackId)
+    let url = ''
+    try {
+      if(!exportedTrack) {
+        throw 'can not find track by id'
+      }
+      const compiledKml = compileKml(exportedTrack)
+      url = RNFS.DownloadDirectoryPath + `/${compiledKml.name}.kml`;
+      console.log('writing kml to:', url, '\n')
+      await RNFS.writeFile(decodeURI(url), compiledKml.data, 'utf8')
+      Alert.alert('Track is saved', `to ${url}`)
+    } catch (err: any) {
+      console.log('Error write to:', url, '\n', err)
+      Alert.alert('Oops', `do not manage to save it ${url}`)
+      if (DocumentPicker.isCancel(err)) {
+        // User cancelled the picker, exit any dialogs or menus and move on
+      } else {
+        throw err;
+      }
+    }
+  };
+};
 export const restartTrackingAction = (): AppThunk => {
   return async (dispatch,  getState) => {
     const tracking = selectIsTracking(getState())

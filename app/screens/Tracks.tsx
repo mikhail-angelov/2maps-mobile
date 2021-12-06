@@ -1,14 +1,14 @@
 import React, { FC } from "react";
-import { View, FlatList, StyleSheet, Modal } from "react-native";
+import { View, FlatList, StyleSheet, Modal, Alert } from "react-native";
 import { connect, ConnectedProps } from "react-redux";
-import { ListItem } from 'react-native-elements';
+import { Button, ListItem } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import distance from '@turf/distance';
 import { orderBy } from 'lodash'
 import dayjs from 'dayjs'
 import { State } from '../store/types'
 import { selectIsTracking, selectTracks } from '../reducers/tracker'
-import { addPointAction, addTrackAction, selectTrackAction, startTrackingAction, stopTrackingAction } from "../actions/tracker-actions";
+import { addPointAction, addTrackAction, selectTrackAction, startTrackingAction, stopTrackingAction, exportTrackAction, removeTrackAction } from "../actions/tracker-actions";
 
 export enum MENU {
     Cancel,
@@ -32,13 +32,15 @@ const mapDispatchToProps = {
     selectTrack: selectTrackAction,
     startTracking: startTrackingAction,
     stopTracking: stopTrackingAction,
+    exportTrack: exportTrackAction,
+    removeTrack: removeTrackAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
 
 
 
-const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, selectTrack, close }) => {
+const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, selectTrack, close, exportTrack, removeTrack }) => {
     const toggleTracking = () => {
         if (isTracking) {
             stopTracking()
@@ -51,6 +53,18 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
         selectTrack(track)
         close()
     }
+
+    const onRemoveTrack = (itemId: string) => {
+        Alert.alert(
+            "Warning!",
+            "Are you sure to remove the track?",
+            [
+                { text: "No", style: "cancel" },
+                { text: "Yes", onPress: () => { removeTrack(itemId); selectTrack(undefined) } }
+            ]
+        );
+    }
+
     const list: Item[] = orderBy(tracks, 'start', 'desc').map(({ id, name, start, end, track }) => {
         const l = distance(track[0], track[track.length - 1]).toFixed(3)
         const subtitle = `T: ${dayjs(end - start).format('HH:mm')}, L: ${l} km.`
@@ -63,13 +77,32 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
 
     const keyExtractor = (item: Item) => item.id
     const renderItem = ({ item }: { item: Item }) => (
-        <ListItem bottomDivider onPress={() => onSelectTrack(item.id)}>
+        <ListItem.Swipeable
+            leftWidth={130}
+            rightContent={
+                <View style={{ flexDirection: "row" }}>
+                    <Button
+                        icon={{ name: 'file-download', color: 'white' }}
+                        buttonStyle={{ minHeight: '100%', backgroundColor: 'blue', borderRadius: 0 }}
+                        containerStyle={{ flex: 1 }}
+                        onPress={() => exportTrack(item.id)}
+                    />
+                    <Button
+                        icon={{ name: 'delete', color: 'white' }}
+                        buttonStyle={{ minHeight: '100%', backgroundColor: 'red', borderRadius: 0 }}
+                        containerStyle={{ flex: 1 }}
+                        onPress={() => onRemoveTrack(item.id)}
+                    />
+                </View>
+            }
+            bottomDivider
+            onPress={() => onSelectTrack(item.id)}>
             <Icon name='map' />
             <ListItem.Content>
                 <ListItem.Title>{item.title}</ListItem.Title>
                 <ListItem.Subtitle>{item.subtitle}</ListItem.Subtitle>
             </ListItem.Content>
-        </ListItem>
+        </ListItem.Swipeable>
     )
 
     return <Modal style={styles.container} visible onRequestClose={close}>
