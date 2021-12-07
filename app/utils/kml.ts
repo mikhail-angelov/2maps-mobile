@@ -13,9 +13,10 @@ export const createKml = (track: Track): {name: string; data: string} => {
   const coordinates = track.track.map(addAltitude).join(' ');
   const timeStart = dayjs(track.start).toISOString() || ''
   const timeEnd = dayjs(track.end).toISOString() || ''
+  const id = track.id || ''
   const data = `<?xml version="1.0" encoding="UTF-8"?>\
     <kml xmlns="http://www.opengis.net/kml/2.2">\
-    <Document>\
+    <Document id="${id}">\
     <name>${name}.kml</name>\
     <description>mapnn.bconf.com</description>\
     <open>1</open>\
@@ -51,7 +52,7 @@ const parseCoordinates = (data: string): Position[] => {
 
 export const parseKml = (
   data: string,
-): {name: string; coordinates: Position[]} => {
+): {name: string; coordinates: Position[], start: number, end: number, id: string} => {
   const kml = new XMLParser().parseFromString(data);
   const placemarkTag = kml.getElementsByTagName('Placemark');
   const name: string = _.get(
@@ -63,6 +64,13 @@ export const parseKml = (
   const coordinatesTag: string = kml.getElementsByTagName('coordinates');
   const coordinates = parseCoordinates(_.get(coordinatesTag, '[0].value', ''));
 
-  const timeSpanTag: string = kml.getElementsByTagName('TimeSpan');
-  return {name, coordinates};
+  const beginTag: string = kml.getElementsByTagName('begin');
+  const start = dayjs(_.get(beginTag, '[0].value', '')).valueOf()
+  const endTag: string = kml.getElementsByTagName('end');
+  const end = dayjs(_.get(endTag, '[0].value', '')).valueOf()
+  
+  const documentTag = kml.getElementsByTagName('Document')
+  const id = _.get(documentTag, '[0].attributes.id', '')
+   
+  return {name, coordinates, start, end, id};
 };
