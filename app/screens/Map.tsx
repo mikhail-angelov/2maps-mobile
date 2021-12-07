@@ -14,6 +14,7 @@ import { addPointAction, setLocationAction, restartTrackingAction } from "../act
 import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecondaryMap } from '../reducers/map'
 import ActiveTrack from '../components/ActiveTrack'
 import MarksLocation from "../components/MarksLocation";
+import { Position } from "geojson";
 
 MapboxGL.setAccessToken(Config.MAPBOX_PUB_KEY || 'pk.eyJ1IjoibWlraGFpbGFuZ2Vsb3YiLCJhIjoiY2tpa2FnbnM5MDg5ejJ3bDQybWN3eWRsdSJ9.vK_kqebrJaO7MdIg4ilaFQ');
 
@@ -167,6 +168,10 @@ class Map extends Component<Props> {
         }
     }
 
+    onTrackSelect = (start: Position, end: Position) => {
+        this.camera?.fitBounds(start, end, 70, 100)
+    }
+
     render() {
         const { tracking, primaryMap, secondaryMap, opacity, center, zoom } = this.props
         const { selected } = this.state
@@ -242,7 +247,7 @@ class Map extends Component<Props> {
                     <MapboxGL.Callout title={selected.properties?.name} />
                 </TouchableOpacity>
             </MapboxGL.MarkerView>}
-            <ActiveTrack />
+            <ActiveTrack onTrackSelect={this.onTrackSelect} />
             {/* <MapboxGL.MarkerView
                         id="sel-center"
                         coordinate={center}
