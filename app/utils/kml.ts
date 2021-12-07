@@ -54,10 +54,10 @@ export const parseKml = (
   data: string,
 ): {name: string; coordinates: Position[]; start: number; end: number} => {
   const kml = new XMLParser().parseFromString(data);
-  const placemarkTag = kml.getElementsByTagName('Placemark');
+  const nameTag = kml.getElementsByTagName('name');
   const name: string = _.get(
-    placemarkTag,
-    '[0].children.[0].value',
+    nameTag,
+    '[0].value',
     `track ${dayjs().format('YY.MM.DD HH-mm')}`,
   );
 
