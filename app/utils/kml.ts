@@ -65,10 +65,10 @@ export const parseKml = (
   const coordinates = parseCoordinates(_.get(coordinatesTag, '[0].value', ''));
 
   const beginTag: string = kml.getElementsByTagName('begin');
-  const start = dayjs(_.get(beginTag, '[0].value', '')).valueOf();
+  const start = dayjs(_.get(beginTag, '[0].value', dayjs())).valueOf();
 
   const endTag: string = kml.getElementsByTagName('end');
-  const end = dayjs(_.get(endTag, '[0].value', '')).valueOf();
+  const end = dayjs(_.get(endTag, '[0].value', dayjs())).valueOf();
 
   return {name, coordinates, start, end};
 };
