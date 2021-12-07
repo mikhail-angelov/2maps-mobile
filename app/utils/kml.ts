@@ -11,6 +11,8 @@ export const createKml = (track: Track): {name: string; data: string} => {
   const name =
     track.name || `track ${dayjs(track.start).format('YY.MM.DD HH-mm')}`;
   const coordinates = track.track.map(addAltitude).join(' ');
+  const timeStart = dayjs(track.start).toISOString() || ''
+  const timeEnd = dayjs(track.end).toISOString() || ''
   const data = `<?xml version="1.0" encoding="UTF-8"?>\
     <kml xmlns="http://www.opengis.net/kml/2.2">\
     <Document>\
@@ -19,6 +21,10 @@ export const createKml = (track: Track): {name: string; data: string} => {
     <open>1</open>\
     <Placemark>\
     <name>${name}.kml</name>\
+    <TimeSpan>\
+    <begin>${timeStart}</begin>\
+    <end>${timeEnd}</end>\
+    </TimeSpan>\
     <LineString>\
     <tessellate>1</tessellate>\
     <coordinates>${coordinates}</coordinates>\
@@ -56,5 +62,7 @@ export const parseKml = (
 
   const coordinatesTag: string = kml.getElementsByTagName('coordinates');
   const coordinates = parseCoordinates(_.get(coordinatesTag, '[0].value', ''));
+
+  const timeSpanTag: string = kml.getElementsByTagName('TimeSpan');
   return {name, coordinates};
 };
