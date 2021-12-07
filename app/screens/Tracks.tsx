@@ -8,7 +8,7 @@ import { orderBy } from 'lodash'
 import dayjs from 'dayjs'
 import { State } from '../store/types'
 import { selectIsTracking, selectTracks } from '../reducers/tracker'
-import { addPointAction, addTrackAction, selectTrackAction, startTrackingAction, stopTrackingAction, exportTrackAction, removeTrackAction } from "../actions/tracker-actions";
+import { addPointAction, addTrackAction, selectTrackAction, startTrackingAction, stopTrackingAction, exportTrackAction, removeTrackAction, importTrackAction } from "../actions/tracker-actions";
 
 export enum MENU {
     Cancel,
@@ -34,13 +34,14 @@ const mapDispatchToProps = {
     stopTracking: stopTrackingAction,
     exportTrack: exportTrackAction,
     removeTrack: removeTrackAction,
+    importTrack: importTrackAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
 
 
 
-const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, selectTrack, close, exportTrack, removeTrack }) => {
+const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, selectTrack, close, exportTrack, removeTrack, importTrack }) => {
     const toggleTracking = () => {
         if (isTracking) {
             stopTracking()
@@ -70,7 +71,7 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
         const subtitle = `T: ${dayjs(end - start).format('HH:mm')}, L: ${l} km.`
         return {
             id,
-            title: `${dayjs(start).format('YY.MM.DD HH:mm')} ${name}`,
+            title: name || dayjs(start).format('YY.MM.DD HH:mm'),
             subtitle,
         }
     })
@@ -107,6 +108,7 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
 
     return <Modal style={styles.container} visible onRequestClose={close}>
         <View style={styles.buttons}>
+            <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-upload" onPress={importTrack} />
             <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name={isTracking ? 'gps-not-fixed' : 'gps-fixed'} onPress={toggleTracking} />
             <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="share" onPress={() => selectTrack(undefined)} />
             <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="close" onPress={close} />

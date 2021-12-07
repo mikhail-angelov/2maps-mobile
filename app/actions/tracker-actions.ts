@@ -6,8 +6,9 @@ import { selectIsTracking, selectLocation } from '../reducers/tracker';
 import { selectTracks } from "../reducers/tracker";
 import RNFS from 'react-native-fs'
 import DocumentPicker from 'react-native-document-picker';
-import { compileKml } from "../utils/kml";
+import { createKml, parseKml } from "../utils/kml";
 import { Alert } from "react-native";
+import { nanoid } from 'nanoid/non-secure'
 
 export const compassAngle = (magnetometer: ThreeAxisMeasurement) => {
   let angle = 0.0
@@ -69,7 +70,7 @@ export const exportTrackAction = (trackId: string): AppThunk => {
       if(!exportedTrack) {
         throw 'can not find track by id'
       }
-      const compiledKml = compileKml(exportedTrack)
+      const compiledKml = createKml(exportedTrack)
       url = RNFS.DownloadDirectoryPath + `/${compiledKml.name}.kml`;
       console.log('writing kml to:', url, '\n')
       await RNFS.writeFile(decodeURI(url), compiledKml.data, 'utf8')
@@ -94,3 +95,29 @@ export const restartTrackingAction = (): AppThunk => {
     }
   };
 }
+export const importTrackAction = (): AppThunk => {
+  return async (dispatch) => {
+    try {
+      const res = await DocumentPicker.pick({
+        type: [DocumentPicker.types.allFiles],
+        copyTo: 'cachesDirectory',
+      });
+      const data = await RNFS.readFile(decodeURI(res.fileCopyUri), 'utf8')
+      const trackFromKml = parseKml(data)
+      const newTrack: Track = {
+        id: nanoid(),
+        start: Date.now(),
+        end: Date.now(),
+        name: trackFromKml.name,
+        track: trackFromKml.coordinates,
+      }
+       dispatch(addTrackAction(newTrack));
+    } catch (err: any) {
+      if (DocumentPicker.isCancel(err)) {
+        // User cancelled the picker, exit any dialogs or menus and move on
+      } else {
+        throw err;
+      }
+    }
+  };
+};
