@@ -11,28 +11,28 @@ export const createKml = (track: Track): {name: string; data: string} => {
   const name =
     track.name || `track ${dayjs(track.start).format('YY.MM.DD HH-mm')}`;
   const coordinates = track.track.map(addAltitude).join(' ');
-  const timeStart = dayjs(track.start).toISOString() || ''
-  const timeEnd = dayjs(track.end).toISOString() || ''
-  const id = track.id || ''
+  const timeStart = dayjs(track.start).toISOString() || '';
+  const timeEnd = dayjs(track.end).toISOString() || '';
+  const id = track.id || '';
   const data = `<?xml version="1.0" encoding="UTF-8"?>\
-    <kml xmlns="http://www.opengis.net/kml/2.2">\
-    <Document id="${id}">\
-    <name>${name}.kml</name>\
-    <description>mapnn.bconf.com</description>\
-    <open>1</open>\
-    <Placemark>\
-    <name>${name}.kml</name>\
-    <TimeSpan>\
-    <begin>${timeStart}</begin>\
-    <end>${timeEnd}</end>\
-    </TimeSpan>\
-    <LineString>\
-    <tessellate>1</tessellate>\
-    <coordinates>${coordinates}</coordinates>\
-    </LineString>\
-    </Placemark>\
-    </Document>\
-    </kml>`;
+<kml xmlns="http://www.opengis.net/kml/2.2">\
+<Document id="${id}">\
+<name>${name}.kml</name>\
+<description>mapnn.bconf.com</description>\
+<open>1</open>\
+<Placemark>\
+<name>${name}.kml</name>\
+<TimeSpan>\
+<begin>${timeStart}</begin>\
+<end>${timeEnd}</end>\
+</TimeSpan>\
+<LineString>\
+<tessellate>1</tessellate>\
+<coordinates>${coordinates}</coordinates>\
+</LineString>\
+</Placemark>\
+</Document>\
+</kml>`;
   return {name, data};
 };
 
@@ -52,7 +52,7 @@ const parseCoordinates = (data: string): Position[] => {
 
 export const parseKml = (
   data: string,
-): {name: string; coordinates: Position[], start: number, end: number, id: string} => {
+): {name: string; coordinates: Position[]; start: number; end: number} => {
   const kml = new XMLParser().parseFromString(data);
   const placemarkTag = kml.getElementsByTagName('Placemark');
   const name: string = _.get(
@@ -65,12 +65,10 @@ export const parseKml = (
   const coordinates = parseCoordinates(_.get(coordinatesTag, '[0].value', ''));
 
   const beginTag: string = kml.getElementsByTagName('begin');
-  const start = dayjs(_.get(beginTag, '[0].value', '')).valueOf()
+  const start = dayjs(_.get(beginTag, '[0].value', '')).valueOf();
+
   const endTag: string = kml.getElementsByTagName('end');
-  const end = dayjs(_.get(endTag, '[0].value', '')).valueOf()
-  
-  const documentTag = kml.getElementsByTagName('Document')
-  const id = _.get(documentTag, '[0].attributes.id', '')
-   
-  return {name, coordinates, start, end, id};
+  const end = dayjs(_.get(endTag, '[0].value', '')).valueOf();
+
+  return {name, coordinates, start, end};
 };

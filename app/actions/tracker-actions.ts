@@ -105,7 +105,7 @@ export const importTrackAction = (): AppThunk => {
       const data = await RNFS.readFile(decodeURI(res.fileCopyUri), 'utf8')
       const trackFromKml = parseKml(data)
       const newTrack: Track = {
-        id: trackFromKml.id || nanoid(),
+        id: nanoid(),
         start: trackFromKml.start,
         end: trackFromKml.end,
         name: trackFromKml.name,
