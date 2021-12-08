@@ -177,7 +177,7 @@ class Map extends Component<Props> {
         const { selected } = this.state
 
         let styleURL = primaryMap.url
-        console.log('render map', zoom, styleURL)
+        console.log('render map', zoom, opacity)
         if (!styleURL) {
             //todo:  render invalid map setting view
             return null

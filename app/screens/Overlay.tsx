@@ -128,6 +128,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
     const closest = getClosestMark(currentLocation, marks)
     const menuItems = isAuthenticated ? menuItemsAuth : menuItemsNotAuth
     const onOpacityChange = (value: number) => {
+        console.log('setOpacityAction c', value);
         setOpacity(value);
     }
     const toCurrentLocation = async () => {
@@ -154,10 +155,11 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         selectTrack(undefined)
     }
 
-    console.log('render overlay', zoom, closest)
+    console.log('render overlay', zoom, opacity)
     return (<>
         <SliderContainer>
             <StyledSlider
+            allowTouchTrack={false}
                 value={opacity}
                 onValueChange={onOpacityChange}
                 thumbTintColor="#4264fb"

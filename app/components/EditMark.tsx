@@ -65,7 +65,7 @@ const EditMark: FC<Props> = ({ mark, save, cancel, remove }) => {
             <AirbnbRating 
                 showRating={false}
                 starStyle={{marginVertical: 10}}
-                onFinishRating={(value) => setRate(value)}
+                onFinishRating={(value: number) => setRate(value)}
                 defaultRating={rate}
             />
         </View>

@@ -4,11 +4,9 @@ import android.app.DownloadManager;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Environment;
 import android.util.Log;
 
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
 
@@ -32,7 +30,7 @@ public class Downloader {
         downloadManager = (DownloadManager) ctx.getSystemService(DOWNLOAD_SERVICE);
     }
 
-    public DownloadManager.Request createRequest(String url, ReadableMap headers, ReadableMap requestConfig) {
+    public DownloadManager.Request createRequest(String url, ReadableMap requestConfig) {
         String downloadTitle = requestConfig.getString("downloadTitle");
         String downloadDescription = requestConfig.getString("downloadTitle");
         String saveAsName = requestConfig.getString("saveAsName");
@@ -46,12 +44,6 @@ public class Downloader {
 
         Uri downloadUri = Uri.parse(url);
         DownloadManager.Request request = new DownloadManager.Request(downloadUri);
-
-        ReadableMapKeySetIterator iterator = headers.keySetIterator();
-        while (iterator.hasNextKey()) {
-            String key = iterator.nextKey();
-            request.addRequestHeader(key, headers.getString(key));
-        }
 
         request.setDestinationInExternalFilesDir(context, "/map", saveAsName);
         request.setTitle(downloadTitle);
@@ -81,6 +73,7 @@ public class Downloader {
             result.put("reason", "COULD_NOT_FIND");
             result.put("downloadId", String.valueOf(downloadId));
         }
+        cursor.close();
         WritableMap wmap = new WritableNativeMap();
         for (HashMap.Entry<String, String> entry : result.entrySet()) {
             wmap.putString(entry.getKey(), entry.getValue());
@@ -92,7 +85,32 @@ public class Downloader {
         return downloadManager.remove(downloadId);
     }
 
+    public WritableMap getProgress(long downloadId, String id) {
+        DownloadManager.Query q = new DownloadManager.Query();
+        q.setFilterById(downloadId);
 
+        Cursor cursor = downloadManager.query(q);
+        WritableMap result = checkDownloadStatus(downloadId);
+        result.putString("id", id);
+        if (!cursor.moveToFirst()) {
+            result.putInt("total", 0);
+            result.putInt("downloaded", 0);
+            result.putString("status", "end");
+        }
+        HashMap<String,String> status = getDownloadStatus(cursor, downloadId);
+        int bytes_downloaded = cursor.getInt(cursor
+                .getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+        int bytes_total = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+
+        Log.d(TAG, String.format("-check- %s", id));
+        cursor.close();
+        for (HashMap.Entry<String, String> entry : status.entrySet()) {
+            result.putString(entry.getKey(), entry.getValue());
+        }
+        result.putInt("total", bytes_total);
+        result.putInt("downloaded", bytes_downloaded);
+        return result;
+    }
     private HashMap<String, String> getDownloadStatus(Cursor cursor, long downloadId) {
 
         int columnStatusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);

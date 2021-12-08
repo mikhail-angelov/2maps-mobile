@@ -26,5 +26,8 @@ export interface MapState {
   list: MapInfo[];
   availableMaps: MapFile[];
   loading: boolean;
+  downloading: boolean;
+  downloadProgress: number;
+  downloadId?: string;
   error?: string;
 }

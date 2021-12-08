@@ -22,7 +22,6 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
-import java.util.LinkedList;
 import java.util.Set;
 
 public class MapsModule extends ReactContextBaseJavaModule {
@@ -76,14 +75,46 @@ public class MapsModule extends ReactContextBaseJavaModule {
 
 
     @ReactMethod
-    public void download(String url, ReadableMap headers, ReadableMap config, Callback onDone) {
+    public void download(String url, ReadableMap config, Callback onDone) {
         try {
-            DownloadManager.Request request = downloader.createRequest(url, headers, config);
+            String id = config.getString("id");
+            final DeviceEventManagerModule.RCTDeviceEventEmitter emitter = this.getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
+            DownloadManager.Request request = downloader.createRequest(url, config);
             long downloadId = downloader.queueDownload(request);
             appDownloads.put(downloadId, onDone);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    boolean downloading = true;
+                    while (downloading) {
+                        try {
+                            if (appDownloads.indexOfKey(downloadId) < 0) {
+                                return;
+                            }
+                            WritableMap progress = downloader.getProgress(downloadId, id);
+                            emitter.emit("map-download", progress);
+                            Thread.sleep(1000);
+                        } catch (Exception e) {
+                            return;
+                        }
+                    }
+                }
+            }).start();
         } catch (Exception e) {
             onDone.invoke(e.getMessage(), null);
         }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @ReactMethod
+    public void cancelDownload(String downloadId, Promise promise) {
+        Log.d(TAG, String.format("cancel download %s", downloadId));
+        try {
+            Long id =  Long.parseLong(downloadId, 10);
+            downloader.cancelDownload(id);
+        } catch (Exception e) {
+        }
+        promise.resolve("ok");
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)

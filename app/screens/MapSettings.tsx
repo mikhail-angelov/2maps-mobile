@@ -1,15 +1,16 @@
 import React, { FC, useEffect } from "react";
 import { View, Text, Modal, StyleSheet, FlatList } from "react-native";
+import { Button } from "react-native-elements";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import { Picker } from "@react-native-community/picker";
+import ProgressBar from '../components/ProgressBar';
 import { connect, ConnectedProps } from "react-redux";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { State, MapInfo } from '../store/types'
-import { gelLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction, removeLocalMapAction } from '../actions/map-actions'
-import { selectPrimaryMap, selectSecondaryMap, selectMapList, selectMapIsLoading, onLineMapList, selectAvailableMapList, selectMapError } from '../reducers/map'
+import { gelLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction, removeLocalMapAction, cancelDownloadMapAction } from '../actions/map-actions'
+import { selectPrimaryMap, selectSecondaryMap, selectMapList, selectMapIsLoading, onLineMapList, selectAvailableMapList, selectMapError, selectDownloadProgress, selectMapIsDownLoading } from '../reducers/map'
 import { selectIsAuthenticated } from '../reducers/auth'
 import { ItemValue } from "@react-native-community/picker/typings/Picker";
-import { Button } from "react-native-elements/dist/buttons/Button";
 import Spinner from "../components/Spinner";
 
 interface MapItem {
@@ -24,9 +25,11 @@ const mapStateToProps = (state: State) => ({
     secondaryMap: selectSecondaryMap(state),
     list: selectMapList(state),
     isLoading: selectMapIsLoading(state),
+    isDownLoading: selectMapIsDownLoading(state),
     availableMapList: selectAvailableMapList(state),
     isAuthenticated: selectIsAuthenticated(state),
     error: selectMapError(state),
+    progress: selectDownloadProgress(state),
 });
 const mapDispatchToProps = {
     gelLocalMapList: gelLocalMapListAction,
@@ -35,12 +38,13 @@ const mapDispatchToProps = {
     loadMapList: loadMapListAction,
     downloadMap: downloadMapAction,
     removeLocalMap: removeLocalMapAction,
+    cancelDownloadMap: cancelDownloadMapAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
 
 
-const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, list, availableMapList, isAuthenticated, error, close, gelLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap }) => {
+const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoading, list, availableMapList, isAuthenticated, error, progress, cancelDownloadMap, close, gelLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap }) => {
     useEffect(() => {
         gelLocalMapList()
         loadMapList()
@@ -68,6 +72,11 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, list, ava
     );
 
     return <Modal style={styles.container} visible onRequestClose={close}>
+        {isDownLoading && <View style={styles.loadingOverlay}>
+            <Text style={styles.loadingLabel}>loading...</Text>
+            <View style={styles.progressBar}><ProgressBar progress={progress} value={progress} /></View>
+            <Button title="Cancel" onPress={cancelDownloadMap} />
+        </View>}
         <Spinner show={isLoading} />
         <View style={styles.header}>
             <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="close" onPress={close} />
@@ -107,7 +116,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, list, ava
                 </View> : <View>
                     <Text>You need to be logged in to download maps</Text>
                 </View>}
-                {!!error && <Text style={styles.errors}>{error}</Text>}
+            {!!error && <Text style={styles.errors}>{error}</Text>}
         </View>
     </Modal>
 }
@@ -166,5 +175,26 @@ const styles = StyleSheet.create({
     },
     errors: {
         color: 'red',
-    }
+    },
+    loadingOverlay: {
+        position: "absolute",
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 9999,
+    },
+    progressBar: {
+        width: '100%',
+        marginBottom: 10,
+        paddingHorizontal: 5,
+    },
+    loadingLabel: {
+        fontSize: 16,
+        marginBottom: 10,
+    },
 });

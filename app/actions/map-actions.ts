@@ -2,15 +2,17 @@ import { ActionTypeEnum, AppThunk } from ".";
 import { Position } from 'geojson';
 import { NativeModules } from "react-native";
 import { MapInfo } from "../store/types";
-import { getLocal, get,post, HOST, HOST_LOCAL } from './api'
+import { getLocal, get, post, HOST, HOST_LOCAL } from './api'
 import { selectToken } from '../reducers/auth'
+import { selectDownloadId } from '../reducers/map'
 
 export const setCenterAction = (center: Position) => {
   //todo: validate params
   return { type: ActionTypeEnum.SetCenter, payload: center }
 };
 export const setOpacityAction = (opacity: number) => {
-  return { type: ActionTypeEnum.SetOpacity, payload: isNaN(+opacity) ? 1 : opacity }
+  console.log('setOpacityAction', opacity);
+  return { type: ActionTypeEnum.SetOpacity, payload: isNaN(+opacity) ? 1 : +opacity }
 };
 export const setZoomAction = (zoom: number) => {
   return { type: ActionTypeEnum.SetZoom, payload: isNaN(+zoom) ? 12 : +zoom }
@@ -59,21 +61,9 @@ export const loadMapListAction = (): AppThunk => {
   };
 };
 
-const getRequestConfig = (config: any, url: string) => Object.assign({}, {
-  downloadTitle: 'File Download',
-  downloadDescription: url,
-  saveAsName: 'Downloaded File - ' + new Date(),
-  allowedInRoaming: true,
-  allowedInMetered: true,
-  showInDownloads: true,
-  external: false,
-  path: "Download/"
-}, config);
-
-const download = (url = '', headers = {}, config = {}) => {
-  const downloadRequestConfig = getRequestConfig(config, url);
+const download = (url = '', config = {}) => {
   return new Promise((resolve, reject) => {
-    NativeModules.MapsModule.download(url, headers, downloadRequestConfig, (err: any, data: any) => {
+    NativeModules.MapsModule.download(url, config, (err: any, data: any) => {
       if (err) {
         return reject(err);
       }
@@ -88,7 +78,7 @@ export const downloadMapAction = ({ id, name }: { id: string, name: string }): A
       console.log('download map ', id);
       const token = selectToken(getState())
       dispatch({ type: ActionTypeEnum.DownloadMap });
-      const res = await post({ url: `${HOST}/maps/${id}`, token, data: { } });
+      const res = await post({ url: `${HOST}/maps/${id}`, token, data: {} });
       console.log('map', res.data);
       if (!res.data?.url) {
         throw new Error('no url')
@@ -98,16 +88,17 @@ export const downloadMapAction = ({ id, name }: { id: string, name: string }): A
         downloadTitle: "Title that should appear in Native Download manager",
         downloadDescription:
           "Description that should appear in Native Download manager",
-        saveAsName: `${name}`,
+        saveAsName: name,
         allowedInRoaming: true,
         allowedInMetered: true,
         showInDownloads: true,
-        external: true, //when false basically means use the default Download path (version ^1.3)
-        path: "any" //if "external" is true then use this path (version ^1.3)
+        external: true,
+        path: "any",
+        id,
       };
 
       // const response = await downloadManager.download(url, headers , config)
-      const response = await download(url, {}, config);
+      const response = await download(url, config);
 
       console.log('download map', response);
       dispatch({ type: ActionTypeEnum.DownloadMapSuccess, payload: response });
@@ -122,10 +113,17 @@ export const downloadMapAction = ({ id, name }: { id: string, name: string }): A
   };
 };
 
+export const cancelDownloadMapAction = (): AppThunk => (dispatch, getState) => {
+  const downloadId = selectDownloadId(getState())
+  if (downloadId) {
+    NativeModules.MapsModule.cancelDownload(downloadId)
+  }
+  dispatch({ type: ActionTypeEnum.CancelDownloadMap });
+}
+
 export const removeLocalMapAction = (name: string): AppThunk => {
   return async (dispatch, getState) => {
     try {
-      console.log('remove map',name);
       dispatch({ type: ActionTypeEnum.DeleteMap });
       await NativeModules.MapsModule.removeMap(name);
       dispatch({ type: ActionTypeEnum.DeleteMapSuccess, payload: name });

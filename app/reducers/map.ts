@@ -18,8 +18,10 @@ const initialState: MapState = Object.freeze({
   primaryMap: onLineMapList[0],
   styleUrl: MapboxGL.StyleURL.Street,
   list: [],
-  availableMaps:[],
+  availableMaps: [],
   loading: false,
+  downloading: false,
+  downloadProgress: 0,
 });
 
 export default createReducer<MapState>(initialState, {
@@ -77,18 +79,34 @@ export default createReducer<MapState>(initialState, {
   }),
   [ActionTypeEnum.DownloadMap]: () => (state: MapState) => ({
     ...state,
-    loading: true,
+    downloading: true,
+    downloadProgress: 0,
+    downloadId: '',
     error: undefined,
   }),
   [ActionTypeEnum.DownloadMapSuccess]: () => (state: MapState) => ({
     ...state,
-    loading: false,
+    downloading: false,
+    downloadProgress: 0,
     error: undefined,
   }),
   [ActionTypeEnum.DownloadMapFailure]: (error: string) => (state: MapState) => ({
     ...state,
-    loading: false,
+    downloading: false,
+    downloadProgress: 0,
     error,
+  }),
+  [ActionTypeEnum.LoadMapProgress]: (data: any) => (state: MapState) => ({
+    ...state,
+    downloadProgress: Math.floor(data?.downloaded ? (data.downloaded * 100 / data.total) : 0),
+    downloadId: data?.downloadId,
+    downloading: true,
+  }),
+  [ActionTypeEnum.CancelDownloadMap]: () => (state: MapState) => ({
+    ...state,
+    downloadProgress: 0,
+    downloadId: '',
+    downloading: false,
   }),
   [ActionTypeEnum.DeleteMap]: () => (state: MapState) => ({
     ...state,
@@ -135,6 +153,10 @@ export const selectMapIsLoading = createSelector(
   selectMapState,
   (state) => state.loading
 );
+export const selectMapIsDownLoading = createSelector(
+  selectMapState,
+  (state) => state.downloading
+);
 export const selectMapError = createSelector(
   selectMapState,
   (state) => state.error
@@ -142,4 +164,12 @@ export const selectMapError = createSelector(
 export const selectAvailableMapList = createSelector(
   selectMapState,
   (state) => state.availableMaps
+);
+export const selectDownloadProgress = createSelector(
+  selectMapState,
+  (state) => state.downloadProgress
+);
+export const selectDownloadId = createSelector(
+  selectMapState,
+  (state) => state.downloadId
 );
