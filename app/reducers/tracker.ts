@@ -57,9 +57,9 @@ export default createReducer<TrackerState>(initialState, {
     activeTrack,
     tracking: true,
   }),
-  [ActionTypeEnum.EndTracking]: () => (state: TrackerState) => ({
+  [ActionTypeEnum.EndTracking]: (thumbnail: string) => (state: TrackerState) => ({
     ...state,
-    tracks: state.activeTrack ? [...state.tracks, state.activeTrack] : state.tracks,
+    tracks: state.activeTrack ? [...state.tracks, {...state.activeTrack, thumbnail}] : state.tracks,
     activeTrack: undefined,
     tracking: false,
   }),

@@ -9,6 +9,7 @@ import dayjs from 'dayjs'
 import { State } from '../store/types'
 import { selectIsTracking, selectTracks } from '../reducers/tracker'
 import { addPointAction, addTrackAction, selectTrackAction, startTrackingAction, stopTrackingAction, exportTrackAction, removeTrackAction, importTrackAction } from "../actions/tracker-actions";
+import { SvgXml } from "react-native-svg";
 
 export enum MENU {
     Cancel,
@@ -22,6 +23,7 @@ interface Item {
     id: string;
     title: string;
     subtitle: string;
+    thumbnail: string;
 }
 
 const mapStateToProps = (state: State) => ({
@@ -38,8 +40,6 @@ const mapDispatchToProps = {
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
-
-
 
 const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, selectTrack, close, exportTrack, removeTrack, importTrack }) => {
     const toggleTracking = () => {
@@ -66,13 +66,14 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
         );
     }
 
-    const list: Item[] = orderBy(tracks, 'start', 'desc').map(({ id, name, start, end, track }) => {
+    const list: Item[] = orderBy(tracks, 'start', 'desc').map(({ id, name, start, end, track, thumbnail }) => {
         const l = distance(track[0], track[track.length - 1]).toFixed(3)
         const subtitle = `T: ${dayjs(end - start).format('HH:mm')}, L: ${l} km.`
         return {
             id,
             title: name || dayjs(start).format('YY.MM.DD HH:mm'),
             subtitle,
+            thumbnail: thumbnail || '',
         }
     })
 
@@ -98,15 +99,15 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
             }
             bottomDivider
             onPress={() => onSelectTrack(item.id)}>
-            <Icon name='map' />
+            {!!item.thumbnail && <SvgXml xml={item.thumbnail} />}
             <ListItem.Content>
                 <ListItem.Title>{item.title}</ListItem.Title>
                 <ListItem.Subtitle>{item.subtitle}</ListItem.Subtitle>
             </ListItem.Content>
         </ListItem.Swipeable>
     )
-
-    return <Modal style={styles.container} visible onRequestClose={close}>
+    
+    return <Modal style={styles.container} visible onRequestClose={close}>        
         <View style={styles.buttons}>
             <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-upload" onPress={importTrack} />
             <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name={isTracking ? 'gps-not-fixed' : 'gps-fixed'} onPress={toggleTracking} />
