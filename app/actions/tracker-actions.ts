@@ -1,14 +1,17 @@
 import { ActionTypeEnum, AppThunk } from ".";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import { ThreeAxisMeasurement } from 'expo-sensors';
-import { Track } from "../store/types";
-import { selectIsTracking, selectLocation } from '../reducers/tracker';
+import { State, Track } from "../store/types";
+import { selectActiveTrack, selectIsTracking, selectLocation } from '../reducers/tracker';
 import { selectTracks } from "../reducers/tracker";
 import RNFS from 'react-native-fs'
 import DocumentPicker from 'react-native-document-picker';
 import { createKml, parseKml } from "../utils/kml";
 import { Alert } from "react-native";
 import { nanoid } from 'nanoid/non-secure'
+import { latLngToTileIndex, convertToBoxSize } from "../utils/normalize";
+import { makeSvg } from "../utils/svg";
+import * as _ from 'lodash'
 
 export const compassAngle = (magnetometer: ThreeAxisMeasurement) => {
   let angle = 0.0
@@ -54,10 +57,23 @@ export const startTrackingAction = (): AppThunk => {
 };
 
 export const addPointAction = (location: MapboxGL.Location) => ({ type: ActionTypeEnum.AddPoint, payload: location });
+
+const renderTrackIcon = (getState: () => State) => {
+  const activeTrack = selectActiveTrack(getState())
+  if(!activeTrack || _.isEmpty(activeTrack.track)) return
+  const coordinatesXY = activeTrack.track.map(point => latLngToTileIndex({lng: point[0], lat: point[1], zoom: 100}))
+  const boxX = 50
+  const boxY = 50
+  const boxCoordinates = convertToBoxSize(coordinatesXY, boxX - 1, boxY - 1)
+  if(!boxCoordinates) return
+  const svg = makeSvg(boxCoordinates, boxX, boxY)
+  return svg
+}
+
 export const stopTrackingAction = (): AppThunk => {
-  return async (dispatch) => {
-    //todo: render trackIcon to save it
-    dispatch({ type: ActionTypeEnum.EndTracking })
+  return async (dispatch, getState) => {  
+    const svgThumbnail = renderTrackIcon(getState) || ''
+    dispatch({ type: ActionTypeEnum.EndTracking, payload: svgThumbnail })
   };
 }
 
