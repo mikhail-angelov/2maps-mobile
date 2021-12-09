@@ -107,7 +107,7 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
             bottomDivider
             onPress={() => onSelectTrack(item.id)}
         >
-            {/* {!!item.thumbnail ? <SvgXml xml={item.thumbnail} /> : <Icon name='map' size={50} />} */}
+            {!!item.thumbnail ? <SvgXml xml={item.thumbnail} /> : <Icon name='map' size={50} />}
             <ListItem.Content>
                 <ListItem.Title>{item.title}</ListItem.Title>
                 <ListItem.Subtitle>{item.subtitle}</ListItem.Subtitle>
