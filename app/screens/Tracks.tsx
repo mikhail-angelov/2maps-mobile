@@ -23,7 +23,7 @@ interface Item {
     id: string;
     title: string;
     subtitle: string;
-    thumbnail: string;
+    thumbnail?: string;
 }
 
 const mapStateToProps = (state: State) => ({
@@ -50,6 +50,7 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
         }
     }
     const onSelectTrack = (id: string) => {
+        console.log('onSelectTrack', id)
         const track = tracks.find((item) => item.id === id)
         selectTrack(track)
         close()
@@ -80,7 +81,7 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
     const keyExtractor = (item: Item) => item.id
     const renderItem = ({ item }: { item: Item }) => (
         <ListItem.Swipeable
-            leftWidth={130}
+            leftWidth={180}
             rightContent={
                 <View style={{ flexDirection: "row" }}>
                     <Button
@@ -95,20 +96,26 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
                         containerStyle={{ flex: 1 }}
                         onPress={() => onRemoveTrack(item.id)}
                     />
+                    <Button
+                        icon={{ name: 'visibility', color: 'white' }}
+                        buttonStyle={{ minHeight: '100%', backgroundColor: 'green', borderRadius: 0 }}
+                        containerStyle={{ flex: 1 }}
+                        onPress={() => onSelectTrack(item.id)}
+                    />
                 </View>
             }
             bottomDivider
-            onPress={() => onSelectTrack(item.id)}>
-            {!item.thumbnail && <Icon name='map' size={50} />}
-            {!!item.thumbnail && <SvgXml xml={item.thumbnail} />}
+            onPress={() => onSelectTrack(item.id)}
+        >
+            {/* {!!item.thumbnail ? <SvgXml xml={item.thumbnail} /> : <Icon name='map' size={50} />} */}
             <ListItem.Content>
                 <ListItem.Title>{item.title}</ListItem.Title>
                 <ListItem.Subtitle>{item.subtitle}</ListItem.Subtitle>
             </ListItem.Content>
         </ListItem.Swipeable>
     )
-    
-    return <Modal style={styles.container} visible onRequestClose={close}>        
+
+    return <Modal style={styles.container} visible onRequestClose={close}>
         <View style={styles.buttons}>
             <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-upload" onPress={importTrack} />
             <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name={isTracking ? 'gps-not-fixed' : 'gps-fixed'} onPress={toggleTracking} />
