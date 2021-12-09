@@ -8,10 +8,11 @@ import { selectMarks, selectEditedMark } from '../reducers/marks'
 import { removeMarkAction, editMarkAction, saveMarkAction, markToFeature } from '../actions/marks-actions'
 import { selectActiveTrack, selectSelectedTrack, selectLocation, selectTracks, selectIsTracking } from '../reducers/tracker'
 import { View, StyleSheet, Text } from "react-native";
-import { Slider, BottomSheet, ListItem } from 'react-native-elements';
+import {  BottomSheet, ListItem } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import styled from 'styled-components/native'
 import EditMark from '../components/EditMark'
+import Slider from '../components/Slider'
 import Tracks from './Tracks'
 import Markers from './Markers'
 import Auth from '../components/Auth'
@@ -35,8 +36,8 @@ interface MenuItem {
 
 const SliderContainer = styled(View)`
     position: absolute;
-    top: 0px;
-    height: 80px;
+    top: 40px;
+    height: 40px;
     width:100%;
 `
 const StyledSlider = styled(Slider)`
@@ -158,15 +159,8 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
     console.log('render overlay', zoom, opacity)
     return (<>
         <SliderContainer>
-            <StyledSlider
-            allowTouchTrack={false}
-                value={opacity}
-                onValueChange={onOpacityChange}
-                thumbTintColor="#4264fb"
-                thumbTouchSize={{ width: 44, height: 44 }}
-                maximumTrackTintColor='#c5b9eb'
-                minimumTrackTintColor='#5a3fc0'
-            />
+            <Slider value={opacity} setValue={onOpacityChange} />
+           
         </SliderContainer>
         <Buttons>
             {/* <MenuButton name="insights" color="black" backgroundColor="#fff5" onPress={() => this.setState({ showTracks: true })} />
