@@ -11,6 +11,7 @@ import { Alert } from "react-native";
 import { nanoid } from 'nanoid/non-secure'
 import { latLngToTileIndex, convertToBoxSize } from "../utils/normalize";
 import { makeSvg } from "../utils/svg";
+import * as _ from 'lodash'
 
 export const compassAngle = (magnetometer: ThreeAxisMeasurement) => {
   let angle = 0.0
@@ -59,11 +60,13 @@ export const addPointAction = (location: MapboxGL.Location) => ({ type: ActionTy
 
 const renderTrackIcon = (getState: () => State) => {
   const activeTrack = selectActiveTrack(getState())
-  if(!activeTrack) return
+  if(!activeTrack || _.isEmpty(activeTrack.track)) return
   const coordinatesXY = activeTrack.track.map(point => latLngToTileIndex({lng: point[0], lat: point[1], zoom: 100}))
-  const boxCoordinates = convertToBoxSize(coordinatesXY, 99, 99)
+  const boxX = 50
+  const boxY = 50
+  const boxCoordinates = convertToBoxSize(coordinatesXY, boxX - 1, boxY - 1)
   if(!boxCoordinates) return
-  const svg = makeSvg(boxCoordinates, 100, 100)
+  const svg = makeSvg(boxCoordinates, boxX, boxY)
   return svg
 }
 
