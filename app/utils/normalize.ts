@@ -12,7 +12,13 @@ export const latLngToTileIndex = ({ lat, lng, zoom }: { lat: number, lng: number
 }
 
 const normalizeBetweenTwoRanges = (val: number, minVal: number, maxVal: number, newMin: number, newMax: number): number => {
-  return Math.round(newMin + (val - minVal) * (newMax - newMin) / (maxVal - minVal));
+  let result
+  if (maxVal === minVal) {
+    result = (newMin + newMax) / 2
+  } else {
+    result = newMin + (val - minVal) * (newMax - newMin) / (maxVal - minVal)
+  }
+  return Math.round(result);
 };
 
 export const convertToBoxSize = (coordinatesXY: number[][], boxX: number, boxY: number) => {
