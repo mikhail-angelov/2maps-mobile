@@ -5,15 +5,18 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { Mark } from '../store/types'
 import MapModal from './Modal'
 import { AirbnbRating } from 'react-native-elements';
+import { markToDistance } from '../utils/normalize'
+import { Position } from 'geojson';
 
 interface Props {
     mark: Mark;
+    center: Position;
     save: (data: { name: string, description: string, rate: number }) => void;
     remove?: (id: string) => void;
     cancel: () => void;
 }
 
-const EditMark: FC<Props> = ({ mark, save, cancel, remove }) => {
+const EditMark: FC<Props> = ({ mark,center, save, cancel, remove }) => {
     const [name, setName] = useState<string>(mark?.name || '')
     const [description, setDescription] = useState<string>(mark?.description || '')
     const [rate, setRate] = useState<number>(mark?.rate || 0)
@@ -44,8 +47,17 @@ const EditMark: FC<Props> = ({ mark, save, cancel, remove }) => {
             ]
         );
     }
+    const distance = markToDistance(center)(mark)
 
     return <MapModal onRequestClose={cancel}>
+        {!isEdit && <View style={styles.header}>
+            <AirbnbRating
+                showRating={false}
+                isDisabled={true}
+                size={10}
+                defaultRating={rate}
+            /><Text style={styles.headerText}>{distance}</Text>
+        </View>}
         {isEdit ? <View style={styles.content}>
             <Text>Name:</Text>
             <TextInput
@@ -62,14 +74,14 @@ const EditMark: FC<Props> = ({ mark, save, cancel, remove }) => {
                 value={description}
             />
             <Text>Rate:</Text>
-            <AirbnbRating 
+            <AirbnbRating
                 showRating={false}
-                starStyle={{marginVertical: 10}}
+                starStyle={{ marginVertical: 10 }}
                 onFinishRating={(value: number) => setRate(value)}
                 defaultRating={rate}
             />
-        </View>
-            : <View style={styles.content}>
+        </View> :
+            <View style={styles.content}>
                 <Text>{name}</Text>
                 <Text style={styles.subTitle}>{description}</Text>
             </View>}
@@ -83,14 +95,19 @@ const EditMark: FC<Props> = ({ mark, save, cancel, remove }) => {
             {remove && <Button buttonStyle={styles.btn} type='clear' onPress={onRemove} icon={<Icon name="trash" size={26} color="grey" />} />}
         </View>
     </MapModal>
-
-
 }
 
 
 const styles = StyleSheet.create({
+    header: {
+        marginTop: -10,
+        flexDirection: 'row',
+    },
+    headerText: {
+        marginLeft: 10,
+    },
     content: {
-        marginTop: 30,
+        marginTop: 10,
         minWidth: '100%',
     },
     row: {

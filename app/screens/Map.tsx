@@ -1,12 +1,11 @@
 import React, { Component } from "react";
 import Config from 'react-native-config'
 import { connect, ConnectedProps } from "react-redux";
-import { State } from '../store/types'
+import { State, Mark } from '../store/types'
 import { featureToMark, editMarkAction } from '../actions/marks-actions'
 import { selectIsTracking } from '../reducers/tracker'
-import { StyleSheet, TouchableOpacity } from "react-native";
 import styled from 'styled-components/native'
-import MapboxGL, { LineLayerStyle, SymbolLayerStyle, RasterSourceProps, RegionPayload } from "@react-native-mapbox-gl/maps";
+import MapboxGL, { RasterSourceProps, RegionPayload } from "@react-native-mapbox-gl/maps";
 import { Feature, Point } from '@turf/helpers';
 import { checkAction } from "../actions/auth-actions";
 import { setCenterAction, setZoomAction } from "../actions/map-actions";
@@ -14,6 +13,8 @@ import { addPointAction, setLocationAction, restartTrackingAction } from "../act
 import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecondaryMap } from '../reducers/map'
 import ActiveTrack from '../components/ActiveTrack'
 import MarksLocation from "../components/MarksLocation";
+import Wikimapia from "../components/Wikimapia";
+import SelectedMark from "../components/SelectedMark";
 import { Position } from "geojson";
 
 MapboxGL.setAccessToken(Config.MAPBOX_PUB_KEY || 'pk.eyJ1IjoibWlraGFpbGFuZ2Vsb3YiLCJhIjoiY2tpa2FnbnM5MDg5ejJ3bDQybWN3eWRsdSJ9.vK_kqebrJaO7MdIg4ilaFQ');
@@ -34,31 +35,6 @@ const StyledMap = styled(MapboxGL.MapView)`
   width: 100%;
 `
 
-const SelectedTrackStyle: LineLayerStyle = {
-    lineCap: 'round',
-    // lineWidth: 6,
-    lineWidth: [
-        'interpolate', ['linear'],
-        ['zoom'],
-        16, 5,
-        20, 7
-    ],
-    lineOpacity: 0.84,
-    lineColor: 'blue',
-}
-
-const WikiStyle: LineLayerStyle = {
-    lineWidth: 2,
-    lineColor: 'red',
-    lineOpacity: 0.6,
-}
-const WikiStyleLabel: SymbolLayerStyle = {
-    textColor: 'red',
-    textSize: 18,
-    textField: ['get', 'title'],
-    textAnchor: 'bottom',
-}
-
 const mapStateToProps = (state: State) => ({
     center: selectCenter(state),
     opacity: selectOpacity(state),
@@ -74,7 +50,7 @@ const mapDispatchToProps = {
     editMark: editMarkAction,
     addPoint: addPointAction,
     setLocation: setLocationAction,
-    restartTracking:restartTrackingAction,
+    restartTracking: restartTrackingAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { setMap: (map: MapboxGL.Camera | undefined) => void }
@@ -84,7 +60,7 @@ class Map extends Component<Props> {
     private map: MapboxGL.MapView | undefined
 
     state: {
-        selected?: Feature<Point>;
+        selected?: Mark;
     } = {};
 
     componentDidMount() {
@@ -116,12 +92,13 @@ class Map extends Component<Props> {
 
     onMarkPress = ({ features }: any) => {
         const feature = features[0]
-        console.log('on press', feature.id, feature, this.state.selected)
+        console.log('on press', feature.id, this.state.selected)
+        const selected = featureToMark(feature)
         if (feature.id === this.state.selected?.id) {
             this.setState({ selected: undefined })
-            this.props.editMark(featureToMark(this.state.selected as Feature<Point>))
+            this.props.editMark(selected)
         } else {
-            this.setState({ selected: features[0] })
+            this.setState({ selected })
         }
         this.camera?.moveTo(feature.geometry.coordinates, 100)
     }
@@ -135,10 +112,9 @@ class Map extends Component<Props> {
         this.props.editMark(mark)
     }
 
-    updateCenter = async (e: Feature<Point, RegionPayload>) => {
-        console.log('update center', e)
+    updateCenter = (e: Feature<Point, RegionPayload>) => {
+        console.log('update center', e.properties)
         this.props.setCenter(e.geometry.coordinates)
-        // const z = await this.map?.getZoom()
         this.props.setZoom(e.properties.zoomLevel || 15)
     }
     onUserLocationUpdate = (location: MapboxGL.Location) => {
@@ -162,8 +138,8 @@ class Map extends Component<Props> {
         this.props.setMap(camera)
     }
     onTouchEnd = () => {
-        const {tracking, restartTracking} = this.props
-        if(tracking){
+        const { tracking, restartTracking } = this.props
+        if (tracking) {
             restartTracking()
         }
     }
@@ -229,60 +205,13 @@ class Map extends Component<Props> {
                     style={{ rasterOpacity: opacity }}
                 />
             </MapboxGL.RasterSource>}
-
-            {/* {wikiCollection && <MapboxGL.ShapeSource
-                    id="wikiSource"
-                    shape={wikiCollection}>
-                    <MapboxGL.LineLayer id='w' style={WikiStyle} minZoomLevel={1} />
-                    <MapboxGL.SymbolLayer id='wl' style={WikiStyleLabel} minZoomLevel={1} />
-                </MapboxGL.ShapeSource>} */}            
+            <Wikimapia />
             <MarksLocation onMarkPress={this.onMarkPress} />
-            {selected && <MapboxGL.MarkerView
-                id="sel"
-                coordinate={selected.geometry.coordinates}
-                title={selected.properties?.name}
-                anchor={{ x: 0.5, y: 1.2 }}
-            >
-                <TouchableOpacity onPress={this.onBalloonClick} style={styles.touchable}>
-                    <MapboxGL.Callout title={selected.properties?.name} />
-                </TouchableOpacity>
-            </MapboxGL.MarkerView>}
             <ActiveTrack onTrackSelect={this.onTrackSelect} />
-            {/* <MapboxGL.MarkerView
-                        id="sel-center"
-                        coordinate={center}
-                        title={`${center}`}
-                        anchor={{ x: 0.5, y: 1.2 }}
-                    >
-                        <TouchableOpacity onPress={() => this.camera.moveTo(centerFeature.geometry.coordinates, 500)} style={styles.touchable}>
-                            <MapboxGL.Callout title={`${center}`} />
-                        </TouchableOpacity>
-                    </MapboxGL.MarkerView> */}
-            {/* <MapboxGL.ShapeSource
-                        id="centerSource"
-                        shape={currentLocationFeature}
-                        onPress={() => this.camera?.moveTo(currentLocationFeature.geometry.coordinates, 500)}
-                    >
-                        <MapboxGL.CircleLayer id='center' style={CurrentLocationStyle} minZoomLevel={1} />
-                        {selected && <MapboxGL.Callout title={selected.properties?.name} ></MapboxGL.Callout>}
-                    </MapboxGL.ShapeSource>  */}
-            {/*  {selectedRoute && <MapboxGL.ShapeSource id='selected-track' shape={selectedRoute}>
-                    <MapboxGL.LineLayer id='sel-lineLayer' style={SelectedTrackStyle} minZoomLevel={1} />
-                </MapboxGL.ShapeSource>} */}
+            <SelectedMark mark={selected} unselect={this.onBalloonClick} />
         </StyledMap>
         );
     }
 }
 
 export default connector(Map)
-
-const styles = StyleSheet.create({
-    touchable: {
-        // backgroundColor: 'blue',
-        // width: 40,
-        height: 50,
-        borderRadius: 20,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-});

@@ -185,6 +185,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         </BottomSheet>}
         {editedMark && <EditMark
             mark={editedMark}
+            center={[location.coords.longitude,location.coords.latitude]}
             save={(data) => saveMark({ ...editedMark, ...data })}
             cancel={() => editMark(undefined)}
             remove={() => editedMark.id ? removeMark(editedMark.id) : null}
