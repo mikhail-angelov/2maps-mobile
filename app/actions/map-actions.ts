@@ -24,7 +24,7 @@ export const setPrimaryMapAction = (map: MapInfo) => {
 export const setSecondaryMapAction = (map?: MapInfo) => {
   return { type: ActionTypeEnum.SetSecondary, payload: map }
 };
-export const gelLocalMapListAction = (): AppThunk => {
+export const getLocalMapListAction = (): AppThunk => {
   return async (dispatch) => {
     try {
       console.log('get maps');
@@ -102,7 +102,7 @@ export const downloadMapAction = ({ id, name }: { id: string, name: string }): A
 
       console.log('download map', response);
       dispatch({ type: ActionTypeEnum.DownloadMapSuccess, payload: response });
-      dispatch(gelLocalMapListAction());
+      dispatch(getLocalMapListAction());
     } catch (err) {
       console.log("download map failure", err);
       dispatch({
@@ -127,7 +127,7 @@ export const removeLocalMapAction = (name: string): AppThunk => {
       dispatch({ type: ActionTypeEnum.DeleteMap });
       await NativeModules.MapsModule.removeMap(name);
       dispatch({ type: ActionTypeEnum.DeleteMapSuccess, payload: name });
-      dispatch(gelLocalMapListAction());
+      dispatch(getLocalMapListAction());
     } catch (err) {
       console.log("error", err);
       dispatch({

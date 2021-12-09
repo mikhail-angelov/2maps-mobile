@@ -7,7 +7,7 @@ import ProgressBar from '../components/ProgressBar';
 import { connect, ConnectedProps } from "react-redux";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { State, MapInfo } from '../store/types'
-import { gelLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction, removeLocalMapAction, cancelDownloadMapAction } from '../actions/map-actions'
+import { getLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction, removeLocalMapAction, cancelDownloadMapAction } from '../actions/map-actions'
 import { selectPrimaryMap, selectSecondaryMap, selectMapList, selectMapIsLoading, onLineMapList, selectAvailableMapList, selectMapError, selectDownloadProgress, selectMapIsDownLoading } from '../reducers/map'
 import { selectIsAuthenticated } from '../reducers/auth'
 import { ItemValue } from "@react-native-community/picker/typings/Picker";
@@ -32,7 +32,7 @@ const mapStateToProps = (state: State) => ({
     progress: selectDownloadProgress(state),
 });
 const mapDispatchToProps = {
-    gelLocalMapList: gelLocalMapListAction,
+    getLocalMapList: getLocalMapListAction,
     setPrimaryMap: setPrimaryMapAction,
     setSecondaryMap: setSecondaryMapAction,
     loadMapList: loadMapListAction,
@@ -44,9 +44,9 @@ const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
 
 
-const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoading, list, availableMapList, isAuthenticated, error, progress, cancelDownloadMap, close, gelLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap }) => {
+const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoading, list, availableMapList, isAuthenticated, error, progress, cancelDownloadMap, close, getLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap }) => {
     useEffect(() => {
-        gelLocalMapList()
+        getLocalMapList()
         loadMapList()
     }, [])
     const allMaps: MapItem[] = [

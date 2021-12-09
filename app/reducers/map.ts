@@ -7,7 +7,7 @@ import { createReducer } from "./reducer-utils";
 export const onLineMapList: MapInfo[] = [
   { name: 'MapBox Vector(online)', url: MapboxGL.StyleURL.Street },
   { name: 'MapBox Satellite(online)', url: MapboxGL.StyleURL.Satellite },
-  { name: 'MapBox SatelliteStreet()online', url: MapboxGL.StyleURL.SatelliteStreet },
+  { name: 'MapBox SatelliteStreet(online)', url: MapboxGL.StyleURL.SatelliteStreet },
 ]
 const CENTER_COORD = [44.320691, 56.090846];
 

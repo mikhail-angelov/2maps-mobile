@@ -50,6 +50,7 @@ const Login: FC<LoginProps> = ({ error, login, setSignUp, setPasswordReset }) =>
                 <Button titleStyle={styles.inlineBtn} type='clear' onPress={setPasswordReset} title="Forgot password?" />
             </View>
             <TextInput
+                secureTextEntry={true}
                 style={styles.modalInput}
                 onChangeText={(value) => setPassword(value)}
                 placeholder="password"
@@ -108,6 +109,7 @@ const SignUp: FC<SignUpProps> = ({ error, signUp, back, isAuthInProgress }) => {
         <View style={styles.formField}>
             <Text style={styles.label}>Password</Text>
             <TextInput
+                secureTextEntry={true}
                 style={styles.modalInput}
                 onChangeText={(value) => setPassword(value)}
                 placeholder="password"
