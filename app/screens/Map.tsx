@@ -102,15 +102,6 @@ class Map extends Component<Props> {
         }
         this.camera?.moveTo(feature.geometry.coordinates, 100)
     }
-    onCreate = (feature: Feature<Point>, data: { name: string }) => {
-        if (!feature.properties?.id) {
-            feature.properties = feature.properties || {}
-            feature.properties.id = `${Date.now()}`
-        }
-        const mark = featureToMark(feature)
-        mark.name = data.name
-        this.props.editMark(mark)
-    }
 
     updateCenter = (e: Feature<Point, RegionPayload>) => {
         console.log('update center', e.properties)

@@ -76,7 +76,7 @@ const EditMark: FC<Props> = ({ mark,center, save, cancel, remove }) => {
             <Text>Rate:</Text>
             <AirbnbRating
                 showRating={false}
-                starStyle={{ marginVertical: 10 }}
+                starContainerStyle={{ marginVertical: 10 }}
                 onFinishRating={(value: number) => setRate(value)}
                 defaultRating={rate}
             />
