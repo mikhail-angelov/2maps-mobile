@@ -2,6 +2,7 @@ import { createSelector } from "reselect";
 import { MarksState, State, Mark } from "../store/types";
 import { ActionTypeEnum } from "../actions";
 import { createReducer } from "./reducer-utils";
+import * as _ from 'lodash'
 
 const initialState: MarksState = Object.freeze({
   isRequestInProgress: false,
@@ -16,7 +17,7 @@ export default createReducer<MarksState>(initialState, {
   [ActionTypeEnum.SaveMark]: (mark: Mark) => (state: MarksState) => ({
     ...state,
     editMark: undefined,
-    marks: (mark.id && state.marks.length > 0)?state.marks.map(item=>item.id===mark.id?mark:item):[...state.marks, mark],
+    marks: _.unionBy([mark], state.marks, 'id'),
   }),
   [ActionTypeEnum.AddMark]: (mark: Mark) => (state: MarksState) => ({
     ...state,
