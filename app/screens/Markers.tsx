@@ -1,7 +1,7 @@
 import React, { FC, useMemo } from "react";
-import { View, FlatList, StyleSheet, Alert, Modal } from "react-native";
+import { View, FlatList, StyleSheet, Alert, Modal, TouchableOpacity } from "react-native";
 import { connect, ConnectedProps } from "react-redux";
-import { ListItem } from 'react-native-elements';
+import { Button, ListItem } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Position } from '@turf/helpers';
 import distance from '@turf/distance';
@@ -9,7 +9,7 @@ import { orderBy } from 'lodash'
 import { State, Mark } from '../store/types'
 import { selectIsAuthenticated } from '../reducers/auth'
 import { selectMarks } from '../reducers/marks'
-import { importPoisAction, exportPoisAction, removeAllPoisAction, syncMarksAction } from '../actions/marks-actions'
+import { importPoisAction, exportPoisAction, removeAllPoisAction, syncMarksAction, removeMarkCompletelyAction, editMarkAction } from '../actions/marks-actions'
 
 
 interface OwnProps {
@@ -32,11 +32,13 @@ const mapDispatchToProps = {
     exportPois: exportPoisAction,
     removeAllPois: removeAllPoisAction,
     syncMarks: syncMarksAction,
+    removeMark: removeMarkCompletelyAction,
+    editMark: editMarkAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & OwnProps
 
-const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, importPois, exportPois, removeAllPois, syncMarks }) => {
+const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, importPois, exportPois, removeAllPois, syncMarks, removeMark, editMark }) => {
     const onRemoveAll = () => {
         Alert.alert(
             "Warning!",
@@ -44,6 +46,17 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
             [
                 { text: "No", style: "cancel" },
                 { text: "Yes", onPress: removeAllPois }
+            ]
+        );
+    }
+    const onRemoveMark = (id?: string) => {
+        if(!id) return
+        Alert.alert(
+            "Warning!",
+            "Are you sure to remove the marker?",
+            [
+                { text: "No", style: "cancel" },
+                { text: "Yes", onPress: () => removeMark(id) }
             ]
         );
     }
@@ -55,13 +68,35 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
         }))
     const keyExtractor = (item: Item, index: number) => index.toString()
     const renderItem = ({ item }: { item: Item }) => (
-        <ListItem bottomDivider onPress={() => select(item.mark)}>
-            <Icon name="location-pin" />
-            <ListItem.Content>
-                <ListItem.Title>{item.title}</ListItem.Title>
-                <ListItem.Subtitle>{item.subtitle}</ListItem.Subtitle>
-            </ListItem.Content>
-        </ListItem>
+        <ListItem.Swipeable
+            leftWidth={120}
+            rightStyle={{width: 120}}
+            rightContent={
+                <View style={{ flexDirection: "row" }}>
+                    <Button
+                        icon={{ name: 'edit', color: 'white' }}
+                        buttonStyle={{ minHeight: '100%', backgroundColor: 'blue', borderRadius: 0 }}
+                        containerStyle={{ flex: 1, borderRadius: 0  }}
+                        onPress={() => editMark(item.mark)}
+                    />
+                    <Button
+                        icon={{ name: 'delete', color: 'white' }}
+                        buttonStyle={{ minHeight: '100%', backgroundColor: 'red', borderRadius: 0 }}
+                        containerStyle={{ flex: 1, borderRadius: 0  }}
+                        onPress={() => onRemoveMark(item.mark.id)}
+                    />
+                </View>
+            }
+            bottomDivider
+        >
+            <TouchableOpacity style={{ flexDirection: "row" }} onPress={() => select(item.mark)}>
+                <Icon name="location-pin" />
+                <ListItem.Content>
+                    <ListItem.Title>{item.title}</ListItem.Title>
+                    <ListItem.Subtitle>{item.subtitle}</ListItem.Subtitle>
+                </ListItem.Content>
+            </TouchableOpacity>
+        </ListItem.Swipeable>
     )
     const memoizedValue = useMemo(() => renderItem, [markers]);
     return <Modal style={styles.container} visible onRequestClose={close}>

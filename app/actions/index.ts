@@ -37,6 +37,7 @@ export enum ActionTypeEnum {
   SaveMark = "marks/SAVE_MARK",
   UpdateMark = "marks/UPDATE_MARK",
   RemoveMark = "marks/REMOVE_MARK",
+  RemoveMarkCompletely = "marks/REMOVE_MARK_COMPLETELY",
   RemoveAllMarks = "marks/REMOVE_ALL_MARKS",
   ImportPois = "marks/IMPORT_POIS",
   //tracker
