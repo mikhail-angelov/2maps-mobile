@@ -1,5 +1,5 @@
 import React, { FC } from "react";
-import { View, FlatList, StyleSheet, Modal, Alert } from "react-native";
+import { View, FlatList, StyleSheet, Modal, Alert, TouchableOpacity } from "react-native";
 import { connect, ConnectedProps } from "react-redux";
 import { Button, ListItem } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -82,36 +82,38 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
     const renderItem = ({ item }: { item: Item }) => (
         <ListItem.Swipeable
             leftWidth={180}
+            rightStyle={{width: 180}}
             rightContent={
                 <View style={{ flexDirection: "row" }}>
                     <Button
                         icon={{ name: 'file-download', color: 'white' }}
                         buttonStyle={{ minHeight: '100%', backgroundColor: 'blue', borderRadius: 0 }}
-                        containerStyle={{ flex: 1 }}
+                        containerStyle={{ flex: 1, borderRadius: 0  }}
                         onPress={() => exportTrack(item.id)}
                     />
                     <Button
                         icon={{ name: 'delete', color: 'white' }}
                         buttonStyle={{ minHeight: '100%', backgroundColor: 'red', borderRadius: 0 }}
-                        containerStyle={{ flex: 1 }}
+                        containerStyle={{ flex: 1, borderRadius: 0  }}
                         onPress={() => onRemoveTrack(item.id)}
                     />
                     <Button
                         icon={{ name: 'visibility', color: 'white' }}
                         buttonStyle={{ minHeight: '100%', backgroundColor: 'green', borderRadius: 0 }}
-                        containerStyle={{ flex: 1 }}
+                        containerStyle={{ flex: 1, borderRadius: 0 }}
                         onPress={() => onSelectTrack(item.id)}
                     />
                 </View>
             }
             bottomDivider
-            onPress={() => onSelectTrack(item.id)}
         >
-            {!!item.thumbnail ? <SvgXml xml={item.thumbnail} /> : <Icon name='map' size={50} />}
-            <ListItem.Content>
-                <ListItem.Title>{item.title}</ListItem.Title>
-                <ListItem.Subtitle>{item.subtitle}</ListItem.Subtitle>
-            </ListItem.Content>
+            <TouchableOpacity style={{ flexDirection: "row" }} onPress={() => onSelectTrack(item.id)}>
+                {!!item.thumbnail ? <SvgXml xml={item.thumbnail} /> : <Icon name='map' size={50} />}
+                <ListItem.Content>
+                    <ListItem.Title>{item.title}</ListItem.Title>
+                    <ListItem.Subtitle>{item.subtitle}</ListItem.Subtitle>
+                </ListItem.Content>
+            </TouchableOpacity>
         </ListItem.Swipeable>
     )
 
