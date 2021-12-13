@@ -65,7 +65,7 @@ const ActiveTrack: FC<Props> = ({ activeTrack, selectedTrack, onTrackSelect }) =
             }
 
             // delta 0.005 of Latitude or 0.006 of Longitude ≈ 0.5km
-            if ((maxX - minX < 0.005) && (maxY - minY < 0.006)) {
+            if ((Math.abs(maxX - minX) < 0.005) && (Math.abs(maxY - minY) < 0.006)) {
                 minX -= 0.0025
                 maxX += 0.0025
                 minY -= 0.003
