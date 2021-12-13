@@ -4,50 +4,46 @@ import { State } from '../store/types'
 import { View, TextInput, Text, StyleSheet } from "react-native";
 import { Button } from 'react-native-elements';
 import { selectError, selectIsAuthInProgress, selectResetToken } from "../reducers/auth";
-import { resetPasswordAction } from "../actions/auth-actions";
+import { changePasswordAction, setAuthErrorAction } from "../actions/auth-actions";
 import MapModal from "./Modal";
 import Spinner from "./Spinner";
 
 const mapStateToProps = (state: State) => ({
     error: selectError(state),
-    resetToken: selectResetToken(state),
     isAuthInProgress: selectIsAuthInProgress(state),
 });
 const mapDispatchToProps = {
-    resetPassword: resetPasswordAction,
+    changePassword: changePasswordAction,
+    setAuthError: setAuthErrorAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
 
-const PasswordReset: FC<Props> = ({ error, resetPassword, close, resetToken, isAuthInProgress }) => {
+const PasswordReset: FC<Props> = ({ error, changePassword, close, isAuthInProgress, setAuthError }) => {
     const [password, setPassword] = useState<string>('')
     const inProcess = useRef(false)
     const onPassword = () => {
-        if (resetPassword && resetToken) {
-            inProcess.current = true
-            resetPassword({
-                password, resetToken
-            })
-        }
+        inProcess.current = true
+        changePassword({ password })
     }
     useEffect(() => {
         if (!isAuthInProgress && !error && inProcess.current) {
             close()
         }
     }, [isAuthInProgress])
-    useEffect(() => {
-        setPassword('')
-    }, [resetToken])
+    useEffect(() => () => { setAuthError('') }, [])
+
     return <MapModal onRequestClose={close}>
         <Spinner show={isAuthInProgress} />
         <View style={styles.content}>
             <Text style={styles.subTitle}>Change your password</Text>
             <View style={styles.formField}>
-                <Text style={styles.label}>New Password</Text>
                 <TextInput
+                    textContentType="password"
+                    secureTextEntry={true}
                     style={styles.modalInput}
                     onChangeText={(value) => setPassword(value)}
-                    placeholder="password"
+                    placeholder="New Password"
                     value={password}
                 />
             </View>
@@ -62,6 +58,7 @@ const PasswordReset: FC<Props> = ({ error, resetPassword, close, resetToken, isA
 const styles = StyleSheet.create({
     content: {
         width: '100%',
+        marginTop: 20,
     },
     error: {
         color: 'red',
