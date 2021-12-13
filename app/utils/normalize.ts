@@ -21,11 +21,16 @@ const normalizeBetweenTwoRanges = (val: number, minVal: number, maxVal: number, 
   return Math.round(result);
 };
 
-export const convertToBoxSize = (coordinatesXY: number[][], boxX: number, boxY: number) => {
+export const findMinMaxCoordinates = (coordinatesXY: number[][]) => {
   const maxX = _.maxBy(coordinatesXY, ([x, _]) => x)?.[0]
   const minX = _.minBy(coordinatesXY, ([x, _]) => x)?.[0]
   const maxY = _.maxBy(coordinatesXY, ([_, y]) => y)?.[1]
   const minY = _.minBy(coordinatesXY, ([_, y]) => y)?.[1]
+  return {maxX, maxY, minX, minY}
+}
+
+export const convertToBoxSize = (coordinatesXY: number[][], boxX: number, boxY: number) => {
+  const { maxX, maxY, minX, minY } = findMinMaxCoordinates(coordinatesXY)
   if (!maxX || !maxY || !minX || !minY) {
     return
   }

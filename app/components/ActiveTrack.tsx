@@ -1,10 +1,12 @@
-import React, { FC, useEffect } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { State } from '../store/types'
-import MapboxGL, { LineLayerStyle } from "@react-native-mapbox-gl/maps";
-import { lineString } from '@turf/helpers';
+import MapboxGL, { CircleLayerStyle, LineLayerStyle } from "@react-native-mapbox-gl/maps";
+import { lineString, point } from '@turf/helpers';
 import { selectActiveTrack, selectSelectedTrack } from '../reducers/tracker'
 import { Position } from "geojson";
+import { findMinMaxCoordinates } from "../utils/normalize";
+import { Feature, LineString, Point } from 'geojson'
 
 const ActiveTrackStyle: LineLayerStyle = {
     lineCap: 'round',
@@ -25,7 +27,12 @@ const SelectedTrackStyle: LineLayerStyle = {
     lineColor: 'blue',
 }
 
-interface ActiveTrackProps{
+const SelectedPointStyle: CircleLayerStyle = {
+    circleRadius: 7,
+    circleColor: "blue",
+    circleOpacity: 0.84,
+}
+interface ActiveTrackProps {
     onTrackSelect: (start: Position, end: Position) => void
 }
 const mapStateToProps = (state: State) => ({
@@ -36,14 +43,41 @@ const connector = connect(mapStateToProps)
 type Props = ConnectedProps<typeof connector> & ActiveTrackProps
 
 const ActiveTrack: FC<Props> = ({ activeTrack, selectedTrack, onTrackSelect }) => {
+    const [selectedRoute, setSelectedRoute] = useState<Feature<LineString> | null>(null)
+    const [selectedPoint, setSelectedPoint] = useState<Feature<Point> | null>(null)
     const activeRoute = activeTrack && activeTrack.track.length > 1 ? lineString(activeTrack.track) : null
-    const selectedRoute = selectedTrack && selectedTrack.track.length > 1 ? lineString(selectedTrack.track) : null
 
     useEffect(() => {
-        if (selectedRoute && selectedTrack) {
-            const start = selectedRoute.geometry.coordinates[0]
-            const end = selectedRoute.geometry.coordinates[selectedRoute.geometry.coordinates.length - 1]
+        if (selectedTrack) {
+            let { maxX, maxY, minX, minY } = findMinMaxCoordinates(selectedTrack.track)
+            if (!maxX || !maxY || !minX || !minY) {
+                return
+            }
+
+            if ((maxX === minX) && (maxY === minY)) {
+                const selectedPoint = point([maxX, maxY])
+                setSelectedPoint(selectedPoint)
+                setSelectedRoute(null)
+            } else {
+                const route = lineString(selectedTrack.track)
+                setSelectedRoute(route)
+                setSelectedPoint(null)
+            }
+
+            // delta 0.005 of Latitude or 0.006 of Longitude ≈ 0.5km
+            if ((maxX - minX < 0.005) && (maxY - minY < 0.006)) {
+                minX -= 0.0025
+                maxX += 0.0025
+                minY -= 0.003
+                maxY += 0.003
+            }
+
+            const start = [minX, minY]
+            const end = [maxX, maxY]
             onTrackSelect(start, end)
+        } else {
+            setSelectedRoute(null)
+            setSelectedPoint(null)
         }
     }, [selectedTrack])
 
@@ -52,6 +86,9 @@ const ActiveTrack: FC<Props> = ({ activeTrack, selectedTrack, onTrackSelect }) =
     </MapboxGL.ShapeSource>}
         {selectedRoute && <MapboxGL.ShapeSource id='selected-track' shape={selectedRoute}>
             <MapboxGL.LineLayer id='selectedLineLayer' style={SelectedTrackStyle} minZoomLevel={1} />
+        </MapboxGL.ShapeSource>}
+        {selectedPoint && <MapboxGL.ShapeSource id='selected-point' shape={selectedPoint}>
+            <MapboxGL.CircleLayer id='selectedPointLayer' style={SelectedPointStyle} minZoomLevel={1} />
         </MapboxGL.ShapeSource>}
     </>);
 }
