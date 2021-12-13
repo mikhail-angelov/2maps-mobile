@@ -4,7 +4,7 @@ import { State } from '../store/types'
 import { View, TextInput, Text, StyleSheet } from "react-native";
 import { Button } from 'react-native-elements';
 import { selectIsAuthenticated, selectIsAuthInProgress, selectError } from "../reducers/auth";
-import { loginAction, signUpAction, setAuthErrorAction, passwordResetAction, Credentials, SignUp as SignUpType, PasswordReset as PasswordResetType } from "../actions/auth-actions";
+import { loginAction, signUpAction, setAuthErrorAction, forgetPasswordAction, Credentials, SignUp as SignUpType, PasswordReset as PasswordResetType } from "../actions/auth-actions";
 import Settings from './Settings'
 import MapModal from './Modal'
 import Spinner from "./Spinner";
@@ -18,7 +18,7 @@ const mapDispatchToProps = {
     login: loginAction,
     signUp: signUpAction,
     setAuthError: setAuthErrorAction,
-    passwordReset: passwordResetAction,
+    forgetPassword: forgetPasswordAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
@@ -124,7 +124,7 @@ const SignUp: FC<SignUpProps> = ({ error, signUp, back, isAuthInProgress }) => {
     </View>
 }
 
-const Auth: FC<Props> = ({ isAuthenticated, isAuthInProgress, error, login, signUp, setAuthError, close, passwordReset }) => {
+const Auth: FC<Props> = ({ isAuthenticated, isAuthInProgress, error, login, signUp, setAuthError, close, forgetPassword }) => {
     const [ui, setUi] = useState<string>('login')
     const authState = useRef(isAuthenticated);
     useEffect(() => {
@@ -139,13 +139,13 @@ const Auth: FC<Props> = ({ isAuthenticated, isAuthInProgress, error, login, sign
 
     let content = <View />
     if (isAuthenticated) {
-        content = <Settings close={close} />
+        content = <Settings />
     } else if (ui === 'login') {
         content = <Login error={error} login={login} setSignUp={() => setUi('signUp')} setPasswordReset={() => setUi('passwordReset')} />
     } else if (ui === 'signUp') {
         content = <SignUp error={error} signUp={signUp} back={() => setUi('login')} isAuthInProgress={isAuthInProgress} />
     } else if (ui === 'passwordReset') {
-        content = <PasswordReset error={error} passwordReset={passwordReset} back={() => setUi('login')} setAuthError={setAuthError} isAuthInProgress={isAuthInProgress} />
+        content = <ForgetPassword error={error} passwordReset={forgetPassword} back={() => setUi('login')} setAuthError={setAuthError} isAuthInProgress={isAuthInProgress} />
     }
 
     return <MapModal onRequestClose={close}>
@@ -160,7 +160,7 @@ interface PasswordResetProps {
     error?: string;
     isAuthInProgress: boolean;
 }
-const PasswordReset: FC<PasswordResetProps> = ({ error, passwordReset, back, setAuthError, isAuthInProgress }) => {
+const ForgetPassword: FC<PasswordResetProps> = ({ error, passwordReset, back, setAuthError, isAuthInProgress }) => {
     const [email, setEmail] = useState<string>('')
     const inProcess = useRef(false)
     const onBack = () => {

@@ -112,7 +112,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         { title: 'Cancel', containerStyle: { backgroundColor: 'blue' }, titleStyle: { color: 'white' }, onPress: () => setShowMenu(false), }
     ]
     const menuItemsAuth: MenuItem[] = [
-        { title: 'Logout', onPress: () => { setShowAuth(true); setShowMenu(false) } },
+        { title: 'Account', onPress: () => { setShowAuth(true); setShowMenu(false) } },
         { title: 'Settings', onPress: () => { setShowSettings(true); setShowMenu(false) } },
         { title: 'POI', onPress: () => { setShowMarkers(true); setShowMenu(false) } },
         { title: 'Tracks', onPress: () => { setShowTracks(true); setShowMenu(false) } },

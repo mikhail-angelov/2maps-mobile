@@ -17,9 +17,12 @@ export interface SignUp {
 export interface PasswordReset {
   email: string;
 }
-interface changePassword {
+interface resetPassword {
   password: string;
   resetToken: string;
+}
+interface changePassword {
+  password: string;
 }
 
 export const setAuthErrorAction = (error: string) => {
@@ -103,25 +106,25 @@ export const signUpAction = (data: SignUp): AppThunk => {
   };
 };
 
-export const passwordResetAction = (data: PasswordReset): AppThunk => {
+export const forgetPasswordAction = (data: PasswordReset): AppThunk => {
   return async (dispatch) => {
     try {
-      dispatch({ type: ActionTypeEnum.PasswordResetRequest });
+      dispatch({ type: ActionTypeEnum.ForgetPasswordRequest });
       await post<AuthParams>({ url: `${AUTH_URL}/forget`, data });
       dispatch({
-        type: ActionTypeEnum.PasswordResetSuccess,
+        type: ActionTypeEnum.ForgetPasswordSuccess,
       });
     } catch (e) {
       console.log("password reset error", e);
       dispatch({
-        type: ActionTypeEnum.PasswordResetFailure,
+        type: ActionTypeEnum.ForgetPasswordFailure,
         payload: "password reset failure",
       });
     }
   };
 };
 
-export const changePasswordAction = (data: changePassword): AppThunk => {
+export const resetPasswordAction = (data: resetPassword): AppThunk => {
   return async (dispatch) => {
     try {
       dispatch({ type: ActionTypeEnum.ChangePasswordRequest });
@@ -141,3 +144,23 @@ export const changePasswordAction = (data: changePassword): AppThunk => {
 };
 
 export const storeResetTokenAction = (resetToken: string) => ({ type: ActionTypeEnum.StoreResetToken, payload: resetToken })
+
+export const changePasswordAction = (data: changePassword): AppThunk => {
+  return async (dispatch, getState) => {
+    const token = selectToken(getState())
+    try {
+      dispatch({ type: ActionTypeEnum.ChangePasswordRequest });
+      const response = await post<AuthParams>({ url: `${AUTH_URL}/change-password`, token, data });
+      dispatch({
+        type: ActionTypeEnum.ChangePasswordSuccess,
+        payload: response.data,
+      });
+    } catch (e) {
+      console.log("password change error", e);
+      dispatch({
+        type: ActionTypeEnum.ChangePasswordFailure,
+        payload: "password change failure",
+      });
+    }
+  };
+};

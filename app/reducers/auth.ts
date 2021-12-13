@@ -74,17 +74,17 @@ export default createReducer<AuthState>(initialState, {
     user: undefined,
     isRequestInProgress: false,
   }),
-  [ActionTypeEnum.PasswordResetRequest]: () => (state: AuthState) => ({
+  [ActionTypeEnum.ForgetPasswordRequest]: () => (state: AuthState) => ({
     ...state,
     isRequestInProgress: true,
     error: '',
   }),
-  [ActionTypeEnum.PasswordResetSuccess]: () => (state: AuthState) => ({
+  [ActionTypeEnum.ForgetPasswordSuccess]: () => (state: AuthState) => ({
     ...state,
     isRequestInProgress: false,
     error: '',
   }),
-  [ActionTypeEnum.PasswordResetFailure]: (error: string) => (state: AuthState) => ({
+  [ActionTypeEnum.ForgetPasswordFailure]: (error: string) => (state: AuthState) => ({
     ...state,
     error,
     authenticated: false,
@@ -95,12 +95,12 @@ export default createReducer<AuthState>(initialState, {
     resetToken,
     error: '',
   }),
-  [ActionTypeEnum.ChangePasswordRequest]: () => (state: AuthState) => ({
+  [ActionTypeEnum.ResetPasswordRequest]: () => (state: AuthState) => ({
     ...state,
     isRequestInProgress: true,
     error: '',
   }),
-  [ActionTypeEnum.ChangePasswordSuccess]: ({ token, user }: AuthParams) => (state: AuthState) => ({
+  [ActionTypeEnum.ResetPasswordSuccess]: ({ token, user }: AuthParams) => (state: AuthState) => ({
     ...state,
     authenticated: true,
     token,
@@ -109,10 +109,25 @@ export default createReducer<AuthState>(initialState, {
     resetToken: '',
     isRequestInProgress: false,
   }),
-  [ActionTypeEnum.ChangePasswordFailure]: (error: string) => (state: AuthState) => ({
+  [ActionTypeEnum.ResetPasswordFailure]: (error: string) => (state: AuthState) => ({
     ...state,
     error,
     authenticated: false,
+    isRequestInProgress: false,
+  }),
+  [ActionTypeEnum.ChangePasswordRequest]: () => (state: AuthState) => ({
+    ...state,
+    isRequestInProgress: true,
+    error: '',
+  }),
+  [ActionTypeEnum.ChangePasswordSuccess]: () => (state: AuthState) => ({
+    ...state,
+    error: '',
+    isRequestInProgress: false,
+  }),
+  [ActionTypeEnum.ChangePasswordFailure]: (error: string) => (state: AuthState) => ({
+    ...state,
+    error,
     isRequestInProgress: false,
   }),
 });

@@ -5,8 +5,8 @@ import { View, Text, StyleSheet } from "react-native";
 import { Button } from 'react-native-elements';
 import QR from './QR'
 import { logoutAction } from "../actions/auth-actions";
-import { syncMarksAction } from "../actions/marks-actions";
 import {selectUser} from '../reducers/auth'
+import ChangePassword from "./ChangePassword";
 
 
 const mapStateToProps = (state: State) => ({
@@ -14,22 +14,25 @@ const mapStateToProps = (state: State) => ({
 });
 const mapDispatchToProps = {
     logout: logoutAction,
-    syncMarks: syncMarksAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
-type Props = ConnectedProps<typeof connector> & { close: () => void }
-const Settings: FC<Props> = ({ logout, syncMarks, user, close }) => {
+type Props = ConnectedProps<typeof connector>
+const Settings: FC<Props> = ({ logout, user }) => {
     const [showQRReader, setShowQRReader] = useState(false)
+    const [showChangePassword, setShowChangePassword] = useState(false)
 
 
     return <View style={styles.content}>
         <Text style={styles.subTitle}>{`Hello ${user?.email}`}</Text>
         <View style={styles.row}>
-        <Button buttonStyle={styles.btn} onPress={syncMarks} title="Sync markers" />
         <Button buttonStyle={styles.btn} onPress={() => setShowQRReader(true)} title="Download map" disabled/>
+        </View>
+        <View style={styles.row}>
+        <Button buttonStyle={styles.btn} onPress={() =>setShowChangePassword(true)} title="Change Password" />
         </View>
         <Button buttonStyle={styles.btn} type='clear' onPress={() => logout && logout()} title="Logout" />
         {showQRReader && <QR close={() => setShowQRReader(false)} select={() => { }} />}
+        {showChangePassword && <ChangePassword close={() => setShowChangePassword(false)} />}
     </View>
 }
 
