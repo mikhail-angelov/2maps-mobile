@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { State } from '../store/types'
 import MapboxGL, { CircleLayerStyle, LineLayerStyle } from "@react-native-mapbox-gl/maps";
@@ -43,43 +43,39 @@ const connector = connect(mapStateToProps)
 type Props = ConnectedProps<typeof connector> & ActiveTrackProps
 
 const ActiveTrack: FC<Props> = ({ activeTrack, selectedTrack, onTrackSelect }) => {
-    const [selectedRoute, setSelectedRoute] = useState<Feature<LineString> | null>(null)
-    const [selectedPoint, setSelectedPoint] = useState<Feature<Point> | null>(null)
+    let selectedRoute: Feature<LineString> | null = null
+    let selectedPoint: Feature<Point> | null = null
     const activeRoute = activeTrack && activeTrack.track.length > 1 ? lineString(activeTrack.track) : null
 
-    useEffect(() => {
-        if (selectedTrack) {
-            let { maxX, maxY, minX, minY } = findMinMaxCoordinates(selectedTrack.track)
-            if (!maxX || !maxY || !minX || !minY) {
-                return
-            }
-
-            if ((maxX === minX) && (maxY === minY)) {
-                const selectedPoint = point([maxX, maxY])
-                setSelectedPoint(selectedPoint)
-                setSelectedRoute(null)
-            } else {
-                const route = lineString(selectedTrack.track)
-                setSelectedRoute(route)
-                setSelectedPoint(null)
-            }
-
-            // delta 0.005 of Latitude or 0.006 of Longitude ≈ 0.5km
-            if ((Math.abs(maxX - minX) < 0.005) && (Math.abs(maxY - minY) < 0.006)) {
-                minX -= 0.0025
-                maxX += 0.0025
-                minY -= 0.003
-                maxY += 0.003
-            }
-
-            const start = [minX, minY]
-            const end = [maxX, maxY]
-            onTrackSelect(start, end)
-        } else {
-            setSelectedRoute(null)
-            setSelectedPoint(null)
+    if (selectedTrack) {
+        let { maxX, maxY, minX, minY } = findMinMaxCoordinates(selectedTrack.track)
+        if (!maxX || !maxY || !minX || !minY) {
+            return null
         }
-    }, [selectedTrack])
+
+        if ((maxX === minX) && (maxY === minY)) {
+            selectedPoint = point([maxX, maxY])
+            selectedRoute = null
+        } else {
+            selectedRoute = lineString(selectedTrack.track)
+            selectedPoint = null
+        }
+
+        // delta 0.005 of Latitude or 0.006 of Longitude ≈ 0.5km
+        if ((Math.abs(maxX - minX) < 0.005) && (Math.abs(maxY - minY) < 0.006)) {
+            minX -= 0.0025
+            maxX += 0.0025
+            minY -= 0.003
+            maxY += 0.003
+        }
+
+        const start = [minX, minY]
+        const end = [maxX, maxY]
+        onTrackSelect(start, end)
+    } else {
+        selectedRoute = null
+        selectedPoint = null
+    }
 
     return (<>{activeRoute && <MapboxGL.ShapeSource id='active-track' shape={activeRoute}>
         <MapboxGL.LineLayer id='activeLineLayer' style={ActiveTrackStyle} minZoomLevel={1} />
