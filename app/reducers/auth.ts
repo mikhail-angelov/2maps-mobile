@@ -8,6 +8,7 @@ const initialState: AuthState = Object.freeze({
   isRequestInProgress: false,
   token: '',
   resetToken: '',
+  showAdMob: true,
 });
 
 export default createReducer<AuthState>(initialState, {
@@ -27,6 +28,7 @@ export default createReducer<AuthState>(initialState, {
     user,
     error: '',
     isRequestInProgress: false,
+    showAdMob: false,
   }),
   [ActionTypeEnum.LoginFailure]: (error:string) => (state: AuthState) => ({
     ...state,
@@ -65,6 +67,7 @@ export default createReducer<AuthState>(initialState, {
     user: undefined,
     isRequestInProgress: false,
     error: '',
+    showAdMob: true,
   }),
   [ActionTypeEnum.LogoutFailure]: (error:string) => (state: AuthState) => ({
     ...state,
@@ -155,4 +158,8 @@ export const selectError = createSelector(
 export const selectResetToken = createSelector(
   selectAuthState,
   (state) => state.resetToken
+);
+export const selectShowAdMob = createSelector(
+  selectAuthState,
+  (state) => state.showAdMob
 );
