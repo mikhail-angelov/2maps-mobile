@@ -50,6 +50,7 @@ export enum ActionTypeEnum {
   AddTrack = 'tracker/ADD_TRACK',
   RemoveTrack = 'tracker/REMOVE_TRACK',
   SetSelectedTrack = 'tracker/SET_SELECTED_TRACK',
+  SetSelectedTrackBBox = 'tracker/SET_SELECTED_TRACK_BBOX',
   StartTracking = 'tracker/START_TRACKING',
   EndTracking = 'tracker/END_TRACKING',
   PauseTracking = 'tracker/PAUSE_TRACKING',

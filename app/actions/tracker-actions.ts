@@ -9,7 +9,7 @@ import DocumentPicker from 'react-native-document-picker';
 import { createKml, parseKml } from "../utils/kml";
 import { Alert } from "react-native";
 import { nanoid } from 'nanoid/non-secure'
-import { latLngToTileIndex, convertToBoxSize } from "../utils/normalize";
+import { latLngToTileIndex, convertToBoxSize, findMinMaxCoordinates } from "../utils/normalize";
 import { makeSvg } from "../utils/svg";
 import * as _ from 'lodash'
 
@@ -38,8 +38,29 @@ export const addTrackAction = (track: Track) => {
 export const removeTrackAction = (trackId: string) => {
   return { type: ActionTypeEnum.RemoveTrack, payload: trackId }
 };
-export const selectTrackAction = (track: Track | undefined) => {
-  return { type: ActionTypeEnum.SetSelectedTrack, payload: track }
+export const selectTrackAction = (track: Track | undefined): AppThunk => {
+  return async (dispatch) => {
+    if(!track) {
+      dispatch({ type: ActionTypeEnum.SetSelectedTrack, payload: track })   
+      dispatch({ type: ActionTypeEnum.SetSelectedTrackBBox, payload: [] })
+      return   
+    }
+    let { maxX, maxY, minX, minY } = findMinMaxCoordinates(track.track)
+      if (!maxX || !maxY || !minX || !minY) {
+          return
+      }
+    // delta 0.005 of Latitude or 0.006 of Longitude ≈ 0.5km
+    if ((Math.abs(maxX - minX) < 0.005) && (Math.abs(maxY - minY) < 0.006)) {
+        minX -= 0.0025
+        maxX += 0.0025
+        minY -= 0.003
+        maxY += 0.003
+    }
+    const start = [minX, minY]
+    const end = [maxX, maxY]
+    dispatch({ type: ActionTypeEnum.SetSelectedTrack, payload: track })
+    dispatch({ type: ActionTypeEnum.SetSelectedTrackBBox, payload: [start, end] })
+  }
 };
 export const startTrackingAction = (): AppThunk => {
   return async (dispatch,  getState) => {
