@@ -28,6 +28,7 @@ export default createReducer<AuthState>(initialState, {
     user,
     error: '',
     isRequestInProgress: false,
+    showAdMob: false,
   }),
   [ActionTypeEnum.LoginFailure]: (error:string) => (state: AuthState) => ({
     ...state,
@@ -66,6 +67,7 @@ export default createReducer<AuthState>(initialState, {
     user: undefined,
     isRequestInProgress: false,
     error: '',
+    showAdMob: true,
   }),
   [ActionTypeEnum.LogoutFailure]: (error:string) => (state: AuthState) => ({
     ...state,
@@ -130,10 +132,6 @@ export default createReducer<AuthState>(initialState, {
     ...state,
     error,
     isRequestInProgress: false,
-  }),
-  [ActionTypeEnum.StoreShowAdMob]: (showAdMob: boolean) => (state: AuthState) => ({
-    ...state,
-    showAdMob,
   }),
 });
 export const selectAuthState = (state: State) => state.auth;

@@ -31,7 +31,6 @@ export enum ActionTypeEnum {
   ChangePasswordRequest = "auth/CHANGE_PASSWORD_REQUEST",
   ChangePasswordSuccess = "auth/CHANGE_PASSWORD_SUCCESS",
   ChangePasswordFailure = "auth/CHANGE_PASSWORD_FAILURE",
-  StoreShowAdMob = "auth/STORE_SHOW_AD_MOB",
   // marks
   MarksRequest = "marks/MARKS_REQUEST",
   MarksSuccess = "marks/MARKS_SUCCESS",
