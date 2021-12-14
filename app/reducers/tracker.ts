@@ -22,6 +22,7 @@ const initialState: TrackerState = Object.freeze({
   compass: { x: 0, y: 0, z: 0 },
   tracks: [],
   tracking: false,
+  selectedTrackBBox: [],
 });
 
 export default createReducer<TrackerState>(initialState, {
@@ -51,6 +52,10 @@ export default createReducer<TrackerState>(initialState, {
   [ActionTypeEnum.SetSelectedTrack]: (selectedTrack?: Track) => (state: TrackerState) => ({
     ...state,
     selectedTrack,
+  }),
+  [ActionTypeEnum.SetSelectedTrackBBox]: (selectedTrackBBox?: number[][]) => (state: TrackerState) => ({
+    ...state,
+    selectedTrackBBox,
   }),
   [ActionTypeEnum.StartTracking]: (activeTrack: Track) => (state: TrackerState) => ({
     ...state,
@@ -105,4 +110,8 @@ export const selectIsTracking = createSelector(
 export const selectSelectedTrack = createSelector(
   selectTrackerState,
   (state) => state.selectedTrack
+);
+export const selectSelectedTrackBBox = createSelector(
+  selectTrackerState,
+  (state) => state.selectedTrackBBox
 );

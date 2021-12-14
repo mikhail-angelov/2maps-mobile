@@ -18,4 +18,5 @@ export interface TrackerState {
   tracking: boolean;
   activeTrack?: Track;
   selectedTrack?: Track;
+  selectedTrackBBox?: number[][];
 }

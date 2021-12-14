@@ -3,7 +3,7 @@ import Config from 'react-native-config'
 import { connect, ConnectedProps } from "react-redux";
 import { State, Mark } from '../store/types'
 import { featureToMark, editMarkAction } from '../actions/marks-actions'
-import { selectIsTracking } from '../reducers/tracker'
+import { selectIsTracking, selectSelectedTrackBBox } from '../reducers/tracker'
 import styled from 'styled-components/native'
 import MapboxGL, { RasterSourceProps, RegionPayload } from "@react-native-mapbox-gl/maps";
 import { Feature, Point } from '@turf/helpers';
@@ -15,7 +15,7 @@ import ActiveTrack from '../components/ActiveTrack'
 import MarksLocation from "../components/MarksLocation";
 import Wikimapia from "../components/Wikimapia";
 import SelectedMark from "../components/SelectedMark";
-import { Position } from "geojson";
+import * as _ from 'lodash'
 
 MapboxGL.setAccessToken(Config.MAPBOX_PUB_KEY || 'pk.eyJ1IjoibWlraGFpbGFuZ2Vsb3YiLCJhIjoiY2tpa2FnbnM5MDg5ejJ3bDQybWN3eWRsdSJ9.vK_kqebrJaO7MdIg4ilaFQ');
 
@@ -42,6 +42,7 @@ const mapStateToProps = (state: State) => ({
     primaryMap: selectPrimaryMap(state),
     secondaryMap: selectSecondaryMap(state),
     tracking: selectIsTracking(state),
+    selectedTrackBBox: selectSelectedTrackBBox(state),
 });
 const mapDispatchToProps = {
     setCenter: setCenterAction,
@@ -77,6 +78,14 @@ class Map extends Component<Props> {
             return false
         }
         return true
+    }
+    
+    componentDidUpdate(prevProps: any) {
+        if(this.props.selectedTrackBBox && !_.isEqual(this.props.selectedTrackBBox, prevProps.selectedTrackBBox)) {
+            const start = this.props.selectedTrackBBox?.[0]
+            const end = this.props.selectedTrackBBox?.[1]
+            this.camera?.fitBounds(start, end, 70, 100)
+        }
     }
 
     onAddMark = async (feature: GeoJSON.Feature) => {
@@ -133,10 +142,6 @@ class Map extends Component<Props> {
         if (tracking) {
             restartTracking()
         }
-    }
-
-    onTrackSelect = (start: Position, end: Position) => {
-        this.camera?.fitBounds(start, end, 70, 100)
     }
 
     render() {
@@ -198,7 +203,7 @@ class Map extends Component<Props> {
             </MapboxGL.RasterSource>}
             <Wikimapia />
             <MarksLocation onMarkPress={this.onMarkPress} />
-            <ActiveTrack onTrackSelect={this.onTrackSelect} />
+            <ActiveTrack />
             <SelectedMark mark={selected} unselect={this.onBalloonClick} />
         </StyledMap>
         );
