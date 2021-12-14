@@ -25,6 +25,11 @@ interface changePassword {
   password: string;
 }
 
+const storeShowAdMobAction = (value: boolean) => ({
+  type: ActionTypeEnum.StoreShowAdMob,
+  payload: value,
+})
+
 export const setAuthErrorAction = (error: string) => {
   return { type: ActionTypeEnum.AuthError, payload: error }
 };
@@ -39,6 +44,7 @@ export const loginAction = (data: Credentials): AppThunk => {
         type: ActionTypeEnum.LoginSuccess,
         payload: response.data,
       });
+      dispatch(storeShowAdMobAction(false));
     } catch (e) {
       console.log("login error", JSON.stringify(e));
       dispatch({
@@ -57,6 +63,7 @@ export const logoutAction = (): AppThunk => {
       dispatch({
         type: ActionTypeEnum.LogoutSuccess,
       });
+      dispatch(storeShowAdMobAction(true));
     } catch (e) {
       console.log("logout error", e);
       dispatch({

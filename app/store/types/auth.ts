@@ -17,4 +17,5 @@ export interface AuthState {
   error?: string;
   user?: any;
   resetToken: string;
+  showAdMob: boolean;
 }
