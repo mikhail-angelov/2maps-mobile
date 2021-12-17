@@ -23,6 +23,7 @@ const EditMark: FC<Props> = ({ mark,center, save, cancel, remove }) => {
     const [rate, setRate] = useState<number>(mark?.rate || 0)
     const [isEdit, setIsEdit] = useState(!mark.id)
     const { t } = useTranslation();
+
     console.log('ed', description)
     const openLink = useCallback(async () => {
         const { coordinates } = mark.geometry
@@ -42,10 +43,10 @@ const EditMark: FC<Props> = ({ mark,center, save, cancel, remove }) => {
         }
         Alert.alert(
             t('Warning!'),
-            `Are you sure to remove ${name} marker?`,
+            t('Are you sure to remove marker?', {name: name || ''}),
             [
-                { text: "No", style: "cancel" },
-                { text: "Yes", onPress: () => remove(mark.id?.toString() || '') }
+                { text: t('No'), style: "cancel" },
+                { text: t('Yes'), onPress: () => remove(mark.id?.toString() || '') }
             ]
         );
     }

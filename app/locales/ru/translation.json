@@ -27,5 +27,18 @@
     "Warning!": "Внимание!",
     "Description": "Описание",
     "description": "описание",
-    "Rate": "Оценка"
+    "Rate": "Оценка",
+    "Change your password": "Изменение пароля",
+    "New Password": "Новый пароль",
+    "Submit": "Подтвердить",
+    "Are you sure to remove the marker?": "Вы точно хотите удалить точку?",
+    "Are you sure to remove all your markers?": "Вы точно хотите удалить ВСЕ точки?",
+    "No": "Нет",
+    "Yes": "Да",
+    "Are you sure to remove marker?": "Вы точно хотите удалить точку {{name}}?",
+    "Are you sure to remove the track?": "Вы точно хотите удалить трек?",
+    "Track is saved": "Трек сохранен",
+    "to": "в",
+    "Oops": "Упс",
+    "do not manage to save it": "не получается сохранить по"
 }

@@ -7,6 +7,7 @@ import { selectError, selectIsAuthInProgress, selectResetToken } from "../reduce
 import { resetPasswordAction } from "../actions/auth-actions";
 import MapModal from "./Modal";
 import Spinner from "./Spinner";
+import { useTranslation } from "react-i18next";
 
 const mapStateToProps = (state: State) => ({
     error: selectError(state),
@@ -22,6 +23,8 @@ type Props = ConnectedProps<typeof connector> & { close: () => void }
 const PasswordReset: FC<Props> = ({ error, resetPassword, close, resetToken, isAuthInProgress }) => {
     const [password, setPassword] = useState<string>('')
     const inProcess = useRef(false)
+    const { t } = useTranslation();
+
     const onPassword = () => {
         if (resetPassword && resetToken) {
             inProcess.current = true
@@ -41,19 +44,19 @@ const PasswordReset: FC<Props> = ({ error, resetPassword, close, resetToken, isA
     return <MapModal onRequestClose={close}>
         <Spinner show={isAuthInProgress} />
         <View style={styles.content}>
-            <Text style={styles.subTitle}>Change your password</Text>
+            <Text style={styles.subTitle}>{t('Change your password')}</Text>
             <View style={styles.formField}>
                 <Text style={styles.label}>New Password</Text>
                 <TextInput
                     style={styles.modalInput}
                     onChangeText={(value) => setPassword(value)}
-                    placeholder="password"
+                    placeholder={t('password')}
                     value={password}
                 />
             </View>
             {error ? <Text style={styles.error}>{error}</Text> : null}
             <View style={styles.row}>
-                <Button buttonStyle={styles.btn} disabled={!password} onPress={onPassword} title="Submit" />
+                <Button buttonStyle={styles.btn} disabled={!password} onPress={onPassword} title={t('Submit')} />
             </View>
         </View>
     </MapModal>

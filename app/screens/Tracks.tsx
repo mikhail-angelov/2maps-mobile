@@ -8,8 +8,9 @@ import { orderBy } from 'lodash'
 import dayjs from 'dayjs'
 import { State } from '../store/types'
 import { selectIsTracking, selectTracks } from '../reducers/tracker'
-import { addPointAction, addTrackAction, selectTrackAction, startTrackingAction, stopTrackingAction, exportTrackAction, removeTrackAction, importTrackAction } from "../actions/tracker-actions";
+import { selectTrackAction, startTrackingAction, stopTrackingAction, exportTrackAction, removeTrackAction, importTrackAction } from "../actions/tracker-actions";
 import { SvgXml } from "react-native-svg";
+import { useTranslation } from "react-i18next";
 
 export enum MENU {
     Cancel,
@@ -42,6 +43,8 @@ const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
 
 const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, selectTrack, close, exportTrack, removeTrack, importTrack }) => {
+    const { t } = useTranslation();
+
     const toggleTracking = () => {
         if (isTracking) {
             stopTracking()
@@ -58,11 +61,11 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
 
     const onRemoveTrack = (itemId: string) => {
         Alert.alert(
-            "Warning!",
-            "Are you sure to remove the track?",
+            t('Warning!'),
+            t('Are you sure to remove the track?'),
             [
-                { text: "No", style: "cancel" },
-                { text: "Yes", onPress: () => { removeTrack(itemId); selectTrack(undefined) } }
+                { text: t('No'), style: "cancel" },
+                { text: t('Yes'), onPress: () => { removeTrack(itemId); selectTrack(undefined) } }
             ]
         );
     }

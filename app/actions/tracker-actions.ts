@@ -12,6 +12,7 @@ import { nanoid } from 'nanoid/non-secure'
 import { latLngToTileIndex, convertToBoxSize, findMinMaxCoordinates } from "../utils/normalize";
 import { makeSvg } from "../utils/svg";
 import * as _ from 'lodash'
+import i18next from 'i18next';
 
 export const compassAngle = (magnetometer: ThreeAxisMeasurement) => {
   let angle = 0.0
@@ -111,10 +112,10 @@ export const exportTrackAction = (trackId: string): AppThunk => {
       url = RNFS.DownloadDirectoryPath + `/${compiledKml.name}.kml`;
       console.log('writing kml to:', url, '\n')
       await RNFS.writeFile(decodeURI(url), compiledKml.data, 'utf8')
-      Alert.alert('Track is saved', `to ${url}`)
+      Alert.alert(i18next.t('Track is saved'), `${i18next.t('to')} ${url}`)
     } catch (err: any) {
       console.log('Error write to:', url, '\n', err)
-      Alert.alert('Oops', `do not manage to save it ${url}`)
+      Alert.alert(i18next.t('Oops'), `${i18next.t('do not manage to save it')} ${url}`)
       if (DocumentPicker.isCancel(err)) {
         // User cancelled the picker, exit any dialogs or menus and move on
       } else {
