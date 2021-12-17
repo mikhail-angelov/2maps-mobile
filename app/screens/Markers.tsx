@@ -10,7 +10,7 @@ import { State, Mark } from '../store/types'
 import { selectIsAuthenticated } from '../reducers/auth'
 import { selectMarks } from '../reducers/marks'
 import { importPoisAction, exportPoisAction, removeAllPoisAction, syncMarksAction, removeMarkCompletelyAction, editMarkAction } from '../actions/marks-actions'
-
+import { useTranslation } from "react-i18next";
 
 interface OwnProps {
     center: Position;
@@ -39,24 +39,26 @@ const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & OwnProps
 
 const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, importPois, exportPois, removeAllPois, syncMarks, removeMark, editMark }) => {
+    const { t } = useTranslation();
+
     const onRemoveAll = () => {
         Alert.alert(
-            "Warning!",
-            "Are you sure to remove all your markers?",
+            t('Warning!'),
+            t('Are you sure to remove all your markers?'),
             [
-                { text: "No", style: "cancel" },
-                { text: "Yes", onPress: removeAllPois }
+                { text: t('No'), style: "cancel" },
+                { text: t('Yes'), onPress: removeAllPois }
             ]
         );
     }
     const onRemoveMark = (id?: string) => {
         if(!id) return
         Alert.alert(
-            "Warning!",
-            "Are you sure to remove the marker?",
+            t('Warning!'),
+            t('Are you sure to remove the marker?'),
             [
-                { text: "No", style: "cancel" },
-                { text: "Yes", onPress: () => removeMark(id) }
+                { text: t('No'), style: "cancel" },
+                { text: t('Yes'), onPress: () => removeMark(id) }
             ]
         );
     }
