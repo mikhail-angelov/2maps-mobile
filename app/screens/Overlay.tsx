@@ -25,6 +25,7 @@ import { selectIsAuthenticated, selectResetToken } from "../reducers/auth";
 import { setCenterAction, setOpacityAction, setZoomAction } from "../actions/map-actions";
 import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecondaryMap } from '../reducers/map'
 import ResetPassword from "../components/ResetPassword";
+import { useTranslation } from "react-i18next";
 
 interface MenuItem {
     title: string;
@@ -103,6 +104,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
     const [showSettings, setShowSettings] = useState(false)
     const [showMarkers, setShowMarkers] = useState(false)
     const [showTracks, setShowTracks] = useState(false)
+    const { t } = useTranslation();
 
     const menuItemsNotAuth: MenuItem[] = [
         { title: 'Login', onPress: () => { setShowAuth(true); setShowMenu(false) } },
@@ -179,7 +181,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         {showMenu && <BottomSheet isVisible={showMenu} containerStyle={{ backgroundColor: 'rgba(0.5, 0.25, 0, 0.2)' }} modalProps={{}}>
             {menuItems.map((l, i) => (<ListItem key={i} containerStyle={l.containerStyle} onPress={l.onPress}>
                 <ListItem.Content>
-                    <ListItem.Title style={l.titleStyle}>{l.title}</ListItem.Title>
+                    <ListItem.Title style={l.titleStyle}>{t(l.title)}</ListItem.Title>
                 </ListItem.Content>
             </ListItem>))}
         </BottomSheet>}

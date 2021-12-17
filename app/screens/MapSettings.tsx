@@ -12,6 +12,7 @@ import { selectPrimaryMap, selectSecondaryMap, selectMapList, selectMapIsLoading
 import { selectIsAuthenticated } from '../reducers/auth'
 import { ItemValue } from "@react-native-community/picker/typings/Picker";
 import Spinner from "../components/Spinner";
+import { useTranslation } from "react-i18next";
 
 interface MapItem {
     id: string;
@@ -45,6 +46,7 @@ type Props = ConnectedProps<typeof connector> & { close: () => void }
 
 
 const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoading, list, availableMapList, isAuthenticated, error, progress, cancelDownloadMap, close, getLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap }) => {
+    const { t } = useTranslation()
     useEffect(() => {
         getLocalMapList()
         loadMapList()
@@ -73,7 +75,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
 
     return <Modal style={styles.container} visible onRequestClose={close}>
         {isDownLoading && <View style={styles.loadingOverlay}>
-            <Text style={styles.loadingLabel}>loading...</Text>
+            <Text style={styles.loadingLabel}>{t('loading...')}</Text>
             <View style={styles.progressBar}><ProgressBar progress={progress} value={progress} /></View>
             <Button title="Cancel" onPress={cancelDownloadMap} />
         </View>}
@@ -83,7 +85,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
         </View>
         <View style={styles.content}>
             <View style={styles.row}>
-                <Text style={styles.label}>Primary Map:</Text>
+                <Text style={styles.label}>{t('Primary Map')}:</Text>
                 <Picker
                     selectedValue={primaryMap?.name}
                     style={styles.picker}
@@ -94,7 +96,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                 </Picker>
             </View>
             <View style={styles.row}>
-                <Text style={styles.label}>Secondary Map:</Text>
+                <Text style={styles.label}>{t('Secondary Map')}:</Text>
                 <Picker
                     selectedValue={secondaryMap?.name}
                     style={styles.picker}
@@ -114,7 +116,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                         keyExtractor={(item: MapItem) => item.name}
                     />
                 </View> : <View>
-                    <Text>You need to be logged in to download maps</Text>
+                    <Text>{t('You need to be logged in to download maps')}</Text>
                 </View>}
             {!!error && <Text style={styles.errors}>{error}</Text>}
         </View>

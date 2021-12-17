@@ -7,6 +7,7 @@ import MapModal from './Modal'
 import { AirbnbRating } from 'react-native-elements';
 import { markToDistance } from '../utils/normalize'
 import { Position } from 'geojson';
+import { useTranslation } from "react-i18next";
 
 interface Props {
     mark: Mark;
@@ -21,6 +22,7 @@ const EditMark: FC<Props> = ({ mark,center, save, cancel, remove }) => {
     const [description, setDescription] = useState<string>(mark?.description || '')
     const [rate, setRate] = useState<number>(mark?.rate || 0)
     const [isEdit, setIsEdit] = useState(!mark.id)
+    const { t } = useTranslation();
     console.log('ed', description)
     const openLink = useCallback(async () => {
         const { coordinates } = mark.geometry
@@ -30,7 +32,7 @@ const EditMark: FC<Props> = ({ mark,center, save, cancel, remove }) => {
         if (supported) {
             await Linking.openURL(url);
         } else {
-            Alert.alert(`Don't know how to open this URL: ${url}`);
+            Alert.alert(`${t('Don\'t know how to open this URL')}: ${url}`);
         }
     }, [mark]);
 
@@ -39,7 +41,7 @@ const EditMark: FC<Props> = ({ mark,center, save, cancel, remove }) => {
             return
         }
         Alert.alert(
-            "Warning!",
+            t('Warning!'),
             `Are you sure to remove ${name} marker?`,
             [
                 { text: "No", style: "cancel" },
@@ -59,21 +61,21 @@ const EditMark: FC<Props> = ({ mark,center, save, cancel, remove }) => {
             /><Text style={styles.headerText}>{distance}</Text>
         </View>}
         {isEdit ? <View style={styles.content}>
-            <Text>Name:</Text>
+            <Text>{t('Name')}:</Text>
             <TextInput
                 style={styles.modalInput}
                 onChangeText={(value) => setName(value)}
-                placeholder="name"
+                placeholder={t('name')}
                 value={name}
             />
-            <Text>Description:</Text>
+            <Text>{t('Description')}:</Text>
             <TextInput
                 style={styles.modalInput}
                 onChangeText={(value) => setDescription(value)}
-                placeholder="description"
+                placeholder={t('description')}
                 value={description}
             />
-            <Text>Rate:</Text>
+            <Text>{t('Rate')}:</Text>
             <AirbnbRating
                 showRating={false}
                 starContainerStyle={{ marginVertical: 10 }}
