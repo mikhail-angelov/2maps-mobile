@@ -1,6 +1,8 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import i18nextReactNative from 'i18next-react-native-language-detector'
+import translationRU from './app/locales/ru/translation.json'
+import translationEN from './app/locales/en/translation.json'
 
 i18n
   .use(i18nextReactNative)
@@ -9,22 +11,16 @@ i18n
   // for all options read: https://www.i18next.com/overview/configuration-options
   .init({
     compatibilityJSON: 'v1',
-    fallbackLng: i18n.locale,
-    lng: i18n.locale,
+    fallbackLng: 'en',
     debug: true,
     resources: {
       ru: {
-        translation: {
-          Tracks: 'Треки',
-        },
+        translation: translationRU
       },
       en: {
-        translation: {
-          Tracks: 'Tracks',
-        },
+        translation: translationEN
       },
     },
   });
-
 
 export default i18n;

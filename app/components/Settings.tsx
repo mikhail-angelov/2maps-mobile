@@ -7,7 +7,7 @@ import QR from './QR'
 import { logoutAction } from "../actions/auth-actions";
 import {selectUser} from '../reducers/auth'
 import ChangePassword from "./ChangePassword";
-
+import { useTranslation } from "react-i18next";
 
 const mapStateToProps = (state: State) => ({
     user: selectUser(state)
@@ -20,17 +20,17 @@ type Props = ConnectedProps<typeof connector>
 const Settings: FC<Props> = ({ logout, user }) => {
     const [showQRReader, setShowQRReader] = useState(false)
     const [showChangePassword, setShowChangePassword] = useState(false)
-
+    const { t } = useTranslation()
 
     return <View style={styles.content}>
-        <Text style={styles.subTitle}>{`Hello ${user?.email}`}</Text>
+        <Text style={styles.subTitle}>{`${t('Hello')} ${user?.email}`}</Text>
         <View style={styles.row}>
-        <Button buttonStyle={styles.btn} onPress={() => setShowQRReader(true)} title="Download map" disabled/>
+        <Button buttonStyle={styles.btn} onPress={() => setShowQRReader(true)} title={t('Download map')} disabled/>
         </View>
         <View style={styles.row}>
-        <Button buttonStyle={styles.btn} onPress={() =>setShowChangePassword(true)} title="Change Password" />
+        <Button buttonStyle={styles.btn} onPress={() =>setShowChangePassword(true)} title={t('Change Password')} />
         </View>
-        <Button buttonStyle={styles.btn} type='clear' onPress={() => logout && logout()} title="Logout" />
+        <Button buttonStyle={styles.btn} type='clear' onPress={() => logout && logout()} title={t('Logout')} />
         {showQRReader && <QR close={() => setShowQRReader(false)} select={() => { }} />}
         {showChangePassword && <ChangePassword close={() => setShowChangePassword(false)} />}
     </View>

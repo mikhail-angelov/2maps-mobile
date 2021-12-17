@@ -104,7 +104,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
     const [showSettings, setShowSettings] = useState(false)
     const [showMarkers, setShowMarkers] = useState(false)
     const [showTracks, setShowTracks] = useState(false)
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
 
     const menuItemsNotAuth: MenuItem[] = [
         { title: 'Login', onPress: () => { setShowAuth(true); setShowMenu(false) } },

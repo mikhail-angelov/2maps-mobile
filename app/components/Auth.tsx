@@ -8,6 +8,7 @@ import { loginAction, signUpAction, setAuthErrorAction, forgetPasswordAction, Cr
 import Settings from './Settings'
 import MapModal from './Modal'
 import Spinner from "./Spinner";
+import { useTranslation } from "react-i18next";
 
 const mapStateToProps = (state: State) => ({
     isAuthenticated: selectIsAuthenticated(state),
@@ -32,35 +33,37 @@ interface LoginProps {
 const Login: FC<LoginProps> = ({ error, login, setSignUp, setPasswordReset }) => {
     const [email, setEmail] = useState<string>('')
     const [password, setPassword] = useState<string>('')
+    const { t } = useTranslation();
+
     return <View style={styles.content}>
-        <Text style={styles.subTitle}>Login</Text>
+        <Text style={styles.subTitle}>{t('Login')}</Text>
         <View style={styles.formField}>
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>{t('Email')}</Text>
             <TextInput
                 keyboardType="email-address"
                 style={styles.modalInput}
                 onChangeText={(value) => setEmail(value)}
-                placeholder="email"
+                placeholder={t('email')}
                 value={email}
             />
         </View>
         <View style={styles.formField}>
             <View style={[styles.passwordWrapper, styles.label]}>
-                <Text>Password</Text>
-                <Button titleStyle={styles.inlineBtn} type='clear' onPress={setPasswordReset} title="Forgot password?" />
+                <Text>{t('Password')}</Text>
+                <Button titleStyle={styles.inlineBtn} type='clear' onPress={setPasswordReset} title={t('Forgot password?')} />
             </View>
             <TextInput
                 secureTextEntry={true}
                 style={styles.modalInput}
                 onChangeText={(value) => setPassword(value)}
-                placeholder="password"
+                placeholder={t('password')}
                 value={password}
             />
         </View>
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <View style={styles.row}>
-            <Button buttonStyle={styles.btn} disabled={!email || !password} onPress={() => login({ email, password })} title="Login" />
-            <Button buttonStyle={styles.btn} type='clear' onPress={setSignUp} title="Sign Up" />
+            <Button buttonStyle={styles.btn} disabled={!email || !password} onPress={() => login({ email, password })} title={t('Login')} />
+            <Button buttonStyle={styles.btn} type='clear' onPress={setSignUp} title={t('Sign Up')} />
         </View>
     </View>
 }
@@ -75,6 +78,7 @@ const SignUp: FC<SignUpProps> = ({ error, signUp, back, isAuthInProgress }) => {
     const [email, setEmail] = useState<string>('')
     const [password, setPassword] = useState<string>('')
     const inProcess = useRef(false)
+    const { t } = useTranslation();
 
     const onSignUp = () => {
         inProcess.current = true
@@ -87,13 +91,13 @@ const SignUp: FC<SignUpProps> = ({ error, signUp, back, isAuthInProgress }) => {
     }, [isAuthInProgress])
 
     return <View style={styles.content}>
-        <Text style={styles.subTitle}>Sign Up</Text>
+        <Text style={styles.subTitle}>{t('Sign Up')}</Text>
         <View style={styles.formField}>
-            <Text style={styles.label}>Name</Text>
+            <Text style={styles.label}>{t('Name')}</Text>
             <TextInput
                 style={styles.modalInput}
                 onChangeText={(value) => setName(value)}
-                placeholder="name"
+                placeholder={t('name')}
                 value={name}
             />
         </View>
@@ -107,19 +111,19 @@ const SignUp: FC<SignUpProps> = ({ error, signUp, back, isAuthInProgress }) => {
             />
         </View>
         <View style={styles.formField}>
-            <Text style={styles.label}>Password</Text>
+            <Text style={styles.label}>{t('Password')}</Text>
             <TextInput
                 secureTextEntry={true}
                 style={styles.modalInput}
                 onChangeText={(value) => setPassword(value)}
-                placeholder="password"
+                placeholder={t('password')}
                 value={password}
             />
         </View>
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <View style={styles.row}>
-            <Button buttonStyle={styles.btn} disabled={!name || !email || !password} onPress={onSignUp} title="Sign Up" />
-            <Button buttonStyle={styles.btn} type='clear' onPress={back} title="Back" />
+            <Button buttonStyle={styles.btn} disabled={!name || !email || !password} onPress={onSignUp} title={t('Sign Up')} />
+            <Button buttonStyle={styles.btn} type='clear' onPress={back} title={t('Back')} />
         </View>
     </View>
 }
@@ -163,6 +167,7 @@ interface PasswordResetProps {
 const ForgetPassword: FC<PasswordResetProps> = ({ error, passwordReset, back, setAuthError, isAuthInProgress }) => {
     const [email, setEmail] = useState<string>('')
     const inProcess = useRef(false)
+    const { t } = useTranslation();
     const onBack = () => {
         setAuthError('')
         back()
@@ -177,9 +182,9 @@ const ForgetPassword: FC<PasswordResetProps> = ({ error, passwordReset, back, se
         }
     }, [isAuthInProgress])
     return <View style={styles.content}>
-        <Text style={styles.subTitle}>Reset your password</Text>
+        <Text style={styles.subTitle}>{t('Reset your password')}</Text>
         <View style={styles.formField}>
-            <Text style={styles.label}>Enter your user account's verified email address and we will send you a password reset link</Text>
+            <Text style={styles.label}>{t('Enter your user account\'s verified email address and we will send you a password reset link')}</Text>
             <TextInput
                 keyboardType="email-address"
                 style={styles.modalInput}
@@ -190,8 +195,8 @@ const ForgetPassword: FC<PasswordResetProps> = ({ error, passwordReset, back, se
         </View>
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <View style={styles.row}>
-            <Button buttonStyle={styles.btn} disabled={!email} onPress={onPasswordReset} title="Password Reset" />
-            <Button buttonStyle={styles.btn} type='clear' onPress={onBack} title="Back" />
+            <Button buttonStyle={styles.btn} disabled={!email} onPress={onPasswordReset} title={t('Password Reset')} />
+            <Button buttonStyle={styles.btn} type='clear' onPress={onBack} title={t('Back')} />
         </View>
     </View>
 }
