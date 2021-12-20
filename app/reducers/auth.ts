@@ -2,6 +2,7 @@ import { createSelector } from "reselect";
 import { AuthState, State, AuthParams } from "../store/types";
 import { ActionTypeEnum } from "../actions";
 import { createReducer } from "./reducer-utils";
+import { InAppPurchase, Product, Purchase, SubscriptionPurchase } from "react-native-iap";
 
 const initialState: AuthState = Object.freeze({
   authenticated: false,
@@ -9,6 +10,7 @@ const initialState: AuthState = Object.freeze({
   token: '',
   resetToken: '',
   showAdMob: true,
+  purchase: null,
 });
 
 export default createReducer<AuthState>(initialState, {
@@ -133,6 +135,10 @@ export default createReducer<AuthState>(initialState, {
     error,
     isRequestInProgress: false,
   }),
+  [ActionTypeEnum.SuccessPurchase]: (purchase: InAppPurchase | SubscriptionPurchase) => (state: AuthState) => ({
+    ...state,
+    purchase,
+  }),
 });
 export const selectAuthState = (state: State) => state.auth;
 export const selectIsAuthInProgress = createSelector(
@@ -162,4 +168,8 @@ export const selectResetToken = createSelector(
 export const selectShowAdMob = createSelector(
   selectAuthState,
   (state) => state.showAdMob
+);
+export const selectPurchase = createSelector(
+  selectAuthState,
+  (state) => state.purchase
 );

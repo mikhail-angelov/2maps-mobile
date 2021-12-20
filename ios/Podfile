@@ -14,6 +14,8 @@ target 'mapnnmobile' do
 
   pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
 
+  pod 'RNIap', :path => '../node_modules/react-native-iap'
+
   target 'mapnnmobileTests' do
     inherit! :complete
     # Pods for testing

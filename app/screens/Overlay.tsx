@@ -21,11 +21,13 @@ import { addPointAction, addTrackAction, selectTrackAction, startTrackingAction,
 import { checkAction, storeResetTokenAction } from "../actions/auth-actions";
 import { loadWikiAction } from "../actions/wiki-actions";
 import { selectWikiCollection } from "../reducers/wiki";
-import { selectIsAuthenticated, selectResetToken } from "../reducers/auth";
+import { selectPurchase, selectResetToken } from "../reducers/auth";
 import { setCenterAction, setOpacityAction, setZoomAction } from "../actions/map-actions";
 import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecondaryMap } from '../reducers/map'
 import ResetPassword from "../components/ResetPassword";
 import { useTranslation } from "react-i18next";
+import Account from "../components/Account";
+import InAppPurchase from "../components/InAppPurchase";
 
 interface MenuItem {
     title: string;
@@ -65,12 +67,12 @@ const mapStateToProps = (state: State) => ({
     opacity: selectOpacity(state),
     zoom: selectZoom(state),
     wikiCollection: selectWikiCollection(state),
-    isAuthenticated: selectIsAuthenticated(state),
     primaryMap: selectPrimaryMap(state),
     secondaryMap: selectSecondaryMap(state),
     tracking: selectIsTracking(state),
     editedMark: selectEditedMark(state),
     resetToken: selectResetToken(state),
+    purchase: selectPurchase(state),
 });
 const mapDispatchToProps = {
     removeMark: removeMarkAction,
@@ -98,23 +100,17 @@ const getClosestMark = (location: any, marks: Mark[]) => {
     }
     return `${closest.name} ${distance(closest.geometry.coordinates, location, { units: 'kilometers' }).toFixed(2)} km.`
 }
-const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, center, zoom, location, isAuthenticated, editMark, saveMark, removeMark, tracking, activeTrack, startTracking, stopTracking, addTrack, resetToken, storeResetToken, selectedTrack, selectTrack }) => {
+const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, center, zoom, location, editMark, saveMark, removeMark, tracking, activeTrack, startTracking, stopTracking, addTrack, resetToken, storeResetToken, selectedTrack, selectTrack }) => {
     const [showMenu, setShowMenu] = useState(false)
     const [showAuth, setShowAuth] = useState(false)
+    const [showAccount, setShowAccount] = useState(false)
     const [showSettings, setShowSettings] = useState(false)
     const [showMarkers, setShowMarkers] = useState(false)
     const [showTracks, setShowTracks] = useState(false)
     const { t } = useTranslation();
 
-    const menuItemsNotAuth: MenuItem[] = [
-        { title: 'Login', onPress: () => { setShowAuth(true); setShowMenu(false) } },
-        { title: 'Settings', onPress: () => { setShowSettings(true); setShowMenu(false) } },
-        { title: 'POI', onPress: () => { setShowMarkers(true); setShowMenu(false) } },
-        { title: 'Tracks', onPress: () => { setShowTracks(true); setShowMenu(false) } },
-        { title: 'Cancel', containerStyle: { backgroundColor: 'blue' }, titleStyle: { color: 'white' }, onPress: () => setShowMenu(false), }
-    ]
-    const menuItemsAuth: MenuItem[] = [
-        { title: 'Account', onPress: () => { setShowAuth(true); setShowMenu(false) } },
+    const menuItems: MenuItem[] = [
+        { title: 'Account', onPress: () => { setShowAccount(true); setShowMenu(false) } },
         { title: 'Settings', onPress: () => { setShowSettings(true); setShowMenu(false) } },
         { title: 'POI', onPress: () => { setShowMarkers(true); setShowMenu(false) } },
         { title: 'Tracks', onPress: () => { setShowTracks(true); setShowMenu(false) } },
@@ -129,7 +125,6 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
     // const currentLocationFeature = point(currentLocation)
     // currentLocationFeature.id = 'currentLocationFeature'
     const closest = getClosestMark(currentLocation, marks)
-    const menuItems = isAuthenticated ? menuItemsAuth : menuItemsNotAuth
     const onOpacityChange = (value: number) => {
         console.log('setOpacityAction c', value);
         setOpacity(value);
@@ -197,6 +192,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         {showAuth && <Auth close={() => setShowAuth(false)} />}
         {showSettings && <MapSettings close={() => setShowSettings(false)} />}
         {!!resetToken && <ResetPassword close={()=> storeResetToken('')} />}
+        {showAccount && <Account close={() => setShowAccount(false)} showAuth={() => {setShowAccount(false); setShowAuth(true)}} />}
     </>
     );
 
