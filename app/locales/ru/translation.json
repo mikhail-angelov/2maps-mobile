@@ -40,5 +40,12 @@
     "Track is saved": "Трек сохранен",
     "to": "в",
     "Oops": "Упс",
-    "do not manage to save it": "не получается сохранить по"
+    "do not manage to save it": "не получается сохранить по",
+    "No Products Available": "Нет доступных для покупки продуктов",
+    "Successfully restored purchases!": "Успешно восстановлено: {{count}} покупок!",
+    "Looks like you haven't purchased anything": "Выглядит как-будто вы не совершали покупок",
+    "Purchase": "Купить платную версию",
+    "Restore Purchase": "Восстановить покупки",
+    "Manage Account": "Управление аккаунтом",
+    "Premium version!": "Платная версия!"
 }

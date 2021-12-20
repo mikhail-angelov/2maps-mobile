@@ -13,7 +13,7 @@ const mapStateToProps = (state: State) => ({
     purchase: selectPurchase(state)
 });
 const mapDispatchToProps = {
-    restorePurchase: restorePurchaseAction,
+    restorePurchase: restorePurchaseAction
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 
@@ -31,8 +31,8 @@ const Account: FC<Props> = ({ close, showAuth, isAuthenticated, purchase, restor
             <View style={styles.row}>
                 <Button buttonStyle={styles.btn} title={isAuthenticated ? t('Account') : t('Login')} onPress={showAuth} />
             </View>
-            {purchase ? <Text style={styles.subTitle}>You have bought Premium!</Text> : <View style={styles.row}>
-                <Button buttonStyle={styles.btn} title={t('Purchase Premium')} onPress={requestPurchase} />
+            {purchase ? <Text style={styles.subTitle}>{t('Premium version!')}</Text> : <View style={styles.row}>
+                <Button buttonStyle={styles.btn} title={t('Purchase')} onPress={requestPurchase} />
             </View>}
             <View style={styles.row}>
                 <Button buttonStyle={styles.btn} title={t('Restore Purchase')} onPress={restorePurchase} />

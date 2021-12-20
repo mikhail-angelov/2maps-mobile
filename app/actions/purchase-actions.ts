@@ -18,7 +18,7 @@ export const requestPurchase = async () => {
   if (!itemSkus) return;
   const products = await RNIap.getProducts(itemSkus);
   if (_.isEmpty(products)) {
-    return Alert.alert(i18next.t('No one available product!'));
+    return Alert.alert(i18next.t('No Products Available'));
   }
   const sku = products?.[0].productId || '';
   try {
@@ -34,10 +34,10 @@ export const restorePurchaseAction = (): AppThunk => {
     console.info('Available purchases', purchases);
     if (purchases && purchases.length) {
       dispatch(completeSuccessPurchaseAction(purchases[0]));
-      Alert.alert(i18next.t('Purchases are restored successfully!'));
+      Alert.alert(i18next.t('Successfully restored purchases!', {count: purchases.length}));
     } else {
       dispatch(completeSuccessPurchaseAction(null));
-      Alert.alert(i18next.t("You don't have any purchases!"));
+      Alert.alert(i18next.t("Looks like you haven't purchased anything"));
     }
   };
 };

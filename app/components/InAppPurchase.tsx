@@ -30,7 +30,6 @@ const IAP: FC<Props> = ({ completeSuccessPurchase }) => {
             } else {
                 await RNIap.clearTransactionIOS();
             }
-
         } catch (err: any) {
             console.warn(err.code, err.message);
         }

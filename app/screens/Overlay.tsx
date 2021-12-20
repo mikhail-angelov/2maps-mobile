@@ -110,7 +110,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
     const { t } = useTranslation();
 
     const menuItems: MenuItem[] = [
-        { title: 'Account', onPress: () => { setShowAccount(true); setShowMenu(false) } },
+        { title: 'Manage Account', onPress: () => { setShowAccount(true); setShowMenu(false) } },
         { title: 'Settings', onPress: () => { setShowSettings(true); setShowMenu(false) } },
         { title: 'POI', onPress: () => { setShowMarkers(true); setShowMenu(false) } },
         { title: 'Tracks', onPress: () => { setShowTracks(true); setShowMenu(false) } },
