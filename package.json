@@ -8,7 +8,8 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "clean-purchase": "adb shell pm clear com.android.vending"
   },
   "dependencies": {
     "@mapbox/geo-viewport": "^0.4.1",
@@ -39,6 +40,7 @@
     "react-native-elements": "^3.4.2",
     "react-native-fs": "^2.18.0",
     "react-native-gesture-handler": "^1.10.3",
+    "react-native-iap": "^7.5.1",
     "react-native-locale-detector": "^1.0.1",
     "react-native-offline": "^5.8.0",
     "react-native-qrcode-scanner": "^1.5.4",

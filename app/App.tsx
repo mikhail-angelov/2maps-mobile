@@ -8,6 +8,7 @@ import { useKeepAwake } from 'expo-keep-awake';
 import createStore from './store'
 import Tracker from './Tracker'
 import Main from './screens/Main'
+import InAppPurchase from './components/InAppPurchase';
 
 const { store, persistor } = createStore()
 
@@ -25,6 +26,7 @@ const App = () => {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <ReduxNetworkProvider>
+          <InAppPurchase />
           <Tracker/>
           <Main />
         </ReduxNetworkProvider>

@@ -144,6 +144,8 @@ android {
         missingDimensionStrategy 'react-native-camera', 'general'
         versionCode 3
         versionName "1.0"
+        // react-native-iap: we only use the Google Play flavor
+        missingDimensionStrategy 'store', 'play'
     }
     splits {
         abi {
