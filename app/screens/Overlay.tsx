@@ -21,13 +21,12 @@ import { addPointAction, addTrackAction, selectTrackAction, startTrackingAction,
 import { checkAction, storeResetTokenAction } from "../actions/auth-actions";
 import { loadWikiAction } from "../actions/wiki-actions";
 import { selectWikiCollection } from "../reducers/wiki";
-import { selectPurchase, selectResetToken } from "../reducers/auth";
+import { selectResetToken } from "../reducers/auth";
 import { setCenterAction, setOpacityAction, setZoomAction } from "../actions/map-actions";
 import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecondaryMap } from '../reducers/map'
 import ResetPassword from "../components/ResetPassword";
 import { useTranslation } from "react-i18next";
 import Account from "../components/Account";
-import InAppPurchase from "../components/InAppPurchase";
 
 interface MenuItem {
     title: string;
@@ -72,7 +71,6 @@ const mapStateToProps = (state: State) => ({
     tracking: selectIsTracking(state),
     editedMark: selectEditedMark(state),
     resetToken: selectResetToken(state),
-    purchase: selectPurchase(state),
 });
 const mapDispatchToProps = {
     removeMark: removeMarkAction,

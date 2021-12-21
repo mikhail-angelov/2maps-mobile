@@ -1,25 +1,26 @@
-import {Alert, Platform} from 'react-native';
-import RNIap, {InAppPurchase, SubscriptionPurchase} from 'react-native-iap';
+import {Alert, EmitterSubscription, Platform} from 'react-native';
+import RNIap, {
+  InAppPurchase,
+  PurchaseError,
+  finishTransaction,
+  purchaseErrorListener,
+  purchaseUpdatedListener,
+} from 'react-native-iap';
 import {ActionTypeEnum, AppThunk} from '.';
 import i18next from 'i18next';
 import * as _ from 'lodash';
 import Config from 'react-native-config';
 
-const itemSkus = Platform.select({
-  ios: [],
-  android: [
-    Config.ANDROID_PURCHASE_APP_ID,
-    //'android.test.purchased',
-    //'android.test.canceled',
-    //'android.test.refunded',
-    //'android.test.item_unavailable',
-  ],
-});
+let purchaseUpdateSubscription: EmitterSubscription;
+let purchaseErrorSubscription: EmitterSubscription;
+
+const itemSkus =
+  Platform.select({
+    ios: [],
+    android: [Config.ANDROID_PURCHASE_APP_ID || ''],
+  }) || [];
 
 export const requestPurchase = async () => {
-  if (!itemSkus) {
-    return;
-  }
   const [purchases, products] = await Promise.all([
     RNIap.getAvailablePurchases(),
     RNIap.getProducts(itemSkus),
@@ -42,22 +43,85 @@ export const requestPurchase = async () => {
 
 export const restorePurchaseAction = (): AppThunk => {
   return async dispatch => {
-    const purchases = await RNIap.getAvailablePurchases();
-    console.info('Available purchases', purchases);
-    if (purchases && purchases.length) {
-      dispatch(completeSuccessPurchaseAction(purchases[0]));
+    try {
+      const purchases = await RNIap.getAvailablePurchases();
+      console.info('Available purchases', purchases);
+      if (purchases && purchases.length) {
+        dispatch(setPurchasesAction(purchases));
+        Alert.alert(
+          i18next.t('Successfully restored purchases!', {
+            count: purchases.length,
+          }),
+        );
+      } else {
+        dispatch(setPurchasesAction(undefined));
+        Alert.alert(i18next.t("Looks like you haven't purchased anything"));
+      }
+    } catch (e) {
+      console.log('error restoring purchase', e);
       Alert.alert(
-        i18next.t('Successfully restored purchases!', {
-          count: purchases.length,
-        }),
+        i18next.t('Something goes wrong :('),
+        i18next.t('Please try one more time'),
       );
-    } else {
-      dispatch(completeSuccessPurchaseAction(null));
-      Alert.alert(i18next.t("Looks like you haven't purchased anything"));
     }
   };
 };
 
-export const completeSuccessPurchaseAction = (
-  purchase: InAppPurchase | SubscriptionPurchase | null,
-) => ({type: ActionTypeEnum.SuccessPurchase, payload: purchase});
+export const addPurchaseAction = (purchase: InAppPurchase) => ({
+  type: ActionTypeEnum.AddPurchase,
+  payload: purchase,
+});
+
+export const setPurchasesAction = (purchases?: InAppPurchase[]) => ({
+  type: ActionTypeEnum.SetPurchases,
+  payload: purchases,
+});
+
+export const initGoogleStoreConnectionAction =
+  (): AppThunk => async dispatch => {
+    try {
+      await RNIap.initConnection();
+      if (Platform.OS === 'android') {
+        await RNIap.flushFailedPurchasesCachedAsPendingAndroid();
+      } else {
+        await RNIap.clearTransactionIOS();
+      }
+    } catch (err: any) {
+      console.warn(err.code, err.message);
+    }
+    purchaseUpdateSubscription = purchaseUpdatedListener(
+      async (purchase: any) => {
+        console.info('purchase', purchase);
+        const receipt = purchase.transactionReceipt
+          ? purchase.transactionReceipt
+          : purchase.originalJson;
+
+        if (receipt) {
+          try {
+            const ackResult = await finishTransaction(purchase);
+            console.info('ackResult', ackResult);
+            dispatch(addPurchaseAction(purchase));
+          } catch (ackErr) {
+            console.warn('ackErr', ackErr);
+          }
+        }
+      },
+    );
+
+    purchaseErrorSubscription = purchaseErrorListener(
+      (error: PurchaseError) => {
+        console.log('purchaseErrorListener', error);
+        Alert.alert('Purchase error', error?.message || '');
+      },
+    );
+  };
+
+export const closeGoogleStoreConnection = async () => {
+  if (purchaseUpdateSubscription) {
+    purchaseUpdateSubscription.remove();
+  }
+  if (purchaseErrorSubscription) {
+    purchaseErrorSubscription.remove();
+  }
+  RNIap.endConnection();
+};

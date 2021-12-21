@@ -18,5 +18,5 @@ export interface AuthState {
   user?: any;
   resetToken: string;
   showAdMob: boolean;
-  purchase: InAppPurchase | SubscriptionPurchase | null;
+  purchases?: InAppPurchase[];
 }
