@@ -8,7 +8,8 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "clean-purchase": "adb shell pm clear com.android.vending"
   },
   "dependencies": {
     "@mapbox/geo-viewport": "^0.4.1",

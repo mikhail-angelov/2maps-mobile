@@ -13,7 +13,7 @@ const mapStateToProps = (state: State) => ({
     purchase: selectPurchase(state)
 });
 const mapDispatchToProps = {
-    restorePurchase: restorePurchaseAction
+    restorePurchase: restorePurchaseAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 
