@@ -3,6 +3,7 @@ import { AuthState, State, AuthParams } from "../store/types";
 import { ActionTypeEnum } from "../actions";
 import { createReducer } from "./reducer-utils";
 import { InAppPurchase } from "react-native-iap";
+import _ from "lodash";
 
 const initialState: AuthState = Object.freeze({
   authenticated: false,
@@ -30,7 +31,6 @@ export default createReducer<AuthState>(initialState, {
     user,
     error: '',
     isRequestInProgress: false,
-    showAdMob: false,
   }),
   [ActionTypeEnum.LoginFailure]: (error:string) => (state: AuthState) => ({
     ...state,
@@ -69,7 +69,6 @@ export default createReducer<AuthState>(initialState, {
     user: undefined,
     isRequestInProgress: false,
     error: '',
-    showAdMob: true,
   }),
   [ActionTypeEnum.LogoutFailure]: (error:string) => (state: AuthState) => ({
     ...state,
@@ -138,10 +137,12 @@ export default createReducer<AuthState>(initialState, {
   [ActionTypeEnum.AddPurchase]: (purchase: InAppPurchase) => (state: AuthState) => ({
     ...state,
     purchases: state.purchases ? [...state.purchases, purchase] : [purchase],
+    showAdMob: false,
   }),
   [ActionTypeEnum.SetPurchases]: (purchases?: InAppPurchase[]) => (state: AuthState) => ({
     ...state,
     purchases,
+    showAdMob: _.isEmpty(purchases),
   }),
 });
 export const selectAuthState = (state: State) => state.auth;
