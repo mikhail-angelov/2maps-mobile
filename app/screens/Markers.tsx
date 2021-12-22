@@ -11,6 +11,7 @@ import { selectIsAuthenticated } from '../reducers/auth'
 import { selectMarks } from '../reducers/marks'
 import { importPoisAction, exportPoisAction, removeAllPoisAction, syncMarksAction, removeMarkCompletelyAction, editMarkAction } from '../actions/marks-actions'
 import { useTranslation } from "react-i18next";
+import Advertisement from "../components/AdMob";
 
 interface OwnProps {
     center: Position;
@@ -52,7 +53,7 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
         );
     }
     const onRemoveMark = (id?: string) => {
-        if(!id) return
+        if (!id) return
         Alert.alert(
             t('Warning!'),
             t('Are you sure to remove the marker?'),
@@ -72,19 +73,19 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
     const renderItem = ({ item }: { item: Item }) => (
         <ListItem.Swipeable
             leftWidth={120}
-            rightStyle={{width: 120}}
+            rightStyle={{ width: 120 }}
             rightContent={
                 <View style={{ flexDirection: "row" }}>
                     <Button
                         icon={{ name: 'edit', color: 'white' }}
                         buttonStyle={{ minHeight: '100%', backgroundColor: 'blue', borderRadius: 0 }}
-                        containerStyle={{ flex: 1, borderRadius: 0  }}
+                        containerStyle={{ flex: 1, borderRadius: 0 }}
                         onPress={() => editMark(item.mark)}
                     />
                     <Button
                         icon={{ name: 'delete', color: 'white' }}
                         buttonStyle={{ minHeight: '100%', backgroundColor: 'red', borderRadius: 0 }}
-                        containerStyle={{ flex: 1, borderRadius: 0  }}
+                        containerStyle={{ flex: 1, borderRadius: 0 }}
                         onPress={() => onRemoveMark(item.mark.id)}
                     />
                 </View>
@@ -102,21 +103,24 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
     )
     const memoizedValue = useMemo(() => renderItem, [markers]);
     return <Modal style={styles.container} visible onRequestClose={close}>
-        <View style={styles.buttons}>
-            <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-download" onPress={exportPois} />
-            <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-upload" onPress={importPois} />
-            {isAuthenticated && <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="import-export" onPress={syncMarks} />}
-            <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="delete" onPress={onRemoveAll} />
-            <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="close" onPress={close} />
+        <View style={styles.wrapper}>
+            <View style={styles.buttons}>
+                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-download" onPress={exportPois} />
+                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-upload" onPress={importPois} />
+                {isAuthenticated && <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="import-export" onPress={syncMarks} />}
+                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="delete" onPress={onRemoveAll} />
+                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="close" onPress={close} />
+            </View>
+            <View style={styles.scroll}>
+                <FlatList
+                    keyExtractor={keyExtractor}
+                    data={list}
+                    renderItem={memoizedValue}
+                    contentContainerStyle={{ paddingBottom: 30 }}
+                />
+            </View>
         </View>
-        <View style={styles.scroll}>
-            <FlatList
-                keyExtractor={keyExtractor}
-                data={list}
-                renderItem={memoizedValue}
-                contentContainerStyle={{ paddingBottom: 30 }}
-            />
-        </View>
+        <Advertisement />
     </Modal>
 }
 
@@ -129,8 +133,11 @@ const styles = StyleSheet.create({
         marginTop: 20,
         width: '100%',
     },
+    wrapper: {
+        flex: 1,
+    },
     scroll: {
-        height: '90%',
+        flex: 1,
     },
     buttons: {
         flexDirection: 'row',

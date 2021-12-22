@@ -11,6 +11,7 @@ import { selectIsTracking, selectTracks } from '../reducers/tracker'
 import { selectTrackAction, startTrackingAction, stopTrackingAction, exportTrackAction, removeTrackAction, importTrackAction } from "../actions/tracker-actions";
 import { SvgXml } from "react-native-svg";
 import { useTranslation } from "react-i18next";
+import Advertisement from "../components/AdMob";
 
 export enum MENU {
     Cancel,
@@ -85,19 +86,19 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
     const renderItem = ({ item }: { item: Item }) => (
         <ListItem.Swipeable
             leftWidth={180}
-            rightStyle={{width: 180}}
+            rightStyle={{ width: 180 }}
             rightContent={
                 <View style={{ flexDirection: "row" }}>
                     <Button
                         icon={{ name: 'file-download', color: 'white' }}
                         buttonStyle={{ minHeight: '100%', backgroundColor: 'blue', borderRadius: 0 }}
-                        containerStyle={{ flex: 1, borderRadius: 0  }}
+                        containerStyle={{ flex: 1, borderRadius: 0 }}
                         onPress={() => exportTrack(item.id)}
                     />
                     <Button
                         icon={{ name: 'delete', color: 'white' }}
                         buttonStyle={{ minHeight: '100%', backgroundColor: 'red', borderRadius: 0 }}
-                        containerStyle={{ flex: 1, borderRadius: 0  }}
+                        containerStyle={{ flex: 1, borderRadius: 0 }}
                         onPress={() => onRemoveTrack(item.id)}
                     />
                     <Button
@@ -121,20 +122,23 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
     )
 
     return <Modal style={styles.container} visible onRequestClose={close}>
-        <View style={styles.buttons}>
-            <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-upload" onPress={importTrack} />
-            <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name={isTracking ? 'gps-not-fixed' : 'gps-fixed'} onPress={toggleTracking} />
-            <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="share" onPress={() => selectTrack(undefined)} />
-            <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="close" onPress={close} />
+        <View style={styles.wrapper}>
+            <View style={styles.buttons}>
+                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-upload" onPress={importTrack} />
+                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name={isTracking ? 'gps-not-fixed' : 'gps-fixed'} onPress={toggleTracking} />
+                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="share" onPress={() => selectTrack(undefined)} />
+                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="close" onPress={close} />
+            </View>
+            <View style={styles.scroll}>
+                <FlatList
+                    keyExtractor={keyExtractor}
+                    data={list}
+                    renderItem={renderItem}
+                    contentContainerStyle={{ paddingBottom: 30 }}
+                />
+            </View>
         </View>
-        <View style={styles.scroll}>
-            <FlatList
-                keyExtractor={keyExtractor}
-                data={list}
-                renderItem={renderItem}
-                contentContainerStyle={{ paddingBottom: 30 }}
-            />
-        </View>
+        <Advertisement />
     </Modal>
 }
 
@@ -148,8 +152,11 @@ const styles = StyleSheet.create({
         marginTop: 20,
         width: '100%',
     },
+    wrapper: {
+        flex: 1,
+    },
     scroll: {
-        height: '90%',
+        flex: 1,
         backgroundColor: '#fff',
     },
     buttons: {
