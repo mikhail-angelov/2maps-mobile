@@ -78,13 +78,13 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
                 <View style={{ flexDirection: "row" }}>
                     <Button
                         icon={{ name: 'edit', color: 'white' }}
-                        buttonStyle={{ minHeight: '100%', backgroundColor: 'blue', borderRadius: 0 }}
+                        buttonStyle={{ minHeight: '100%', backgroundColor: '#6666FF', borderRadius: 0 }}
                         containerStyle={{ flex: 1, borderRadius: 0 }}
                         onPress={() => editMark(item.mark)}
                     />
                     <Button
                         icon={{ name: 'delete', color: 'white' }}
-                        buttonStyle={{ minHeight: '100%', backgroundColor: 'red', borderRadius: 0 }}
+                        buttonStyle={{ minHeight: '100%', backgroundColor: '#CC6666', borderRadius: 0 }}
                         containerStyle={{ flex: 1, borderRadius: 0 }}
                         onPress={() => onRemoveMark(item.mark.id)}
                     />

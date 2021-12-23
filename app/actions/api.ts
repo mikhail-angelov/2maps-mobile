@@ -2,7 +2,7 @@ import axios from 'axios';
 import FormData from "form-data";
 import { Buffer } from "buffer";
 
-export const HOST = 'https://mapnn.bconf.com'
+export const HOST = 'https://2map.xyz'
 export const HOST_LOCAL = 'http://localhost:5555'
 // export const HOST = 'http://192.168.31.251:3000'
 

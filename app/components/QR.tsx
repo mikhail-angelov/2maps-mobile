@@ -28,7 +28,7 @@ const QR: FC<Props> = ({ select, close }) => {
         cameraType={front ? "front" : 'back'}
         topContent={
             <Text style={styles.centerText}>
-                Scan map QR code form https://mapnn.bconf.com
+                Scan map QR code form https://2map.xyz
             </Text>
         }
         bottomContent={
