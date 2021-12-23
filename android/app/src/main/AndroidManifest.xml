@@ -44,7 +44,7 @@
             <category android:name="android.intent.category.DEFAULT" />
             <category android:name="android.intent.category.BROWSABLE" />
             <data android:scheme="https"
-                  android:host="mapnn.bconf.com" />
+                  android:host="2map.xyz" />
         </intent-filter>
       </activity>
     </application>

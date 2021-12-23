@@ -18,7 +18,7 @@ export const createKml = (track: Track): {name: string; data: string} => {
 <kml xmlns="http://www.opengis.net/kml/2.2">\
 <Document id="${id}">\
 <name>${name}.kml</name>\
-<description>mapnn.bconf.com</description>\
+<description>2map.xyz</description>\
 <open>1</open>\
 <Placemark>\
 <name>${name}.kml</name>\
