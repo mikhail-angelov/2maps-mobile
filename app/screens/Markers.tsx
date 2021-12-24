@@ -1,7 +1,8 @@
 import React, { FC, useMemo } from "react";
-import { View, FlatList, StyleSheet, Alert, Modal, TouchableOpacity } from "react-native";
+import { View, StyleSheet, Alert, Modal, TouchableOpacity } from "react-native";
 import { connect, ConnectedProps } from "react-redux";
 import { Button, ListItem } from 'react-native-elements';
+import { SwipeListView } from 'react-native-swipe-list-view';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Position } from '@turf/helpers';
 import distance from '@turf/distance';
@@ -65,43 +66,45 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
     }
     const list: Item[] = orderBy(markers, mark => distance(mark.geometry.coordinates, center, { units: 'kilometers' }))
         .map(mark => ({
+            key: mark.id,
             title: mark.name,
             subtitle: `${distance(mark.geometry.coordinates, center, { units: 'kilometers' }).toFixed(2)} km, ${mark.description || ''}`,
             mark,
         }))
-    const keyExtractor = (item: Item, index: number) => index.toString()
+    
     const renderItem = ({ item }: { item: Item }) => (
-        <ListItem.Swipeable
-            leftWidth={120}
-            rightStyle={{ width: 120 }}
-            rightContent={
-                <View style={{ flexDirection: "row" }}>
-                    <Button
-                        icon={{ name: 'edit', color: 'white' }}
-                        buttonStyle={{ minHeight: '100%', backgroundColor: '#6666FF', borderRadius: 0 }}
-                        containerStyle={{ flex: 1, borderRadius: 0 }}
-                        onPress={() => editMark(item.mark)}
-                    />
-                    <Button
-                        icon={{ name: 'delete', color: 'white' }}
-                        buttonStyle={{ minHeight: '100%', backgroundColor: '#CC6666', borderRadius: 0 }}
-                        containerStyle={{ flex: 1, borderRadius: 0 }}
-                        onPress={() => onRemoveMark(item.mark.id)}
-                    />
-                </View>
-            }
-            bottomDivider
+        <TouchableOpacity
+            activeOpacity={1}
+            style={styles.row}
+            onPress={() => select(item.mark)}
         >
-            <TouchableOpacity style={{ flexDirection: "row" }} onPress={() => select(item.mark)}>
-                <Icon name="location-pin" />
-                <ListItem.Content>
-                    <ListItem.Title>{item.title}</ListItem.Title>
-                    <ListItem.Subtitle>{item.subtitle}</ListItem.Subtitle>
-                </ListItem.Content>
-            </TouchableOpacity>
-        </ListItem.Swipeable>
+            <View style={{ minHeight: '100%', justifyContent: 'center', paddingRight: 10 }}>
+                <Icon size={30} name="location-pin" />
+            </View>
+            <ListItem.Content>
+                <ListItem.Title>{item.title}</ListItem.Title>
+                <ListItem.Subtitle>{item.subtitle}</ListItem.Subtitle>
+            </ListItem.Content>
+        </TouchableOpacity>
     )
+    const renderHiddenItem = ({ item }: { item: Item }) => (
+        <View style={{ flexDirection: "row", marginLeft: 'auto', maxWidth: 150 }}>
+            <Button
+                icon={{ name: 'edit', color: 'white' }}
+                buttonStyle={{ minHeight: '100%', backgroundColor: '#6666FF', borderRadius: 0 }}
+                containerStyle={{ flex: 1, borderRadius: 0 }}
+                onPress={() => editMark(item.mark)}
+            />
+            <Button
+                icon={{ name: 'delete', color: 'white' }}
+                buttonStyle={{ minHeight: '100%', backgroundColor: '#CC6666', borderRadius: 0 }}
+                containerStyle={{ flex: 1, borderRadius: 0 }}
+                onPress={() => onRemoveMark(item.mark.id)}
+            />
+        </View>
+    );
     const memoizedValue = useMemo(() => renderItem, [markers]);
+    const memoizedHiddenValue = useMemo(() => renderHiddenItem, [markers]);
     return <Modal style={styles.container} visible onRequestClose={close}>
         <View style={styles.wrapper}>
             <View style={styles.buttons}>
@@ -112,11 +115,15 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
                 <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="close" onPress={close} />
             </View>
             <View style={styles.scroll}>
-                <FlatList
-                    keyExtractor={keyExtractor}
+                <SwipeListView
                     data={list}
                     renderItem={memoizedValue}
-                    contentContainerStyle={{ paddingBottom: 30 }}
+                    renderHiddenItem={memoizedHiddenValue}
+                    leftOpenValue={0}
+                    rightOpenValue={-150}
+                    previewRowKey={list[0] ? list[0].mark.id : undefined}
+                    previewOpenValue={-40}
+                    previewOpenDelay={1000}
                 />
             </View>
         </View>
@@ -139,8 +146,18 @@ const styles = StyleSheet.create({
     scroll: {
         flex: 1,
     },
+    row: {
+        flexDirection: "row",
+        textAlign: 'center',
+        backgroundColor: "white",
+        borderBottomColor: '#DDDDDD',
+        borderBottomWidth: 1,
+        height: 70,
+        paddingHorizontal: 20,
+    },
     buttons: {
         flexDirection: 'row',
+        textAlign: 'center',
         justifyContent: "flex-end",
         padding: 10,
         backgroundColor: '#303846',
