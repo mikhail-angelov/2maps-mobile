@@ -35,7 +35,7 @@ const MarksLocation: FC<Props> = ({ marks, onMarkPress }) => {
         hitbox={{ width: 20, height: 20 }}
         onPress={onMarkPress}
         shape={marksCollection}>
-        <MapboxGL.CircleLayer id='marks' style={MarkStyle} minZoomLevel={1} />
+        <MapboxGL.CircleLayer id='marks' style={MarkStyle} minZoomLevel={1} layerIndex={200}/>
     </MapboxGL.ShapeSource>);
 }
 
