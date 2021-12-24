@@ -199,7 +199,6 @@ class Map extends Component<Props> {
                     id="stamenWatercolorLayer"
                     sourceID="stamenWatercolorSource"
                     style={{ rasterOpacity: opacity }}
-                    layerIndex={10}
                 />
             </MapboxGL.RasterSource>}
             <Wikimapia />
