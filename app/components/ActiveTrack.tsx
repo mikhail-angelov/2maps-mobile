@@ -36,10 +36,10 @@ const ActiveTrack: FC<Props> = ({ activeTrack, selectedTrack }) => {
     const selectedRoute = selectedTrack && selectedTrack.track.length > 1 ? lineString(selectedTrack.track) : null
 
     return (<>{activeRoute && <MapboxGL.ShapeSource id='active-track' shape={activeRoute}>
-        <MapboxGL.LineLayer id='activeLineLayer' style={ActiveTrackStyle} minZoomLevel={1} />
+        <MapboxGL.LineLayer id='activeLineLayer' style={ActiveTrackStyle} minZoomLevel={1} layerIndex={10000}/>
     </MapboxGL.ShapeSource>}
         {selectedRoute && <MapboxGL.ShapeSource id='selected-track' shape={selectedRoute}>
-            <MapboxGL.LineLayer id='selectedLineLayer' style={SelectedTrackStyle} minZoomLevel={1} />
+            <MapboxGL.LineLayer id='selectedLineLayer' style={SelectedTrackStyle} minZoomLevel={1} layerIndex={10001}/>
         </MapboxGL.ShapeSource>}
     </>);
 }
