@@ -1,7 +1,8 @@
 import React, { FC } from "react";
-import { View, FlatList, StyleSheet, Modal, Alert, TouchableOpacity } from "react-native";
+import { View, StyleSheet, Modal, Alert, TouchableOpacity } from "react-native";
 import { connect, ConnectedProps } from "react-redux";
 import { Button, ListItem } from 'react-native-elements';
+import { SwipeListView } from 'react-native-swipe-list-view';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import distance from '@turf/distance';
 import { orderBy } from 'lodash'
@@ -76,50 +77,50 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
         const subtitle = `T: ${dayjs(end - start).format('HH:mm')}, L: ${l} km.`
         return {
             id,
+            key: id,
             title: name || dayjs(start).format('YY.MM.DD HH:mm'),
             subtitle,
             thumbnail: thumbnail || '',
         }
     })
 
-    const keyExtractor = (item: Item) => item.id
     const renderItem = ({ item }: { item: Item }) => (
-        <ListItem.Swipeable
-            leftWidth={180}
-            rightStyle={{ width: 180 }}
-            rightContent={
-                <View style={{ flexDirection: "row" }}>
-                    <Button
-                        icon={{ name: 'file-download', color: 'white' }}
-                        buttonStyle={{ minHeight: '100%', backgroundColor: '#6666FF', borderRadius: 0 }}
-                        containerStyle={{ flex: 1, borderRadius: 0 }}
-                        onPress={() => exportTrack(item.id)}
-                    />
-                    <Button
-                        icon={{ name: 'delete', color: 'white' }}
-                        buttonStyle={{ minHeight: '100%', backgroundColor: '#CC6666', borderRadius: 0 }}
-                        containerStyle={{ flex: 1, borderRadius: 0 }}
-                        onPress={() => onRemoveTrack(item.id)}
-                    />
-                    <Button
-                        icon={{ name: 'visibility', color: 'white' }}
-                        buttonStyle={{ minHeight: '100%', backgroundColor: '#669966', borderRadius: 0 }}
-                        containerStyle={{ flex: 1, borderRadius: 0 }}
-                        onPress={() => onSelectTrack(item.id)}
-                    />
-                </View>
-            }
-            bottomDivider
+        <TouchableOpacity
+            activeOpacity={1}
+            style={styles.row}
+            onPress={() => onSelectTrack(item.id)}
         >
-            <TouchableOpacity style={{ flexDirection: "row" }} onPress={() => onSelectTrack(item.id)}>
+            <View style={{ minHeight: '100%', justifyContent: 'center', paddingRight: 10 }}>
                 {!!item.thumbnail ? <SvgXml xml={item.thumbnail} /> : <Icon name='map' size={50} />}
-                <ListItem.Content>
-                    <ListItem.Title>{item.title}</ListItem.Title>
-                    <ListItem.Subtitle>{item.subtitle}</ListItem.Subtitle>
-                </ListItem.Content>
-            </TouchableOpacity>
-        </ListItem.Swipeable>
+            </View>
+            <ListItem.Content>
+                <ListItem.Title>{item.title}</ListItem.Title>
+                <ListItem.Subtitle>{item.subtitle}</ListItem.Subtitle>
+            </ListItem.Content>
+        </TouchableOpacity>
     )
+    const renderHiddenItem = ({ item }: { item: Item }) => (
+        <View style={{ flexDirection: "row", marginLeft: 'auto', maxWidth: 200 }}>
+            <Button
+                icon={{ name: 'file-download', color: 'white' }}
+                buttonStyle={{ minHeight: '100%', backgroundColor: '#6666FF', borderRadius: 0 }}
+                containerStyle={{ flex: 1, borderRadius: 0 }}
+                onPress={() => exportTrack(item.id)}
+            />
+            <Button
+                icon={{ name: 'delete', color: 'white' }}
+                buttonStyle={{ minHeight: '100%', backgroundColor: '#CC6666', borderRadius: 0 }}
+                containerStyle={{ flex: 1, borderRadius: 0 }}
+                onPress={() => onRemoveTrack(item.id)}
+            />
+            <Button
+                icon={{ name: 'visibility', color: 'white' }}
+                buttonStyle={{ minHeight: '100%', backgroundColor: '#669966', borderRadius: 0 }}
+                containerStyle={{ flex: 1, borderRadius: 0 }}
+                onPress={() => onSelectTrack(item.id)}
+            />
+        </View>
+    );
 
     return <Modal style={styles.container} visible onRequestClose={close}>
         <View style={styles.wrapper}>
@@ -130,11 +131,15 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
                 <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="close" onPress={close} />
             </View>
             <View style={styles.scroll}>
-                <FlatList
-                    keyExtractor={keyExtractor}
+                <SwipeListView
                     data={list}
                     renderItem={renderItem}
-                    contentContainerStyle={{ paddingBottom: 30 }}
+                    renderHiddenItem={renderHiddenItem}
+                    leftOpenValue={0}
+                    rightOpenValue={-200}
+                    previewRowKey={list[0] ? list[0].id : undefined}
+                    previewOpenValue={-40}
+                    previewOpenDelay={1000}
                 />
             </View>
         </View>
@@ -159,9 +164,19 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
     },
+    row: {
+        flexDirection: "row",
+        textAlign: 'center',
+        backgroundColor: "white",
+        borderBottomColor: '#DDDDDD',
+        borderBottomWidth: 1,
+        height: 70,
+        paddingHorizontal: 20,
+    },
     buttons: {
         flexDirection: 'row',
         justifyContent: "flex-end",
+        textAlign: 'center',
         padding: 10,
         backgroundColor: '#303846',
     },
