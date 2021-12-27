@@ -4,6 +4,7 @@ import { State } from '../store/types'
 import MapboxGL, { LineLayerStyle } from "@react-native-mapbox-gl/maps";
 import { lineString } from '@turf/helpers';
 import { selectActiveTrack, selectSelectedTrack } from '../reducers/tracker'
+import { purple } from "../constants/color";
 
 const ActiveTrackStyle: LineLayerStyle = {
     lineCap: 'round',
@@ -21,7 +22,7 @@ const SelectedTrackStyle: LineLayerStyle = {
     lineCap: 'round',
     lineWidth: 6,
     lineOpacity: 0.84,
-    lineColor: 'blue',
+    lineColor: purple,
 }
 
 const mapStateToProps = (state: State) => ({
