@@ -6,6 +6,11 @@ export const HOST = 'https://2map.xyz'
 export const HOST_LOCAL = 'http://localhost:5555'
 // export const HOST = 'http://192.168.31.251:3000'
 
+export const TERMS_URL = `${HOST}/terms`
+export const HELP_URL = `${HOST}/help`
+
+export const CONTACT_EMAIL = "mikhail.angelov@gmail.com"
+
 export const get = ({ url, token }: {
   url: string; token?: string
 }) => {
