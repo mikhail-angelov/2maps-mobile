@@ -3,6 +3,7 @@ import { connect, ConnectedProps } from "react-redux";
 import { State } from '../store/types'
 import { View, Text, StyleSheet } from "react-native";
 import { Button } from 'react-native-elements';
+import { purple } from "../constants/color";
 import { selectIsAuthenticated, selectPurchases } from '../reducers/auth'
 import { useTranslation } from "react-i18next";
 import MapModal from "./Modal";
@@ -61,5 +62,6 @@ const styles = StyleSheet.create({
     },
     btn: {
         paddingHorizontal: 20,
+        backgroundColor: purple,
     },
 });

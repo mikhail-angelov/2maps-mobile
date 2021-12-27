@@ -3,6 +3,7 @@ import { connect, ConnectedProps } from "react-redux";
 import { State } from '../store/types'
 import { View, TextInput, Text, StyleSheet } from "react-native";
 import { Button } from 'react-native-elements';
+import { purple } from "../constants/color";
 import { selectError, selectIsAuthInProgress, selectResetToken } from "../reducers/auth";
 import { changePasswordAction, setAuthErrorAction } from "../actions/auth-actions";
 import MapModal from "./Modal";
@@ -78,6 +79,7 @@ const styles = StyleSheet.create({
     },
     btn: {
         paddingHorizontal: 20,
+        backgroundColor: purple,
     },
     formField: {
         flexDirection: 'column',
@@ -89,6 +91,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
     },
     modalInput: {
+        borderRadius: 5,
         borderWidth: 1,
         borderColor: 'grey',
         marginBottom: 10,

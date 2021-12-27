@@ -13,6 +13,7 @@ import { selectIsAuthenticated } from '../reducers/auth'
 import { ItemValue } from "@react-native-community/picker/typings/Picker";
 import Spinner from "../components/Spinner";
 import { useTranslation } from "react-i18next";
+import { purple } from "../constants/color";
 
 interface MapItem {
     id: string;
@@ -69,7 +70,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
     const renderItem = ({ item }: { item: MapItem }) => (
         <View style={styles.row}>
             <Text>{item.name}</Text>
-            {item.loaded ? <Button type='clear' onPress={() => removeLocalMap(item.id)} title="remove" /> : <Button type='clear' onPress={() => downloadMap({ id: item.id, name: item.file })} title="download" />}
+            {item.loaded ? <Button titleStyle={{color: purple}} type='clear' onPress={() => removeLocalMap(item.id)} title="remove" /> : <Button titleStyle={{color: purple}} type='clear' onPress={() => downloadMap({ id: item.id, name: item.file })} title="download" />}
         </View>
     );
 

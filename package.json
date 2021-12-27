@@ -84,6 +84,13 @@
     "react-test-renderer": "17.0.1",
     "typescript": "^3.8.3"
   },
+  "react-native-unimodules": {
+    "android": {
+      "exclude": [
+        "expo-face-detector"
+      ]
+    }
+  },
   "resolutions": {
     "@types/react": "^17"
   },
