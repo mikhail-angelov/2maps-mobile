@@ -9,8 +9,6 @@ apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 
 import com.android.build.OutputFile
 
-buildConfigField("String", "ADMOB_APP_ID", "\"${System.env.ADMOB_APP_ID}\"")
-
 /**
  * The react.gradle file registers a task for each build variant (e.g. bundleDebugJsAndAssets
  * and bundleReleaseJsAndAssets).
@@ -146,6 +144,7 @@ android {
         missingDimensionStrategy 'react-native-camera', 'general'
         versionCode 3
         versionName "1.0"
+        buildConfigField "String", "ADMOB_APP_ID", '"${System.env.ADMOB_APP_ID}"'
         // react-native-iap: we only use the Google Play flavor
         missingDimensionStrategy 'store', 'play'
     }
