@@ -3,65 +3,25 @@ import { View, StyleSheet, Linking } from "react-native";
 import { Button } from 'react-native-elements';
 import { useTranslation } from "react-i18next";
 import MapModal from "./Modal";
-import Pdf from 'react-native-pdf';
-
-const CONTACT_EMAIL = "mikhail.angelov@gmail.com"
-const EULA_URL = "http://samples.leanpub.com/thereactnativebook-sample.pdf"
-const HELP_URL = "http://samples.leanpub.com/thereactnativebook-sample.pdf"
-
-enum UI {
-    eula,
-    help,
-    default
-}
-
-interface PdfProps {
-    sourceUri: string
-}
-
-const PdfComponent: FC<PdfProps> = ({ sourceUri }) => {
-    return <View style={styles.container}><Pdf source={{ uri: sourceUri, cache: true }}
-        onLoadComplete={(numberOfPages, filePath) => {
-            console.log(`Number of pages: ${numberOfPages}`);
-        }}
-        onPageChanged={(page, numberOfPages) => {
-            console.log(`Current page: ${page}`);
-        }}
-        onError={(error) => {
-            console.log(error);
-        }}
-        onPressLink={(uri) => {
-            console.log(`Link pressed: ${uri}`);
-        }}
-        style={styles.pdf}
-    /></View>
-}
+import { CONTACT_EMAIL, HELP_URL, TERMS_URL } from "../actions/api";
 
 interface AboutProps {
     close: () => void;
 }
 
 const About: FC<AboutProps> = ({ close }) => {
-    const [ui, setUi] = useState<UI>(UI.default)
-    const { t } = useTranslation()
-    let content = <View style={styles.content}>
-        <View style={styles.row}>
-            <Button buttonStyle={styles.btn} title={t('Contact')} onPress={() => Linking.openURL(`mailto:${CONTACT_EMAIL}`)} />
-        </View>
-        <View style={styles.row}>
-            <Button buttonStyle={styles.btn} title={t('EULA')} onPress={() => setUi(UI.eula)} />
-        </View>
-        <View style={styles.row}>
-            <Button buttonStyle={styles.btn} title={t('Help')} onPress={() => setUi(UI.help)} />
-        </View>
-    </View>
-    if (ui === UI.eula) {
-        content = <PdfComponent sourceUri={EULA_URL} />
-    } else if (ui === UI.help) {
-        content = <PdfComponent sourceUri={HELP_URL} />
-    }
+    const { t, i18n } = useTranslation()
     return <MapModal onRequestClose={close}>
-        {content}
+        <View style={styles.content}>
+            <View style={styles.row}>
+                <Button buttonStyle={styles.btn} title={t('Contact Developer')} onPress={() => Linking.openURL(`mailto:${CONTACT_EMAIL}`)} />
+            </View>
+            <View style={styles.row}>
+                <Button buttonStyle={styles.btn} title={t('Terms of the Service')} onPress={() => Linking.openURL(`${TERMS_URL}?lang=${i18n.language}`)} />
+            </View>
+            <View style={styles.lastRow}>
+                <Button buttonStyle={styles.btn} title={t('Help')} onPress={() => Linking.openURL(`${HELP_URL}?lang=${i18n.language}`)} />
+            </View></View>
     </MapModal>
 }
 
@@ -73,23 +33,14 @@ const styles = StyleSheet.create({
         marginTop: 40,
     },
     row: {
-        flexDirection: 'row',
         width: '100%',
-        marginBottom: 10
+        marginBottom: 15
+    },
+    lastRow: {
+        marginBottom: 0
     },
     btn: {
         paddingHorizontal: 20,
-    },
-    container: {
-        height: '100%',
         width: '100%',
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-        marginTop: 40,
     },
-    pdf: {
-        flex: 1,
-        width: '100%',
-    }
-
 });
