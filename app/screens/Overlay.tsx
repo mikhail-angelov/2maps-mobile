@@ -27,6 +27,7 @@ import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecond
 import ResetPassword from "../components/ResetPassword";
 import { useTranslation } from "react-i18next";
 import Account from "../components/Account";
+import About from "../components/About";
 
 interface MenuItem {
     title: string;
@@ -105,6 +106,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
     const [showSettings, setShowSettings] = useState(false)
     const [showMarkers, setShowMarkers] = useState(false)
     const [showTracks, setShowTracks] = useState(false)
+    const [showAbout, setShowAbout] = useState(false)
     const { t } = useTranslation();
 
     const menuItems: MenuItem[] = [
@@ -112,6 +114,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         { title: 'Settings', onPress: () => { setShowSettings(true); setShowMenu(false) } },
         { title: 'POI', onPress: () => { setShowMarkers(true); setShowMenu(false) } },
         { title: 'Tracks', onPress: () => { setShowTracks(true); setShowMenu(false) } },
+        { title: 'About app', onPress: () => { setShowAbout(true); setShowMenu(false) } },
         { title: 'Cancel', containerStyle: { backgroundColor: 'blue' }, titleStyle: { color: 'white' }, onPress: () => setShowMenu(false), }
     ]
 
@@ -191,6 +194,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         {showSettings && <MapSettings close={() => setShowSettings(false)} />}
         {!!resetToken && <ResetPassword close={()=> storeResetToken('')} />}
         {showAccount && <Account close={() => setShowAccount(false)} showAuth={() => {setShowAccount(false); setShowAuth(true)}} />}
+        {showAbout && <About close={() => setShowAbout(false)} />}
     </>
     );
 
