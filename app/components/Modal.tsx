@@ -1,5 +1,6 @@
 import React, { FC } from 'react';
 import { Modal, ModalProps, Pressable, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { purple } from '../constants/color';
 interface OwnProps {
     children: React.ReactNode;
 }
@@ -43,7 +44,8 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         marginTop: 22
-    }, modalView: {
+    },
+    modalView: {
         position: 'relative',
         margin: 20,
         backgroundColor: "white",
@@ -63,18 +65,18 @@ const styles = StyleSheet.create({
     button: {
         borderRadius: 20,
         padding: 10,
-        elevation: 2
     },
     buttonClose: {
-        backgroundColor: "#2196F3",
+        backgroundColor: "white",
         position: "absolute",
         top: 20,
         right: 20,
         width: 40,
     },
     textStyle: {
-        color: "white",
-        fontWeight: "bold",
+        color: purple,
+        fontWeight: 'bold',
+        fontSize: 20,
         textAlign: "center"
     },
 })

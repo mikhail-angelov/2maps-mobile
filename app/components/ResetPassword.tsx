@@ -5,6 +5,7 @@ import { View, TextInput, Text, StyleSheet } from "react-native";
 import { Button } from 'react-native-elements';
 import { selectError, selectIsAuthInProgress, selectResetToken } from "../reducers/auth";
 import { resetPasswordAction } from "../actions/auth-actions";
+import { purple } from "../constants/color";
 import MapModal from "./Modal";
 import Spinner from "./Spinner";
 import { useTranslation } from "react-i18next";
@@ -81,6 +82,7 @@ const styles = StyleSheet.create({
     },
     btn: {
         paddingHorizontal: 20,
+        backgroundColor: purple,
     },
     formField: {
         flexDirection: 'column',
@@ -92,6 +94,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
     },
     modalInput: {
+        borderRadius: 5,
         borderWidth: 1,
         borderColor: 'grey',
         marginBottom: 10,

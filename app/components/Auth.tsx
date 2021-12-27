@@ -9,6 +9,7 @@ import Settings from './Settings'
 import MapModal from './Modal'
 import Spinner from "./Spinner";
 import { useTranslation } from "react-i18next";
+import { purple } from "../constants/color";
 
 const mapStateToProps = (state: State) => ({
     isAuthenticated: selectIsAuthenticated(state),
@@ -63,7 +64,7 @@ const Login: FC<LoginProps> = ({ error, login, setSignUp, setPasswordReset }) =>
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <View style={styles.row}>
             <Button buttonStyle={styles.btn} disabled={!email || !password} onPress={() => login({ email, password })} title={t('Login')} />
-            <Button buttonStyle={styles.btn} type='clear' onPress={setSignUp} title={t('Sign Up')} />
+            <Button titleStyle={styles.inlineBtn} type='clear' onPress={setSignUp} title={t('Sign Up')} />
         </View>
     </View>
 }
@@ -123,7 +124,7 @@ const SignUp: FC<SignUpProps> = ({ error, signUp, back, isAuthInProgress }) => {
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <View style={styles.row}>
             <Button buttonStyle={styles.btn} disabled={!name || !email || !password} onPress={onSignUp} title={t('Sign Up')} />
-            <Button buttonStyle={styles.btn} type='clear' onPress={back} title={t('Back')} />
+            <Button titleStyle={styles.inlineBtn} type='clear' onPress={back} title={t('Back')} />
         </View>
     </View>
 }
@@ -196,7 +197,7 @@ const ForgetPassword: FC<PasswordResetProps> = ({ error, passwordReset, back, se
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <View style={styles.row}>
             <Button buttonStyle={styles.btn} disabled={!email} onPress={onPasswordReset} title={t('Password Reset')} />
-            <Button buttonStyle={styles.btn} type='clear' onPress={onBack} title={t('Back')} />
+            <Button titleStyle={styles.inlineBtn} type='clear' onPress={onBack} title={t('Back')} />
         </View>
     </View>
 }
@@ -225,6 +226,7 @@ const styles = StyleSheet.create({
     },
     btn: {
         // paddingHorizontal: 20,
+        backgroundColor: purple,
     },
     buttonOpen: {
         backgroundColor: "#F194FF",
@@ -239,6 +241,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
     },
     modalInput: {
+        borderRadius: 5,
         borderWidth: 1,
         borderColor: 'grey',
         marginBottom: 10,
@@ -252,6 +255,7 @@ const styles = StyleSheet.create({
     },
     inlineBtn: {
         fontSize: 14,
+        color: purple,
     }
 });
 

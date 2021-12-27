@@ -8,6 +8,7 @@ import { logoutAction } from "../actions/auth-actions";
 import {selectUser} from '../reducers/auth'
 import ChangePassword from "./ChangePassword";
 import { useTranslation } from "react-i18next";
+import { purple } from "../constants/color";
 
 const mapStateToProps = (state: State) => ({
     user: selectUser(state)
@@ -30,7 +31,7 @@ const Settings: FC<Props> = ({ logout, user }) => {
         <View style={styles.row}>
         <Button buttonStyle={styles.btn} onPress={() =>setShowChangePassword(true)} title={t('Change Password')} />
         </View>
-        <Button buttonStyle={styles.btn} type='clear' onPress={() => logout && logout()} title={t('Logout')} />
+        <Button titleStyle={styles.inlineBtn} type='clear' onPress={() => logout && logout()} title={t('Logout')} />
         {showQRReader && <QR close={() => setShowQRReader(false)} select={() => { }} />}
         {showChangePassword && <ChangePassword close={() => setShowChangePassword(false)} />}
     </View>
@@ -57,5 +58,9 @@ const styles = StyleSheet.create({
     },
     btn: {
         // paddingHorizontal: 20,
+        backgroundColor: purple,
     },
+    inlineBtn: {
+        color: purple,
+    }
 });

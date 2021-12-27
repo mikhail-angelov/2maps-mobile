@@ -27,6 +27,7 @@ import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecond
 import ResetPassword from "../components/ResetPassword";
 import { useTranslation } from "react-i18next";
 import Account from "../components/Account";
+import { purple } from "../constants/color";
 
 interface MenuItem {
     title: string;
@@ -112,7 +113,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         { title: 'Settings', onPress: () => { setShowSettings(true); setShowMenu(false) } },
         { title: 'POI', onPress: () => { setShowMarkers(true); setShowMenu(false) } },
         { title: 'Tracks', onPress: () => { setShowTracks(true); setShowMenu(false) } },
-        { title: 'Cancel', containerStyle: { backgroundColor: 'blue' }, titleStyle: { color: 'white' }, onPress: () => setShowMenu(false), }
+        { title: 'Cancel', containerStyle: { backgroundColor: purple }, titleStyle: { color: 'white' }, onPress: () => setShowMenu(false), }
     ]
 
     if (!location?.coords) {

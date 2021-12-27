@@ -1,5 +1,6 @@
 import React, { FC, useRef, useEffect, useState } from "react";
 import { Animated, View, StyleSheet, PanResponder, PanResponderGestureState, GestureResponderEvent, LayoutChangeEvent } from "react-native";
+import { purple } from "../constants/color";
 
 interface Props {
     value: number;
@@ -74,7 +75,7 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: '#00f',
+        backgroundColor: purple,
     },
     left: {
         position: "absolute",
@@ -86,7 +87,7 @@ const styles = StyleSheet.create({
         position: "absolute",
         height: 2,
         top: 19,
-        backgroundColor: '#00f',
+        backgroundColor: purple,
     },
 })
 
