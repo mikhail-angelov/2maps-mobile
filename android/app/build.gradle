@@ -144,7 +144,7 @@ android {
         missingDimensionStrategy 'react-native-camera', 'general'
         versionCode 3
         versionName "1.0"
-        buildConfigField "String", "ADMOB_APP_ID", '"${System.env.ADMOB_APP_ID}"'
+        resValue "string", "ADMOB_APP_ID", "${System.env.ADMOB_APP_ID}"
         // react-native-iap: we only use the Google Play flavor
         missingDimensionStrategy 'store', 'play'
     }
