@@ -13,6 +13,7 @@ import { selectMarks } from '../reducers/marks'
 import { importPoisAction, exportPoisAction, removeAllPoisAction, syncMarksAction, removeMarkCompletelyAction, editMarkAction } from '../actions/marks-actions'
 import { useTranslation } from "react-i18next";
 import Advertisement from "../components/AdMob";
+import { renderColor } from "../utils/formats";
 
 interface OwnProps {
     center: Position;
@@ -20,6 +21,7 @@ interface OwnProps {
     select: (item: Mark) => void;
 }
 interface Item {
+    rate: number;
     title: string;
     subtitle: string;
     mark: Mark;
@@ -66,6 +68,7 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
     }
     const list: Item[] = orderBy(markers, mark => distance(mark.geometry.coordinates, center, { units: 'kilometers' }))
         .map(mark => ({
+            rate: mark.rate,
             key: mark.id,
             title: mark.name,
             subtitle: `${distance(mark.geometry.coordinates, center, { units: 'kilometers' }).toFixed(2)} km, ${mark.description || ''}`,
@@ -79,11 +82,11 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
             onPress={() => select(item.mark)}
         >
             <View style={{ minHeight: '100%', justifyContent: 'center', paddingRight: 10 }}>
-                <Icon size={30} name="location-pin" />
+                <Icon style={{color: renderColor(item.rate)}} size={30} name="location-pin" />
             </View>
             <ListItem.Content>
                 <ListItem.Title>{item.title}</ListItem.Title>
-                <ListItem.Subtitle>{item.subtitle}</ListItem.Subtitle>
+                <ListItem.Subtitle style={{color: '#aaa'}}>{item.subtitle}</ListItem.Subtitle>
             </ListItem.Content>
         </TouchableOpacity>
     )

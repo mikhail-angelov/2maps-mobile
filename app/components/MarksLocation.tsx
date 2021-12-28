@@ -5,8 +5,7 @@ import MapboxGL, { CircleLayerStyle, OnPressEvent } from "@react-native-mapbox-g
 import { featureCollection } from '@turf/helpers';
 import { selectMarks } from "../reducers/marks";
 import { markToFeature } from "../actions/marks-actions";
-
-const colorPalette = ['#01579B', '#263238', '#F57F17', '#B71C1C', '#4A148C', '#1B5E20']
+import { colorPalette } from "../constants/color";
 
 const MarkStyle: CircleLayerStyle = {
     circleRadius: 8,
