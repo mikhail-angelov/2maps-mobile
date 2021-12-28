@@ -6,8 +6,11 @@ export const HOST = 'https://2map.xyz'
 export const HOST_LOCAL = 'http://localhost:5555'
 // export const HOST = 'http://192.168.31.251:3000'
 
-export const TERMS_URL = `${HOST}/?terms`
-export const HELP_URL = `${HOST}/?help`
+export const TERMS_OF_SERVICE_RU_URL = `${HOST}/2maps-tos-ru.html`
+export const PRIVACY_POLICY_RU_URL = `${HOST}/2maps-pp-ru.html`
+export const TERMS_OF_SERVICE_EN_URL = `${HOST}/2maps-tos-en.html`
+export const PRIVACY_POLICY_EN_URL = `${HOST}/2maps-pp-en.html`
+export const HELP_URL = `${HOST}/help.html`
 
 export const CONTACT_EMAIL = "mikhail.angelov@gmail.com"
 
