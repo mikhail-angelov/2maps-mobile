@@ -5,7 +5,7 @@ import { Mark, POI } from "../store/types";
 import { feature, Feature, Point } from '@turf/helpers';
 import DocumentPicker from 'react-native-document-picker';
 import RNFS from 'react-native-fs'
-import { nanoid } from 'nanoid/non-secure'
+import { v4 as uuid } from '@lukeed/uuid';
 import { selectMarks } from '../reducers/marks'
 import { selectToken } from '../reducers/auth'
 
@@ -83,7 +83,7 @@ export const importPoisAction = (): AppThunk => {
       const data = await RNFS.readFile(decodeURI(res.fileCopyUri), 'utf8')
       const pois = JSON.parse(data) as POI[]
       const marks = pois.map(({ id, name = '', description = '', point, timestamp }) => {
-        return { id: id || nanoid(), name, description, timestamp, geometry: { type: 'Point', coordinates: [point.lng, point.lat] } }
+        return { id: id || uuid(), name, description, timestamp, geometry: { type: 'Point', coordinates: [point.lng, point.lat] } }
       })
       dispatch({ type: ActionTypeEnum.ImportPois, payload: marks });
     } catch (err: any) {
@@ -127,7 +127,7 @@ export const syncMarksAction = (): AppThunk => {
       console.log('sync', res.data)
       
       const marks: Mark[] = res.data.map(({ id, name = '', description = '', rate = 0, lat, lng, timestamp }: any) => {
-        return { id: id || nanoid(), name, description, rate, timestamp, geometry: { type: 'Point', coordinates: [lng, lat] } }
+        return { id: id || uuid(), name, description, rate, timestamp, geometry: { type: 'Point', coordinates: [lng, lat] } }
       })
       dispatch({ type: ActionTypeEnum.ImportPois, payload: marks });
 

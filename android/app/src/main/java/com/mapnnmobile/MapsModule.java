@@ -46,7 +46,7 @@ public class MapsModule extends ReactContextBaseJavaModule {
                 }
 
             } catch (Exception e) {
-                Log.e("RN_DOWNLOAD_MANAGER", Log.getStackTraceString(e));
+                Log.e(TAG, Log.getStackTraceString(e));
             }
         }
     };

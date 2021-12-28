@@ -1,6 +1,5 @@
 import { ActionTypeEnum, AppThunk } from ".";
 import MapboxGL from "@react-native-mapbox-gl/maps";
-import { ThreeAxisMeasurement } from 'expo-sensors';
 import { State, Track } from "../store/types";
 import { selectActiveTrack, selectIsTracking, selectLocation } from '../reducers/tracker';
 import { selectTracks } from "../reducers/tracker";
@@ -8,13 +7,13 @@ import RNFS from 'react-native-fs'
 import DocumentPicker from 'react-native-document-picker';
 import { createKml, parseKml } from "../utils/kml";
 import { Alert } from "react-native";
-import { nanoid } from 'nanoid/non-secure'
+import { v4 as uuid } from '@lukeed/uuid';
 import { latLngToTileIndex, convertToBoxSize, findMinMaxCoordinates } from "../utils/normalize";
 import { makeSvg } from "../utils/svg";
 import * as _ from 'lodash'
 import i18next from 'i18next';
 
-export const compassAngle = (magnetometer: ThreeAxisMeasurement) => {
+export const compassAngle = (magnetometer: any) => {
   let angle = 0.0
   if (magnetometer) {
     const { x, y, z } = magnetometer;
@@ -26,7 +25,7 @@ export const compassAngle = (magnetometer: ThreeAxisMeasurement) => {
   return Math.round(angle);
 };
 
-export const setCompassAction = (compass: ThreeAxisMeasurement) => {
+export const setCompassAction = (compass: any) => {
   return { type: ActionTypeEnum.SetCompass, payload: compass }
 };
 export const setLocationAction = (location: MapboxGL.Location) => ({ type: ActionTypeEnum.SetLocation, payload: location });
@@ -143,7 +142,7 @@ export const importTrackAction = (): AppThunk => {
       const data = await RNFS.readFile(decodeURI(res.fileCopyUri), 'utf8')
       const trackFromKml = parseKml(data)
       const newTrack: Track = {
-        id: nanoid(),
+        id: uuid(),
         start: trackFromKml.start,
         end: trackFromKml.end,
         name: trackFromKml.name,
