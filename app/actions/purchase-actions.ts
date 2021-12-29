@@ -77,43 +77,44 @@ export const setPurchasesAction = (purchases?: InAppPurchase[]) => ({
   payload: purchases,
 });
 
+//todo: fix it
 export const initGoogleStoreConnectionAction =
   (): AppThunk => async dispatch => {
     try {
-      await RNIap.initConnection();
-      if (Platform.OS === 'android') {
-        await RNIap.flushFailedPurchasesCachedAsPendingAndroid();
-      } else {
-        await RNIap.clearTransactionIOS();
-      }
+      // await RNIap.initConnection();
+      // if (Platform.OS === 'android') {
+      //   await RNIap.flushFailedPurchasesCachedAsPendingAndroid();
+      // } else {
+      //   await RNIap.clearTransactionIOS();
+      // }
     } catch (err: any) {
       console.warn(err.code, err.message);
     }
-    purchaseUpdateSubscription = purchaseUpdatedListener(
-      async (purchase: any) => {
-        console.info('purchase', purchase);
-        const receipt = purchase.transactionReceipt
-          ? purchase.transactionReceipt
-          : purchase.originalJson;
+    // purchaseUpdateSubscription = purchaseUpdatedListener(
+    //   async (purchase: any) => {
+    //     console.info('purchase', purchase);
+    //     const receipt = purchase.transactionReceipt
+    //       ? purchase.transactionReceipt
+    //       : purchase.originalJson;
 
-        if (receipt) {
-          try {
-            const ackResult = await finishTransaction(purchase);
-            console.info('ackResult', ackResult);
-            dispatch(addPurchaseAction(purchase));
-          } catch (ackErr) {
-            console.warn('ackErr', ackErr);
-          }
-        }
-      },
-    );
+    //     if (receipt) {
+    //       try {
+    //         const ackResult = await finishTransaction(purchase);
+    //         console.info('ackResult', ackResult);
+    //         dispatch(addPurchaseAction(purchase));
+    //       } catch (ackErr) {
+    //         console.warn('ackErr', ackErr);
+    //       }
+    //     }
+    //   },
+    // );
 
-    purchaseErrorSubscription = purchaseErrorListener(
-      (error: PurchaseError) => {
-        console.log('purchaseErrorListener', error);
-        Alert.alert('Purchase error', error?.message || '');
-      },
-    );
+    // purchaseErrorSubscription = purchaseErrorListener(
+    //   (error: PurchaseError) => {
+    //     console.log('purchaseErrorListener', error);
+    //     Alert.alert('Purchase error', error?.message || '');
+    //   },
+    // );
   };
 
 export const closeGoogleStoreConnection = async () => {
