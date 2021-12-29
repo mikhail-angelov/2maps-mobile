@@ -171,13 +171,13 @@ android {
                 keyAlias MYAPP_RELEASE_KEY_ALIAS
                 keyPassword MYAPP_RELEASE_KEY_PASSWORD
             }
-            if (System.getenv("APPCENTER_KEYSTORE_FILE_ID")) {
-                println "+++release props: appcenter: "+System.getenv("APPCENTER_KEYSTORE_FILE_ID") +" -- "+System.getenv("APPCENTER_KEY_ALIAS")
-                
-                storeFile file(System.getenv("APPCENTER_KEYSTORE_FILE_ID")) //rootProject.file("app/playpost-upload-key.keystore")
-                storePassword System.getenv("APPCENTER_KEYSTORE_PASSWORD")
-                keyAlias System.getenv("APPCENTER_KEY_ALIAS")
-                keyPassword System.getenv("APPCENTER_KEY_PASSWORD")
+            if (System.getProperty("APPCENTER_KEYSTORE_FILE_ID")) {
+                println "+++release props: appcenter: "+System.getProperty("APPCENTER_KEYSTORE_FILE_ID") +" -- "+System.getProperty("APPCENTER_KEY_ALIAS")
+
+                storeFile rootProject.file("app/"+System.getProperty("APPCENTER_KEYSTORE_FILE_ID"))
+                storePassword System.getProperty("APPCENTER_KEYSTORE_PASSWORD")
+                keyAlias System.getProperty("APPCENTER_KEY_ALIAS")
+                keyPassword System.getProperty("APPCENTER_KEY_PASSWORD")
             }
         }
     }
@@ -189,7 +189,9 @@ android {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
             // signingConfig signingConfigs.debug
-            signingConfig signingConfigs.release
+            if (project.hasProperty('MYAPP_RELEASE_STORE_FILE')) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
