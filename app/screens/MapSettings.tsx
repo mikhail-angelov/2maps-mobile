@@ -53,7 +53,9 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
     const { t } = useTranslation()
     useEffect(() => {
         getLocalMapList()
-        loadMapList()
+        if(isAuthenticated) {
+            loadMapList()
+        }
     }, [])
     const allMaps: MapItem[] = [
         ...list.map(({ name, url }: MapInfo) => ({ id: name, name: `${name} (${(0 / 1000000).toFixed(3)}M)`, file: url, loaded: true })),
