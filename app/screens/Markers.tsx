@@ -1,5 +1,5 @@
 import React, { FC, useMemo, useState } from "react";
-import { View, Text, TextInput, StyleSheet, Alert, Modal, TouchableOpacity } from "react-native";
+import { View, TextInput, StyleSheet, Alert, Modal, TouchableOpacity } from "react-native";
 import { connect, ConnectedProps } from "react-redux";
 import { Button, ListItem } from 'react-native-elements';
 import { SwipeListView } from 'react-native-swipe-list-view';
@@ -13,7 +13,6 @@ import { selectMarks } from '../reducers/marks'
 import { importPoisAction, exportPoisAction, removeAllPoisAction, syncMarksAction, removeMarkCompletelyAction, editMarkAction } from '../actions/marks-actions'
 import { useTranslation } from "react-i18next";
 import Advertisement from "../components/AdMob";
-import MapModal from "../components/Modal";
 import { renderColor } from "../utils/formats";
 import { purple } from "../constants/color";
 
@@ -82,10 +81,13 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
         );
     }
     
-    const setFilterMarks = () => {
-        const newMarkList = filterText ? list.filter(item => item.title.includes(filterText) || item.subtitle.includes(filterText)) : list;
+    const onFilterMarks = (text?: string) => {
+        setFilterText(text || '');
+        const newMarkList = text
+            ? list.filter(item => item.title.toLowerCase().includes(text.toLowerCase()) ||
+                item.subtitle.toLowerCase().includes(text.toLowerCase()))
+            : list;
         setFilterList(newMarkList);
-        setIsFilterMarks(false);
     }
 
     const setFilterReset = () => {
@@ -130,11 +132,25 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
     return <Modal style={styles.container} visible onRequestClose={close}>
         <View style={styles.wrapper}>
             <View style={styles.buttons}>
-                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="search" onPress={() => setIsFilterMarks(true)} />
-                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-download" onPress={exportPois} />
-                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-upload" onPress={importPois} />
-                {isAuthenticated && <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="import-export" onPress={syncMarks} />}
-                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="delete" onPress={onRemoveAll} />
+                {isFilterMarks ? (
+                    <View style={styles.filterContainer}>
+                        <TextInput
+                            placeholder={t('filter')}
+                            style={styles.filterInput}
+                            onChangeText={(value) => onFilterMarks(value)}
+                            value={filterText}
+                        />
+                        <Button buttonStyle={styles.btn} titleStyle={styles.inlineBtn} type='clear' onPress={setFilterReset} title='x' />
+                    </View>
+                ) : (
+                    <View style={styles.buttonsWithoutClose}>
+                        <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="search" onPress={() => setIsFilterMarks(!isFilterMarks)} />
+                        <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-download" onPress={exportPois} />
+                        <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-upload" onPress={importPois} />
+                        {isAuthenticated && <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="import-export" onPress={syncMarks} />}
+                        <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="delete" onPress={onRemoveAll} />
+                    </View>
+                )}
                 <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="close" onPress={close} />
             </View>
             <View style={styles.scroll}>
@@ -151,22 +167,6 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
             </View>
         </View>
         <Advertisement />
-        {isFilterMarks && (
-            <MapModal onRequestClose={() => setIsFilterMarks(false)}>
-                <View style={styles.filterContainer}>
-                    <Text style={styles.inputLabel}>{t('Filter')}:</Text>
-                    <TextInput
-                        style={styles.modalInput}
-                        onChangeText={(value) => setFilterText(value)}
-                        value={filterText}
-                    />
-                    <View style={styles.buttonsRow}>
-                        <Button buttonStyle={styles.btn} title={t('Apply')} onPress={setFilterMarks} />
-                        <Button titleStyle={styles.inlineBtn} type='clear' onPress={setFilterReset} title={t('Clear')} />
-                    </View>
-                </View>
-            </MapModal>
-        )}
     </Modal>
 }
 
@@ -201,41 +201,49 @@ const styles = StyleSheet.create({
         padding: 5,
         backgroundColor: '#303846',
     },
+    buttonsWithoutClose: {
+        flexDirection: 'row',
+        textAlign: 'center',
+        justifyContent: "space-between",
+        width: '80%',
+    },
     titleButton: {
         textAlign: 'center',
         alignContent: 'center',
-        padding: 10,
+        padding: 5,
         margin: 10,
+        height: 40,
     },
     filterContainer: {
-        marginTop: 20,
-        width: '100%',
-    },
-    inputLabel: {
-        marginBottom: 5,
-        color: 'black',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    modalInput: {
-        borderRadius: 5,
-        borderWidth: 1,
-        borderColor: 'grey',
-        marginBottom: 10,
-        width: '100%',
-    },
-    buttonsRow: {
-        width: '100%',
+        paddingTop: 5,
+        width: '80%',
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 15,
-        marginBottom: 15,
+        justifyContent: 'center'
+    },
+    filterInput: {
+        borderRadius: 5,
+        borderTopRightRadius: 0,
+        borderBottomRightRadius: 0,
+        borderWidth: 1,
+        borderRightWidth: 0,
+        borderColor: 'grey',
+        paddingHorizontal: 10,
+        backgroundColor: 'white',
+        width: '80%',
+        height: 50,
     },
     btn: {
-        paddingHorizontal: 20,
-        backgroundColor: purple,
+        borderRadius: 5,
+        borderTopLeftRadius: 0,
+        borderBottomLeftRadius: 0,
+        borderWidth: 1,
+        borderLeftWidth: 0,
+        borderColor: 'grey',
+        height: 50,
+        backgroundColor: 'white',
     },
     inlineBtn: {
         color: purple,
+        fontSize: 20,
     }
 });

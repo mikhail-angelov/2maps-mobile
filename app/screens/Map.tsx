@@ -129,6 +129,7 @@ class Map extends Component<Props> {
     }
     onBalloonClick = () => {
         this.setState({ selected: undefined })
+        this.props.editMark(this.state.selected)
     }
     onSetMap = (map: MapboxGL.MapView) => {
         this.map = map
