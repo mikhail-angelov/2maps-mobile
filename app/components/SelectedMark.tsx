@@ -19,6 +19,7 @@ const WikiStyleLabel: SymbolLayerStyle = {
 interface OwnProps {
     mark?: Mark;
     unselect: () => void;
+    openEdit: () => void;
 }
 const mapStateToProps = (state: State) => ({
 
@@ -26,7 +27,7 @@ const mapStateToProps = (state: State) => ({
 const connector = connect(mapStateToProps)
 type Props = ConnectedProps<typeof connector> & OwnProps;
 
-const SelectedMark: FC<Props> = ({ mark, unselect }) => {
+const SelectedMark: FC<Props> = ({ mark, unselect, openEdit }) => {
     if (!mark) {
         return null
     }
@@ -37,7 +38,7 @@ const SelectedMark: FC<Props> = ({ mark, unselect }) => {
         title={mark.name}
         anchor={{ x: 0.5, y: 1.2 }}
     >
-        <TouchableOpacity onPress={unselect} style={styles.touchable}>
+        <TouchableOpacity delayLongPress={500} onLongPress={openEdit} onPress={unselect} style={styles.touchable}>
             <MapboxGL.Callout title={mark.name} />
         </TouchableOpacity>
     </MapboxGL.MarkerView>);

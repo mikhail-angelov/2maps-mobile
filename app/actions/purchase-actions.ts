@@ -1,18 +1,9 @@
-import {Alert, EmitterSubscription, Platform} from 'react-native';
-import RNIap, {
-  InAppPurchase,
-  PurchaseError,
-  finishTransaction,
-  purchaseErrorListener,
-  purchaseUpdatedListener,
-} from 'react-native-iap';
+import {Alert, Platform} from 'react-native';
+import RNIap, {InAppPurchase} from 'react-native-iap';
 import {ActionTypeEnum, AppThunk} from '.';
 import i18next from 'i18next';
 import * as _ from 'lodash';
 import Config from 'react-native-config';
-
-let purchaseUpdateSubscription: EmitterSubscription;
-let purchaseErrorSubscription: EmitterSubscription;
 
 const itemSkus =
   Platform.select({
@@ -77,52 +68,7 @@ export const setPurchasesAction = (purchases?: InAppPurchase[]) => ({
   payload: purchases,
 });
 
-//todo: fix it
-export const initGoogleStoreConnectionAction =
-  (): AppThunk => async dispatch => {
-    try {
-      // await RNIap.initConnection();
-      // if (Platform.OS === 'android') {
-      //   await RNIap.flushFailedPurchasesCachedAsPendingAndroid();
-      // } else {
-      //   await RNIap.clearTransactionIOS();
-      // }
-    } catch (err: any) {
-      console.warn(err.code, err.message);
-    }
-    // purchaseUpdateSubscription = purchaseUpdatedListener(
-    //   async (purchase: any) => {
-    //     console.info('purchase', purchase);
-    //     const receipt = purchase.transactionReceipt
-    //       ? purchase.transactionReceipt
-    //       : purchase.originalJson;
-
-    //     if (receipt) {
-    //       try {
-    //         const ackResult = await finishTransaction(purchase);
-    //         console.info('ackResult', ackResult);
-    //         dispatch(addPurchaseAction(purchase));
-    //       } catch (ackErr) {
-    //         console.warn('ackErr', ackErr);
-    //       }
-    //     }
-    //   },
-    // );
-
-    // purchaseErrorSubscription = purchaseErrorListener(
-    //   (error: PurchaseError) => {
-    //     console.log('purchaseErrorListener', error);
-    //     Alert.alert('Purchase error', error?.message || '');
-    //   },
-    // );
-  };
-
-export const closeGoogleStoreConnection = async () => {
-  if (purchaseUpdateSubscription) {
-    purchaseUpdateSubscription.remove();
-  }
-  if (purchaseErrorSubscription) {
-    purchaseErrorSubscription.remove();
-  }
-  RNIap.endConnection();
-};
+export const setPurchaseConnectionFlagAction = (value : boolean) => ({
+  type: ActionTypeEnum.EstablishedPurchaseConnection,
+  payload: value,
+})
