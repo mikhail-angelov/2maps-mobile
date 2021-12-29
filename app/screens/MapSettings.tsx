@@ -43,10 +43,13 @@ const mapDispatchToProps = {
     cancelDownloadMap: cancelDownloadMapAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
-type Props = ConnectedProps<typeof connector> & { close: () => void }
+type Props = ConnectedProps<typeof connector> & {
+    close: () => void,
+    showAuth: () => void,
+}
 
 
-const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoading, list, availableMapList, isAuthenticated, error, progress, cancelDownloadMap, close, getLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap }) => {
+const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoading, list, availableMapList, isAuthenticated, error, progress, cancelDownloadMap, close, getLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap, showAuth }) => {
     const { t } = useTranslation()
     useEffect(() => {
         getLocalMapList()
@@ -118,6 +121,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                     />
                 </View> : <View>
                     <Text>{t('You need to be logged in to download maps')}</Text>
+                    <Button buttonStyle={styles.btn} title={t('Login')} onPress={showAuth} />
                 </View>}
             {!!error && <Text style={styles.errors}>{error}</Text>}
         </View>
@@ -141,8 +145,8 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         justifyContent: "flex-end",
-        padding: 10,
-        backgroundColor: '#303846',
+        paddingHorizontal: 10,
+        backgroundColor: purple,
     },
     row: {
         flexDirection: 'row',
@@ -175,6 +179,11 @@ const styles = StyleSheet.create({
         padding: 10,
         flex: 1,
         overflow: 'scroll',
+    },
+    btn: {
+        marginVertical: 15,
+        width: '100%',
+        backgroundColor: purple,
     },
     errors: {
         color: 'red',
