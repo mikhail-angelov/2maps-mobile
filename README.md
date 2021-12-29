@@ -12,8 +12,8 @@ from [https://reactnative.dev/docs/signed-apk-android](https://reactnative.dev/d
 
 ### set config at `~/.gradle/gradle.properties`
 ```
-MYAPP_UPLOAD_STORE_FILE=2maps-upload-key.keystore
-MYAPP_UPLOAD_KEY_ALIAS=2maps
-MYAPP_UPLOAD_STORE_PASSWORD=<sec>
-MYAPP_UPLOAD_KEY_PASSWORD=<sec>
+MYAPP_RELEASE_STORE_FILE=2maps-upload-key.keystore
+MYAPP_RELEASE_KEY_ALIAS=2maps
+MYAPP_RELEASE_STORE_PASSWORD=<sec>
+MYAPP_RELEASE_KEY_PASSWORD=<sec>
 ```
