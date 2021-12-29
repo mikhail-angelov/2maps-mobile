@@ -140,7 +140,7 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
                             onChangeText={(value) => onFilterMarks(value)}
                             value={filterText}
                         />
-                        <Button buttonStyle={styles.btn} titleStyle={styles.inlineBtn} type='clear' onPress={setFilterReset} title='x' />
+                        <Button buttonStyle={styles.btn} titleStyle={styles.inlineBtn} type='clear' onPress={setFilterReset} title='&#215;' />
                     </View>
                 ) : (
                     <View style={styles.buttonsWithoutClose}>
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         justifyContent: "space-between",
         padding: 5,
-        backgroundColor: '#303846',
+        backgroundColor: purple,
     },
     buttonsWithoutClose: {
         flexDirection: 'row',

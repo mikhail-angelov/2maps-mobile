@@ -141,8 +141,8 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         justifyContent: "flex-end",
-        padding: 10,
-        backgroundColor: '#303846',
+        paddingHorizontal: 10,
+        backgroundColor: purple,
     },
     row: {
         flexDirection: 'row',

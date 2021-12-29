@@ -129,7 +129,10 @@ class Map extends Component<Props> {
     }
     onBalloonClick = () => {
         this.setState({ selected: undefined })
+    }
+    onBalloonLongClick = () => {
         this.props.editMark(this.state.selected)
+        this.setState({ selected: undefined })
     }
     onSetMap = (map: MapboxGL.MapView) => {
         this.map = map
@@ -205,7 +208,7 @@ class Map extends Component<Props> {
             <Wikimapia />
             <MarksLocation onMarkPress={this.onMarkPress} />
             <ActiveTrack />
-            <SelectedMark mark={selected} unselect={this.onBalloonClick} />
+            <SelectedMark mark={selected} unselect={this.onBalloonClick} openEdit={this.onBalloonLongClick} />
         </StyledMap>
         );
     }
