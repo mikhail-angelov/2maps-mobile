@@ -4,7 +4,6 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { StatusBar, Platform } from 'react-native';
 import { ReduxNetworkProvider } from 'react-native-offline'
 import SplashScreen from  "react-native-splash-screen";
-import { useKeepAwake } from 'expo-keep-awake';
 import createStore from './store'
 import Tracker from './Tracker'
 import Main from './screens/Main'
@@ -20,7 +19,6 @@ const App = () => {
     StatusBar.setTranslucent(true);
     SplashScreen.hide();
   }, [])
-  useKeepAwake()
 
   return (
     <Provider store={store}>

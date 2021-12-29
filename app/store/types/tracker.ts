@@ -1,5 +1,4 @@
 import MapboxGL from "@react-native-mapbox-gl/maps";
-import { ThreeAxisMeasurement } from 'expo-sensors';
 import { Position } from 'geojson';
 
 export interface Track {
@@ -12,7 +11,7 @@ export interface Track {
 }
 
 export interface TrackerState {
-  compass: ThreeAxisMeasurement;
+  compass: any;
   location: MapboxGL.Location;
   tracks: Track[];
   tracking: boolean;
