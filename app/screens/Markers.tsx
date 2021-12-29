@@ -1,5 +1,5 @@
-import React, { FC, useMemo } from "react";
-import { View, StyleSheet, Alert, Modal, TouchableOpacity } from "react-native";
+import React, { FC, useMemo, useState } from "react";
+import { View, TextInput, StyleSheet, Alert, Modal, TouchableOpacity } from "react-native";
 import { connect, ConnectedProps } from "react-redux";
 import { Button, ListItem } from 'react-native-elements';
 import { SwipeListView } from 'react-native-swipe-list-view';
@@ -13,6 +13,8 @@ import { selectMarks } from '../reducers/marks'
 import { importPoisAction, exportPoisAction, removeAllPoisAction, syncMarksAction, removeMarkCompletelyAction, editMarkAction } from '../actions/marks-actions'
 import { useTranslation } from "react-i18next";
 import Advertisement from "../components/AdMob";
+import { renderColor } from "../utils/formats";
+import { purple } from "../constants/color";
 
 interface OwnProps {
     center: Position;
@@ -20,6 +22,7 @@ interface OwnProps {
     select: (item: Mark) => void;
 }
 interface Item {
+    rate: number;
     title: string;
     subtitle: string;
     mark: Mark;
@@ -43,6 +46,19 @@ type Props = ConnectedProps<typeof connector> & OwnProps
 const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, importPois, exportPois, removeAllPois, syncMarks, removeMark, editMark }) => {
     const { t } = useTranslation();
 
+    const list: Item[] = orderBy(markers, mark => distance(mark.geometry.coordinates, center, { units: 'kilometers' }))
+    .map(mark => ({
+        rate: mark.rate,
+        key: mark.id,
+        title: mark.name,
+        subtitle: `${distance(mark.geometry.coordinates, center, { units: 'kilometers' }).toFixed(2)} km, ${mark.description || ''}`,
+        mark,
+    }));
+
+    const [isFilterMarks, setIsFilterMarks] = useState<boolean>(false);
+    const [filterText, setFilterText] = useState<string>('');
+    const [filterList, setFilterList] = useState<Item[]>(list);
+
     const onRemoveAll = () => {
         Alert.alert(
             t('Warning!'),
@@ -64,14 +80,22 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
             ]
         );
     }
-    const list: Item[] = orderBy(markers, mark => distance(mark.geometry.coordinates, center, { units: 'kilometers' }))
-        .map(mark => ({
-            key: mark.id,
-            title: mark.name,
-            subtitle: `${distance(mark.geometry.coordinates, center, { units: 'kilometers' }).toFixed(2)} km, ${mark.description || ''}`,
-            mark,
-        }))
     
+    const onFilterMarks = (text?: string) => {
+        setFilterText(text || '');
+        const newMarkList = text
+            ? list.filter(item => item.title.toLowerCase().includes(text.toLowerCase()) ||
+                item.subtitle.toLowerCase().includes(text.toLowerCase()))
+            : list;
+        setFilterList(newMarkList);
+    }
+
+    const setFilterReset = () => {
+        setFilterText('');
+        setFilterList(list);
+        setIsFilterMarks(false);
+    }
+
     const renderItem = ({ item }: { item: Item }) => (
         <TouchableOpacity
             activeOpacity={1}
@@ -79,11 +103,11 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
             onPress={() => select(item.mark)}
         >
             <View style={{ minHeight: '100%', justifyContent: 'center', paddingRight: 10 }}>
-                <Icon size={30} name="location-pin" />
+                <Icon style={{color: renderColor(item.rate)}} size={30} name="location-pin" />
             </View>
             <ListItem.Content>
                 <ListItem.Title>{item.title}</ListItem.Title>
-                <ListItem.Subtitle>{item.subtitle}</ListItem.Subtitle>
+                <ListItem.Subtitle style={{color: '#aaa'}}>{item.subtitle}</ListItem.Subtitle>
             </ListItem.Content>
         </TouchableOpacity>
     )
@@ -108,20 +132,35 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
     return <Modal style={styles.container} visible onRequestClose={close}>
         <View style={styles.wrapper}>
             <View style={styles.buttons}>
-                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-download" onPress={exportPois} />
-                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-upload" onPress={importPois} />
-                {isAuthenticated && <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="import-export" onPress={syncMarks} />}
-                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="delete" onPress={onRemoveAll} />
+                {isFilterMarks ? (
+                    <View style={styles.filterContainer}>
+                        <TextInput
+                            placeholder={t('filter')}
+                            style={styles.filterInput}
+                            onChangeText={(value) => onFilterMarks(value)}
+                            value={filterText}
+                        />
+                        <Button buttonStyle={styles.btn} titleStyle={styles.inlineBtn} type='clear' onPress={setFilterReset} title='&#215;' />
+                    </View>
+                ) : (
+                    <View style={styles.buttonsWithoutClose}>
+                        <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="search" onPress={() => setIsFilterMarks(!isFilterMarks)} />
+                        <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-download" onPress={exportPois} />
+                        <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-upload" onPress={importPois} />
+                        {isAuthenticated && <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="import-export" onPress={syncMarks} />}
+                        <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="delete" onPress={onRemoveAll} />
+                    </View>
+                )}
                 <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="close" onPress={close} />
             </View>
             <View style={styles.scroll}>
                 <SwipeListView
-                    data={list}
+                    data={filterList}
                     renderItem={memoizedValue}
                     renderHiddenItem={memoizedHiddenValue}
                     leftOpenValue={0}
                     rightOpenValue={-150}
-                    previewRowKey={list[0] ? list[0].mark.id : undefined}
+                    previewRowKey={filterList[0] ? filterList[0].mark.id : undefined}
                     previewOpenValue={-40}
                     previewOpenDelay={1000}
                 />
@@ -158,14 +197,53 @@ const styles = StyleSheet.create({
     buttons: {
         flexDirection: 'row',
         textAlign: 'center',
-        justifyContent: "flex-end",
-        padding: 10,
-        backgroundColor: '#303846',
+        justifyContent: "space-between",
+        padding: 5,
+        backgroundColor: purple,
+    },
+    buttonsWithoutClose: {
+        flexDirection: 'row',
+        textAlign: 'center',
+        justifyContent: "space-between",
+        width: '80%',
     },
     titleButton: {
         textAlign: 'center',
         alignContent: 'center',
-        padding: 10,
+        padding: 5,
         margin: 10,
+        height: 40,
     },
+    filterContainer: {
+        paddingTop: 5,
+        width: '80%',
+        flexDirection: 'row',
+        justifyContent: 'center'
+    },
+    filterInput: {
+        borderRadius: 5,
+        borderTopRightRadius: 0,
+        borderBottomRightRadius: 0,
+        borderWidth: 1,
+        borderRightWidth: 0,
+        borderColor: 'grey',
+        paddingHorizontal: 10,
+        backgroundColor: 'white',
+        width: '80%',
+        height: 50,
+    },
+    btn: {
+        borderRadius: 5,
+        borderTopLeftRadius: 0,
+        borderBottomLeftRadius: 0,
+        borderWidth: 1,
+        borderLeftWidth: 0,
+        borderColor: 'grey',
+        height: 50,
+        backgroundColor: 'white',
+    },
+    inlineBtn: {
+        color: purple,
+        fontSize: 20,
+    }
 });

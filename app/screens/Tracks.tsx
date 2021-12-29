@@ -13,6 +13,7 @@ import { selectTrackAction, startTrackingAction, stopTrackingAction, exportTrack
 import { SvgXml } from "react-native-svg";
 import { useTranslation } from "react-i18next";
 import Advertisement from "../components/AdMob";
+import { purple } from "../constants/color";
 
 export enum MENU {
     Cancel,
@@ -175,10 +176,10 @@ const styles = StyleSheet.create({
     },
     buttons: {
         flexDirection: 'row',
-        justifyContent: "flex-end",
+        justifyContent: "space-between",
         textAlign: 'center',
-        padding: 10,
-        backgroundColor: '#303846',
+        paddingHorizontal: 10,
+        backgroundColor: purple,
     },
     titleButton: {
         textAlign: 'center',
