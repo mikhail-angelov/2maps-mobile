@@ -87,7 +87,12 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
         </View>}
         <Spinner show={isLoading} />
         <View style={styles.header}>
-            <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="close" onPress={close} />
+            <View style={styles.headerButton}>
+                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="arrow-back-ios" onPress={close} />
+            </View>
+            <View style={styles.headerText}>
+                <Text style={styles.title}>{t('Settings')}</Text>
+            </View>
         </View>
         <View style={styles.content}>
             <View style={styles.row}>
@@ -144,8 +149,8 @@ const styles = StyleSheet.create({
         margin: 10,
     },
     header: {
-        flexDirection: 'row',
-        justifyContent: "flex-end",
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
         paddingHorizontal: 10,
         backgroundColor: purple,
     },
@@ -155,11 +160,29 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         margin: 5,
     },
+    headerButton: {
+        width: 60,
+    },
     titleButton: {
+        minWidth: 100,
+        maxWidth: 1,
         textAlign: 'center',
         alignContent: 'center',
         padding: 10,
         margin: 10,
+    },
+    headerText: {
+        width: '100%',
+        position: 'absolute',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 15,
+    },
+    title: {
+        color: 'white',
+        fontSize: 24,
+        fontWeight: '700',
+        textAlign: 'center',
     },
     item: {
         backgroundColor: "#f9c2ff",
