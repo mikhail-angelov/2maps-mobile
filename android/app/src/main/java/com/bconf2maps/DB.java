@@ -1,16 +1,11 @@
-package com.mapnnmobile;
+package com.bconf2maps;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.Cursor;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.os.Environment;
-import android.os.StrictMode;
 import android.util.Log;
-
-import java.io.File;
 
 public class DB extends SQLiteOpenHelper {
     private static final String TAG = "DataBase";

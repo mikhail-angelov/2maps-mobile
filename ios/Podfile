@@ -3,7 +3,7 @@ require_relative '../node_modules/@react-native-community/cli-platform-ios/nativ
 
 platform :ios, '10.0'
 
-target 'mapnnmobile' do
+target 'bconf2maps' do
   config = use_native_modules!
 
   use_react_native!(
@@ -16,7 +16,7 @@ target 'mapnnmobile' do
 
   pod 'RNIap', :path => '../node_modules/react-native-iap'
 
-  target 'mapnnmobileTests' do
+  target 'bconf2mapsTests' do
     inherit! :complete
     # Pods for testing
   end

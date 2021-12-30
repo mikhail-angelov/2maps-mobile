@@ -1,4 +1,4 @@
-package com.mapnnmobile;
+package com.bconf2maps;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;

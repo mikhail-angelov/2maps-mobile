@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "mapnnmobile.app"
-               BlueprintName = "mapnnmobile"
-               ReferencedContainer = "container:mapnnmobile.xcodeproj">
+               BuildableName = "bconf2maps.app"
+               BlueprintName = "bconf2maps"
+               ReferencedContainer = "container:bconf2maps.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "mapnnmobileTests.xctest"
-               BlueprintName = "mapnnmobileTests"
-               ReferencedContainer = "container:mapnnmobile.xcodeproj">
+               BuildableName = "bconf2mapsTests.xctest"
+               BlueprintName = "bconf2mapsTests"
+               ReferencedContainer = "container:bconf2maps.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "mapnnmobile.app"
-            BlueprintName = "mapnnmobile"
-            ReferencedContainer = "container:mapnnmobile.xcodeproj">
+            BuildableName = "bconf2maps.app"
+            BlueprintName = "bconf2maps"
+            ReferencedContainer = "container:bconf2maps.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "mapnnmobile.app"
-            BlueprintName = "mapnnmobile"
-            ReferencedContainer = "container:mapnnmobile.xcodeproj">
+            BuildableName = "bconf2maps.app"
+            BlueprintName = "bconf2maps"
+            ReferencedContainer = "container:bconf2maps.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

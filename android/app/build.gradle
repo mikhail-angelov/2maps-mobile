@@ -137,15 +137,14 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.mapnnmobile"
+        applicationId "com.bconf2maps"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        missingDimensionStrategy 'react-native-camera', 'general'
-        versionCode 3
+        versionCode 6
         versionName "1.0"
         // resValue "string", "ADMOB_APP_ID", "${System.env.ADMOB_APP_ID}"
         // react-native-iap: we only use the Google Play flavor
-        missingDimensionStrategy 'store', 'play'
+        missingDimensionStrategy 'store', 'play', 'general'
     }
     splits {
         abi {
@@ -163,13 +162,15 @@ android {
             keyPassword 'android'
         }
         release {
-            if (project.hasProperty('MYAPP_RELEASE_STORE_FILE')) {
-                println "+++release props: local: "+MYAPP_RELEASE_STORE_FILE
+            Properties properties = new Properties()
+            if (rootProject.file("local.properties").exists()) {
+                properties.load(rootProject.file("local.properties").newDataInputStream())
+                println "+++release props: local:"+properties.getProperty("MYAPP_RELEASE_STORE_FILE")
             
-                storeFile file(MYAPP_RELEASE_STORE_FILE)
-                storePassword MYAPP_RELEASE_STORE_PASSWORD
-                keyAlias MYAPP_RELEASE_KEY_ALIAS
-                keyPassword MYAPP_RELEASE_KEY_PASSWORD
+                storeFile file(properties.getProperty("MYAPP_RELEASE_STORE_FILE"))
+                storePassword properties.getProperty("MYAPP_RELEASE_STORE_PASSWORD")
+                keyAlias properties.getProperty("MYAPP_RELEASE_KEY_ALIAS")
+                keyPassword properties.getProperty("MYAPP_RELEASE_KEY_PASSWORD")
             }
             if (System.getProperty("APPCENTER_KEYSTORE_FILE_ID")) {
                 println "+++release props: appcenter: "+System.getProperty("APPCENTER_KEYSTORE_FILE_ID") +" -- "+System.getProperty("APPCENTER_KEY_ALIAS")
@@ -189,7 +190,8 @@ android {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
             // signingConfig signingConfigs.debug
-            if (project.hasProperty('MYAPP_RELEASE_STORE_FILE')) {
+            // set signingConfig only for local build, otherwise it will sign automaticaly by appcenter
+            if (rootProject.file("local.properties").exists()) {
                 signingConfig signingConfigs.release
             }
             minifyEnabled enableProguardInReleaseBuilds
