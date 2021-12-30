@@ -8,6 +8,7 @@ export interface Track {
   name: string;
   track: Position[];
   thumbnail?: string;
+  distance?: string;
 }
 
 export interface TrackerState {

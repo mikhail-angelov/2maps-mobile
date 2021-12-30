@@ -4,7 +4,6 @@ import { connect, ConnectedProps } from "react-redux";
 import { Button, ListItem } from 'react-native-elements';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import distance from '@turf/distance';
 import { orderBy } from 'lodash'
 import dayjs from 'dayjs'
 import { State } from '../store/types'
@@ -47,7 +46,6 @@ type Props = ConnectedProps<typeof connector> & { close: () => void }
 
 const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, selectTrack, close, exportTrack, removeTrack, importTrack }) => {
     const { t } = useTranslation();
-
     const toggleTracking = () => {
         if (isTracking) {
             stopTracking()
@@ -73,9 +71,8 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
         );
     }
 
-    const list: Item[] = orderBy(tracks, 'start', 'desc').map(({ id, name, start, end, track, thumbnail }) => {
-        const l = distance(track[0], track[track.length - 1]).toFixed(3)
-        const subtitle = `T: ${dayjs(end - start).format('HH:mm')}, L: ${l} km.`
+    const list: Item[] = orderBy(tracks, 'start', 'desc').map(({ id, name, start, end, distance, thumbnail }) => {
+        const subtitle = `T: ${dayjs(end - start).format('HH:mm')}, L: ${distance} km.`
         return {
             id,
             key: id,
@@ -122,7 +119,7 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
             />
         </View>
     );
-
+        
     return <Modal style={styles.container} visible onRequestClose={close}>
         <View style={styles.wrapper}>
             <View style={styles.buttons}>
