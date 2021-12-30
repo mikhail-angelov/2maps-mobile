@@ -236,6 +236,7 @@ const styles = StyleSheet.create({
         display: 'flex',
     },
     title: {
+        maxWidth: '90%',
         marginTop: -8,
         marginBottom: 10,
         color: 'black',

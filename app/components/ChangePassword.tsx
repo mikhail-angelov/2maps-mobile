@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
         display: 'flex',
     },
     title: {
-        maxWidth: '80%',
+        maxWidth: '90%',
         marginTop: -30,
         marginBottom: 10,
         color: 'black',

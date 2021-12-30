@@ -121,9 +121,8 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                         renderItem={renderItem}
                         keyExtractor={(item: MapItem) => item.name}
                     />
-                </View> : <View>
-                    <Text>{t('You need to be logged in to download maps')}</Text>
-                    <Button buttonStyle={styles.btn} title={t('Login')} onPress={showAuth} />
+                </View> : <View style={styles.availableMaps}>
+                    <Button buttonStyle={styles.btn} title={t('Login to download maps')} onPress={showAuth} />
                 </View>}
             {!!error && <Text style={styles.errors}>{error}</Text>}
         </View>
@@ -183,8 +182,8 @@ const styles = StyleSheet.create({
         overflow: 'scroll',
     },
     btn: {
-        marginVertical: 15,
-        width: '100%',
+        margin: 15,
+        maxWidth: '100%',
         backgroundColor: purple,
     },
     errors: {

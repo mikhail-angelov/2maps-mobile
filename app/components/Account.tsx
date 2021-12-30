@@ -52,6 +52,7 @@ export default connector(Account)
 
 const styles = StyleSheet.create({
     title: {
+        maxWidth: '90%',
         marginTop: -8,
         marginBottom: 10,
         color: 'black',

@@ -47,6 +47,7 @@ const styles = StyleSheet.create({
         alignItems:'flex-start',
     },
     title: {
+        maxWidth: '90%',
         marginTop: -5,
         marginBottom: 10,
         color: 'black',
