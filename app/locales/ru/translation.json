@@ -2,7 +2,7 @@
     "Login": "Войти",
     "Account": "Аккаунт",
     "Settings": "Настройки",
-    "POI": "Места",
+    "Marks": "Метки",
     "Tracks": "Треки",
     "Cancel": "Отмена",
     "Forgot password?":"Забыли пароль?",
@@ -57,5 +57,10 @@
     "Help": "Помощь",
     "no description": "нет описания",
     "filter": "фильтр",
-    "Privacy Policy": "Политика конфиденциальности"
+    "Privacy Policy": "Политика конфиденциальности",
+    "Import Track": "Импорт Трека",
+    "Export Marks": "Экспорт Меток",
+    "Import Mark": "Импорт Метки",
+    "Sync Mark": "Синхронизация",
+    "Remove Marks": "Удалить Метки"
 }

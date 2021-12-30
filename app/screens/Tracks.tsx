@@ -1,15 +1,22 @@
 import React, { FC } from "react";
 import { View, StyleSheet, Modal, Alert, TouchableOpacity } from "react-native";
 import { connect, ConnectedProps } from "react-redux";
-import { Button, ListItem } from 'react-native-elements';
+import { Button, ListItem, Text } from 'react-native-elements';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import distance from '@turf/distance';
 import { orderBy } from 'lodash'
 import dayjs from 'dayjs'
+import {
+    MenuProvider,
+    Menu,
+    MenuOptions,
+    MenuOption,
+    MenuTrigger,
+} from 'react-native-popup-menu';
 import { State } from '../store/types'
-import { selectIsTracking, selectTracks } from '../reducers/tracker'
-import { selectTrackAction, startTrackingAction, stopTrackingAction, exportTrackAction, removeTrackAction, importTrackAction } from "../actions/tracker-actions";
+import { selectSelectedTrack, selectTracks } from '../reducers/tracker'
+import { selectTrackAction, exportTrackAction, removeTrackAction, importTrackAction } from "../actions/tracker-actions";
 import { SvgXml } from "react-native-svg";
 import { useTranslation } from "react-i18next";
 import Advertisement from "../components/AdMob";
@@ -32,12 +39,10 @@ interface Item {
 
 const mapStateToProps = (state: State) => ({
     tracks: selectTracks(state),
-    isTracking: selectIsTracking(state),
+    selectedTrack: selectSelectedTrack(state),
 });
 const mapDispatchToProps = {
     selectTrack: selectTrackAction,
-    startTracking: startTrackingAction,
-    stopTracking: stopTrackingAction,
     exportTrack: exportTrackAction,
     removeTrack: removeTrackAction,
     importTrack: importTrackAction,
@@ -45,21 +50,18 @@ const mapDispatchToProps = {
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
 
-const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, selectTrack, close, exportTrack, removeTrack, importTrack }) => {
+const Tracks: FC<Props> = ({ tracks, selectedTrack, selectTrack, close, exportTrack, removeTrack, importTrack }) => {
     const { t } = useTranslation();
 
-    const toggleTracking = () => {
-        if (isTracking) {
-            stopTracking()
-        } else {
-            startTracking()
-        }
-    }
     const onSelectTrack = (id: string) => {
-        console.log('onSelectTrack', id)
-        const track = tracks.find((item) => item.id === id)
-        selectTrack(track)
-        close()
+        if (id === selectedTrack?.id) {
+            selectTrack(undefined);
+        } else {
+            console.log('onSelectTrack', id)
+            const track = tracks.find((item) => item.id === id)
+            selectTrack(track)
+            close()
+        }
     }
 
     const onRemoveTrack = (itemId: string) => {
@@ -115,7 +117,7 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
                 onPress={() => onRemoveTrack(item.id)}
             />
             <Button
-                icon={{ name: 'visibility', color: 'white' }}
+                icon={{ name: item.id !== selectedTrack?.id ? 'visibility' : 'visibility-off', color: 'white' }}
                 buttonStyle={{ minHeight: '100%', backgroundColor: green, borderRadius: 0 }}
                 containerStyle={{ flex: 1, borderRadius: 0 }}
                 onPress={() => onSelectTrack(item.id)}
@@ -124,27 +126,38 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
     );
 
     return <Modal style={styles.container} visible onRequestClose={close}>
-        <View style={styles.wrapper}>
-            <View style={styles.buttons}>
-                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-upload" onPress={importTrack} />
-                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name={isTracking ? 'gps-not-fixed' : 'gps-fixed'} onPress={toggleTracking} />
-                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="share" onPress={() => selectTrack(undefined)} />
-                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="close" onPress={close} />
+        <MenuProvider>
+            <View style={styles.wrapper}>
+                <View style={styles.buttons}>
+                    <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="arrow-back-ios" onPress={close} />
+                    <Text style={styles.title}>{t('Tracks')}</Text>
+                    <Menu>
+                        <MenuTrigger><Icon style={styles.menuMainIcon} name="menu" /></MenuTrigger>
+                        <MenuOptions >
+                            <MenuOption onSelect={importTrack}>
+                                <View style={styles.menuOptionContainer}>
+                                    <Icon style={styles.menuIcon} name="file-upload" />
+                                    <Text style={styles.menuText}>{t('Import Track')}</Text>
+                                </View>
+                            </MenuOption>
+                        </MenuOptions>
+                    </Menu>
+                </View>
+                <View style={styles.scroll}>
+                    <SwipeListView
+                        data={list}
+                        renderItem={renderItem}
+                        renderHiddenItem={renderHiddenItem}
+                        leftOpenValue={0}
+                        rightOpenValue={-200}
+                        previewRowKey={list[0] ? list[0].id : undefined}
+                        previewOpenValue={-40}
+                        previewOpenDelay={1000}
+                    />
+                </View>
             </View>
-            <View style={styles.scroll}>
-                <SwipeListView
-                    data={list}
-                    renderItem={renderItem}
-                    renderHiddenItem={renderHiddenItem}
-                    leftOpenValue={0}
-                    rightOpenValue={-200}
-                    previewRowKey={list[0] ? list[0].id : undefined}
-                    previewOpenValue={-40}
-                    previewOpenDelay={1000}
-                />
-            </View>
-        </View>
-        <Advertisement />
+            <Advertisement />
+        </MenuProvider>
     </Modal>
 }
 
@@ -186,5 +199,36 @@ const styles = StyleSheet.create({
         alignContent: 'center',
         padding: 10,
         margin: 10,
+    },
+    title: {
+        marginTop: 12,
+        color: 'white',
+        fontSize: 24,
+        fontWeight: '700',
+    },
+    menuMainIcon: {
+        textAlign: 'center',
+        alignContent: 'center',
+        padding: 10,
+        margin: 10,
+        fontSize: 22,
+        fontWeight: '700',
+        color: 'white',
+    },
+    menuOptionContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    menuIcon: {
+        padding: 10,
+        margin: 10,
+        fontSize: 22,
+        fontWeight: '700',
+        color: purple,
+    },
+    menuText: {
+        color: 'black',
+        fontSize: 16,
+        fontWeight: '700',
     },
 });
