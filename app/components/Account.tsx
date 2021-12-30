@@ -29,14 +29,18 @@ const Account: FC<Props> = ({ close, showAuth, isAuthenticated, purchases, resto
     const { t } = useTranslation()
 
     return <MapModal onRequestClose={close}>
+        <Text style={styles.title}>{t('Manage Account')}</Text>
         <View style={styles.content}>
+            {purchases && <Text style={styles.subTitle}>{t('Premium version!')}</Text> }
             <View style={styles.row}>
                 <Button buttonStyle={styles.btn} title={isAuthenticated ? t('Account') : t('Login')} onPress={showAuth} />
             </View>
-            {purchases ? <Text style={styles.subTitle}>{t('Premium version!')}</Text> : <View style={styles.row}>
-                <Button buttonStyle={styles.btn} title={t('Purchase')} onPress={requestPurchase} disabled={!isPurchaseConnected} />
-            </View>}
-            <View style={styles.row}>
+            {!purchases && 
+                <View style={styles.row}>
+                    <Button buttonStyle={styles.btn} title={t('Purchase')} onPress={requestPurchase} disabled={!isPurchaseConnected} />
+                </View>
+            }
+            <View style={styles.lastRow}>
                 <Button buttonStyle={styles.btn} title={t('Restore Purchase')} onPress={restorePurchase} disabled={!isPurchaseConnected} />
             </View>
         </View>
@@ -47,22 +51,35 @@ export default connector(Account)
 
 
 const styles = StyleSheet.create({
+    title: {
+        maxWidth: '90%',
+        marginTop: -8,
+        marginBottom: 10,
+        color: 'black',
+        fontSize: 24,
+        fontWeight: '700',
+    },
     content: {
         width: '100%',
-        alignItems: 'flex-start',
+        marginTop: 10,
     },
     subTitle: {
-        marginVertical: 10,
+        width: '100%',
+        marginBottom: 20,
         color: 'black',
         fontSize: 18,
     },
     row: {
-        flexDirection: 'row',
         width: '100%',
-        marginBottom: 10
+        marginBottom: 15,
+        flexDirection: 'row',
+    },
+    lastRow: {
+        marginBottom: 0
     },
     btn: {
         paddingHorizontal: 20,
+        minWidth: '100%',
         backgroundColor: purple,
     },
 });

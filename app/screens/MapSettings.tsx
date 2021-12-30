@@ -43,14 +43,19 @@ const mapDispatchToProps = {
     cancelDownloadMap: cancelDownloadMapAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
-type Props = ConnectedProps<typeof connector> & { close: () => void }
+type Props = ConnectedProps<typeof connector> & {
+    close: () => void,
+    showAuth: () => void,
+}
 
 
-const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoading, list, availableMapList, isAuthenticated, error, progress, cancelDownloadMap, close, getLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap }) => {
+const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoading, list, availableMapList, isAuthenticated, error, progress, cancelDownloadMap, close, getLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap, showAuth }) => {
     const { t } = useTranslation()
     useEffect(() => {
         getLocalMapList()
-        loadMapList()
+        if(isAuthenticated) {
+            loadMapList()
+        }
     }, [])
     const allMaps: MapItem[] = [
         ...list.map(({ name, url }: MapInfo) => ({ id: name, name: `${name} (${(0 / 1000000).toFixed(3)}M)`, file: url, loaded: true })),
@@ -116,8 +121,8 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                         renderItem={renderItem}
                         keyExtractor={(item: MapItem) => item.name}
                     />
-                </View> : <View>
-                    <Text>{t('You need to be logged in to download maps')}</Text>
+                </View> : <View style={styles.availableMaps}>
+                    <Button buttonStyle={styles.btn} title={t('Login to download maps')} onPress={showAuth} />
                 </View>}
             {!!error && <Text style={styles.errors}>{error}</Text>}
         </View>
@@ -175,6 +180,11 @@ const styles = StyleSheet.create({
         padding: 10,
         flex: 1,
         overflow: 'scroll',
+    },
+    btn: {
+        margin: 15,
+        maxWidth: '100%',
+        backgroundColor: purple,
     },
     errors: {
         color: 'red',

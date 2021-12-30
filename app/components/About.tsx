@@ -1,5 +1,5 @@
-import React, { FC, useState } from "react";
-import { View, StyleSheet, Linking } from "react-native";
+import React, { FC } from "react";
+import { View, Text, StyleSheet, Linking } from "react-native";
 import { Button } from 'react-native-elements';
 import { useTranslation } from "react-i18next";
 import MapModal from "./Modal";
@@ -14,6 +14,7 @@ const About: FC<AboutProps> = ({ close }) => {
     const { t, i18n } = useTranslation()
     const termsUrl = i18n.language === 'ru-RU' ? { tos: TERMS_OF_SERVICE_RU_URL, privacy: PRIVACY_POLICY_RU_URL } : { tos: TERMS_OF_SERVICE_EN_URL, privacy: PRIVACY_POLICY_EN_URL }
     return <MapModal onRequestClose={close}>
+        <Text style={styles.title}>{t('About app')}</Text>
         <View style={styles.content}>
             <View style={styles.row}>
                 <Button buttonStyle={styles.btn} title={t('Contact Developer')} onPress={() => Linking.openURL(`mailto:${CONTACT_EMAIL}`)} />
@@ -35,7 +36,7 @@ export default About
 const styles = StyleSheet.create({
     content: {
         width: '100%',
-        marginTop: 40,
+        marginTop: 20,
     },
     row: {
         width: '100%',
@@ -49,4 +50,12 @@ const styles = StyleSheet.create({
         width: '100%',
         backgroundColor: purple,
     },
+    title: {
+        maxWidth: '90%',
+        marginTop: -8,
+        marginBottom: 10,
+        color: 'black',
+        fontSize: 24,
+        fontWeight: '700',
+    }
 });

@@ -192,7 +192,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         {showTracks && <Tracks close={() => setShowTracks(false)} />}
         {showMarkers && center && <Markers center={center} select={selectMark} close={() => setShowMarkers(false)} />}
         {showAuth && <Auth close={() => setShowAuth(false)} />}
-        {showSettings && <MapSettings close={() => setShowSettings(false)} />}
+        {showSettings && <MapSettings close={() => setShowSettings(false)} showAuth={() => {setShowSettings(false); setShowAuth(true)}} />}
         {!!resetToken && <ResetPassword close={()=> storeResetToken('')} />}
         {showAccount && <Account close={() => setShowAccount(false)} showAuth={() => {setShowAccount(false); setShowAuth(true)}} />}
         {showAbout && <About close={() => setShowAbout(false)} />}

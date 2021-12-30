@@ -123,6 +123,7 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
     },
     title: {
+        maxWidth: '90%',
         marginBottom: 10,
         color: 'black',
         fontSize: 24,
