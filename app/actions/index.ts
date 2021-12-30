@@ -33,6 +33,7 @@ export enum ActionTypeEnum {
   ChangePasswordFailure = "auth/CHANGE_PASSWORD_FAILURE",
   AddPurchase = "auth/ADD_PURCHASE",
   SetPurchases = "auth/SET_PURCHASES",
+  EstablishedPurchaseConnection = "auth/ESTABLISH_PURCHASE_CONNECTION",
   // marks
   MarksRequest = "marks/MARKS_REQUEST",
   MarksSuccess = "marks/MARKS_SUCCESS",
