@@ -51,9 +51,13 @@ export const setTracksAction = (tracks: Track[]) => {
 export const addTrackAction = (track: Track) => {
   return {type: ActionTypeEnum.AddTrack, payload: track};
 };
-export const removeTrackAction = (trackId: string) => {
-  return {type: ActionTypeEnum.RemoveTrack, payload: trackId};
-};
+export const removeTrackAction =
+  (trackId: string): AppThunk =>
+  async (dispatch) => {
+    await removeFile(`${PATH}/${trackId}${TRACKS_EXT}`);
+    await removeFile(`${PATH}/${trackId}${SVG_EXT}`);
+    dispatch({type: ActionTypeEnum.RemoveTrack, payload: trackId});
+  };
 export const selectTrackAction = (track: Track | undefined): AppThunk => {
   return async dispatch => {
     if (!track) {
@@ -63,11 +67,14 @@ export const selectTrackAction = (track: Track | undefined): AppThunk => {
     }
     let trackFromFile;
     try {
-      const data = await RNFS.readFile(`${PATH}/${track.id}${TRACKS_EXT}`, 'utf8');
+      const data = await RNFS.readFile(
+        `${PATH}/${track.id}${TRACKS_EXT}`,
+        'utf8',
+      );
       trackFromFile = JSON.parse(data) as Track;
     } catch (e) {
       console.log(e);
-      Alert.alert("Can not read track file")
+      Alert.alert('Can not read track file');
       return;
     }
     let {maxX, maxY, minX, minY} = findMinMaxCoordinates(trackFromFile.track);
@@ -251,4 +258,12 @@ export const importTrackAction = (): AppThunk => {
       }
     }
   };
+};
+
+const removeFile = async (path: string) => {
+  try {
+    await RNFS.unlink(path);
+  } catch (e) {
+    console.log(e);
+  }
 };
