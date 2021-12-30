@@ -1,4 +1,4 @@
-package com.mapnnmobile;
+package com.bconf2maps;
 
 import android.content.Context;
 import android.content.Intent;

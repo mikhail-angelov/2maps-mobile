@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		00E356F31AD99517003FC87E /* mapnnmobileTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* mapnnmobileTests.m */; };
+		00E356F31AD99517003FC87E /* bconf2mapsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* bconf2mapsTests.m */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		9269C228B6569B6C698F9E2C /* libPods-mapnnmobile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CE9D2C0CB894108D6C854451 /* libPods-mapnnmobile.a */; };
-		BABD06EC3326932E8EC885B2 /* libPods-mapnnmobile-mapnnmobileTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 758FBAACB4048D8C97FBEABA /* libPods-mapnnmobile-mapnnmobileTests.a */; };
+		9269C228B6569B6C698F9E2C /* libPods-bconf2maps.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CE9D2C0CB894108D6C854451 /* libPods-bconf2maps.a */; };
+		BABD06EC3326932E8EC885B2 /* libPods-bconf2maps-bconf2mapsTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 758FBAACB4048D8C97FBEABA /* libPods-bconf2maps-bconf2mapsTests.a */; };
 		4BEF78343D2F4E669443CD12 /* AntDesign.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5DD902327ECF40D8BCD78B94 /* AntDesign.ttf */; };
 		7BA794DBCF1847C48A84CFDD /* Entypo.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EC55320E7F3B4F4DBFCA2FC5 /* Entypo.ttf */; };
 		19306D15D6704EEABC253744 /* EvilIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 07B7366FE0334804AE5ECE6C /* EvilIcons.ttf */; };
@@ -38,28 +38,28 @@
 			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
-			remoteInfo = mapnnmobile;
+			remoteInfo = bconf2maps;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		00E356EE1AD99517003FC87E /* mapnnmobileTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = mapnnmobileTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		00E356EE1AD99517003FC87E /* bconf2mapsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = bconf2mapsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		00E356F21AD99517003FC87E /* mapnnmobileTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = mapnnmobileTests.m; sourceTree = "<group>"; };
-		13B07F961A680F5B00A75B9A /* mapnnmobile.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mapnnmobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = mapnnmobile/AppDelegate.h; sourceTree = "<group>"; };
-		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = mapnnmobile/AppDelegate.m; sourceTree = "<group>"; };
-		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = mapnnmobile/Images.xcassets; sourceTree = "<group>"; };
-		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = mapnnmobile/Info.plist; sourceTree = "<group>"; };
-		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = mapnnmobile/main.m; sourceTree = "<group>"; };
-		758FBAACB4048D8C97FBEABA /* libPods-mapnnmobile-mapnnmobileTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-mapnnmobile-mapnnmobileTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = mapnnmobile/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		87BC8DE10A611EFCA88EC6AB /* Pods-mapnnmobile.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-mapnnmobile.debug.xcconfig"; path = "Target Support Files/Pods-mapnnmobile/Pods-mapnnmobile.debug.xcconfig"; sourceTree = "<group>"; };
-		8F012E3E52D82387EEC75710 /* Pods-mapnnmobile.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-mapnnmobile.release.xcconfig"; path = "Target Support Files/Pods-mapnnmobile/Pods-mapnnmobile.release.xcconfig"; sourceTree = "<group>"; };
-		A9C1B8949BC064CF4F75FAB5 /* Pods-mapnnmobile-mapnnmobileTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-mapnnmobile-mapnnmobileTests.debug.xcconfig"; path = "Target Support Files/Pods-mapnnmobile-mapnnmobileTests/Pods-mapnnmobile-mapnnmobileTests.debug.xcconfig"; sourceTree = "<group>"; };
-		CE9D2C0CB894108D6C854451 /* libPods-mapnnmobile.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-mapnnmobile.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		00E356F21AD99517003FC87E /* bconf2mapsTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = bconf2mapsTests.m; sourceTree = "<group>"; };
+		13B07F961A680F5B00A75B9A /* bconf2maps.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = bconf2maps.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = bconf2maps/AppDelegate.h; sourceTree = "<group>"; };
+		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = bconf2maps/AppDelegate.m; sourceTree = "<group>"; };
+		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = bconf2maps/Images.xcassets; sourceTree = "<group>"; };
+		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = bconf2maps/Info.plist; sourceTree = "<group>"; };
+		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = bconf2maps/main.m; sourceTree = "<group>"; };
+		758FBAACB4048D8C97FBEABA /* libPods-bconf2maps-bconf2mapsTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-bconf2maps-bconf2mapsTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = bconf2maps/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		87BC8DE10A611EFCA88EC6AB /* Pods-bconf2maps.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-bconf2maps.debug.xcconfig"; path = "Target Support Files/Pods-bconf2maps/Pods-bconf2maps.debug.xcconfig"; sourceTree = "<group>"; };
+		8F012E3E52D82387EEC75710 /* Pods-bconf2maps.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-bconf2maps.release.xcconfig"; path = "Target Support Files/Pods-bconf2maps/Pods-bconf2maps.release.xcconfig"; sourceTree = "<group>"; };
+		A9C1B8949BC064CF4F75FAB5 /* Pods-bconf2maps-bconf2mapsTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-bconf2maps-bconf2mapsTests.debug.xcconfig"; path = "Target Support Files/Pods-bconf2maps-bconf2mapsTests/Pods-bconf2maps-bconf2mapsTests.debug.xcconfig"; sourceTree = "<group>"; };
+		CE9D2C0CB894108D6C854451 /* libPods-bconf2maps.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-bconf2maps.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		EF8988E6EBBAF005BD73DC41 /* Pods-mapnnmobile-mapnnmobileTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-mapnnmobile-mapnnmobileTests.release.xcconfig"; path = "Target Support Files/Pods-mapnnmobile-mapnnmobileTests/Pods-mapnnmobile-mapnnmobileTests.release.xcconfig"; sourceTree = "<group>"; };
+		EF8988E6EBBAF005BD73DC41 /* Pods-bconf2maps-bconf2mapsTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-bconf2maps-bconf2mapsTests.release.xcconfig"; path = "Target Support Files/Pods-bconf2maps-bconf2mapsTests/Pods-bconf2maps-bconf2mapsTests.release.xcconfig"; sourceTree = "<group>"; };
 		5DD902327ECF40D8BCD78B94 /* AntDesign.ttf */ = {isa = PBXFileReference; name = "AntDesign.ttf"; path = "../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		EC55320E7F3B4F4DBFCA2FC5 /* Entypo.ttf */ = {isa = PBXFileReference; name = "Entypo.ttf"; path = "../node_modules/react-native-vector-icons/Fonts/Entypo.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		07B7366FE0334804AE5ECE6C /* EvilIcons.ttf */ = {isa = PBXFileReference; name = "EvilIcons.ttf"; path = "../node_modules/react-native-vector-icons/Fonts/EvilIcons.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
@@ -83,7 +83,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BABD06EC3326932E8EC885B2 /* libPods-mapnnmobile-mapnnmobileTests.a in Frameworks */,
+				BABD06EC3326932E8EC885B2 /* libPods-bconf2maps-bconf2mapsTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -91,20 +91,20 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9269C228B6569B6C698F9E2C /* libPods-mapnnmobile.a in Frameworks */,
+				9269C228B6569B6C698F9E2C /* libPods-bconf2maps.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		00E356EF1AD99517003FC87E /* mapnnmobileTests */ = {
+		00E356EF1AD99517003FC87E /* bconf2mapsTests */ = {
 			isa = PBXGroup;
 			children = (
-				00E356F21AD99517003FC87E /* mapnnmobileTests.m */,
+				00E356F21AD99517003FC87E /* bconf2mapsTests.m */,
 				00E356F01AD99517003FC87E /* Supporting Files */,
 			);
-			path = mapnnmobileTests;
+			path = bconf2mapsTests;
 			sourceTree = "<group>";
 		};
 		00E356F01AD99517003FC87E /* Supporting Files */ = {
@@ -115,7 +115,7 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		13B07FAE1A68108700A75B9A /* mapnnmobile */ = {
+		13B07FAE1A68108700A75B9A /* bconf2maps */ = {
 			isa = PBXGroup;
 			children = (
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
@@ -125,15 +125,15 @@
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
 			);
-			name = mapnnmobile;
+			name = bconf2maps;
 			sourceTree = "<group>";
 		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				CE9D2C0CB894108D6C854451 /* libPods-mapnnmobile.a */,
-				758FBAACB4048D8C97FBEABA /* libPods-mapnnmobile-mapnnmobileTests.a */,
+				CE9D2C0CB894108D6C854451 /* libPods-bconf2maps.a */,
+				758FBAACB4048D8C97FBEABA /* libPods-bconf2maps-bconf2mapsTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -148,9 +148,9 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				13B07FAE1A68108700A75B9A /* mapnnmobile */,
+				13B07FAE1A68108700A75B9A /* bconf2maps */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
-				00E356EF1AD99517003FC87E /* mapnnmobileTests */,
+				00E356EF1AD99517003FC87E /* bconf2mapsTests */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				C4C7AC660B3E1C7DE797E633 /* Pods */,
@@ -164,8 +164,8 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* mapnnmobile.app */,
-				00E356EE1AD99517003FC87E /* mapnnmobileTests.xctest */,
+				13B07F961A680F5B00A75B9A /* bconf2maps.app */,
+				00E356EE1AD99517003FC87E /* bconf2mapsTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -173,10 +173,10 @@
 		C4C7AC660B3E1C7DE797E633 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				87BC8DE10A611EFCA88EC6AB /* Pods-mapnnmobile.debug.xcconfig */,
-				8F012E3E52D82387EEC75710 /* Pods-mapnnmobile.release.xcconfig */,
-				A9C1B8949BC064CF4F75FAB5 /* Pods-mapnnmobile-mapnnmobileTests.debug.xcconfig */,
-				EF8988E6EBBAF005BD73DC41 /* Pods-mapnnmobile-mapnnmobileTests.release.xcconfig */,
+				87BC8DE10A611EFCA88EC6AB /* Pods-bconf2maps.debug.xcconfig */,
+				8F012E3E52D82387EEC75710 /* Pods-bconf2maps.release.xcconfig */,
+				A9C1B8949BC064CF4F75FAB5 /* Pods-bconf2maps-bconf2mapsTests.debug.xcconfig */,
+				EF8988E6EBBAF005BD73DC41 /* Pods-bconf2maps-bconf2mapsTests.release.xcconfig */,
 			);
 			name = Pods;
 			path = Pods;
@@ -209,9 +209,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		00E356ED1AD99517003FC87E /* mapnnmobileTests */ = {
+		00E356ED1AD99517003FC87E /* bconf2mapsTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "mapnnmobileTests" */;
+			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "bconf2mapsTests" */;
 			buildPhases = (
 				F5C84870BAB26E3C823F9791 /* [CP] Check Pods Manifest.lock */,
 				00E356EA1AD99517003FC87E /* Sources */,
@@ -225,14 +225,14 @@
 			dependencies = (
 				00E356F51AD99517003FC87E /* PBXTargetDependency */,
 			);
-			name = mapnnmobileTests;
-			productName = mapnnmobileTests;
-			productReference = 00E356EE1AD99517003FC87E /* mapnnmobileTests.xctest */;
+			name = bconf2mapsTests;
+			productName = bconf2mapsTests;
+			productReference = 00E356EE1AD99517003FC87E /* bconf2mapsTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		13B07F861A680F5B00A75B9A /* mapnnmobile */ = {
+		13B07F861A680F5B00A75B9A /* bconf2maps */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "mapnnmobile" */;
+			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "bconf2maps" */;
 			buildPhases = (
 				46E277554CB0FF948EAB6446 /* [CP] Check Pods Manifest.lock */,
 				FD10A7F022414F080027D42C /* Start Packager */,
@@ -247,9 +247,9 @@
 			);
 			dependencies = (
 			);
-			name = mapnnmobile;
-			productName = mapnnmobile;
-			productReference = 13B07F961A680F5B00A75B9A /* mapnnmobile.app */;
+			name = bconf2maps;
+			productName = bconf2maps;
+			productReference = 13B07F961A680F5B00A75B9A /* bconf2maps.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -269,7 +269,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "mapnnmobile" */;
+			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "bconf2maps" */;
 			compatibilityVersion = "Xcode 12.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -282,8 +282,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				13B07F861A680F5B00A75B9A /* mapnnmobile */,
-				00E356ED1AD99517003FC87E /* mapnnmobileTests */,
+				13B07F861A680F5B00A75B9A /* bconf2maps */,
+				00E356ED1AD99517003FC87E /* bconf2mapsTests */,
 			);
 		};
 /* End PBXProject section */
@@ -330,15 +330,15 @@
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-mapnnmobile-mapnnmobileTests/Pods-mapnnmobile-mapnnmobileTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-bconf2maps-bconf2mapsTests/Pods-bconf2maps-bconf2mapsTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-mapnnmobile-mapnnmobileTests/Pods-mapnnmobile-mapnnmobileTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-bconf2maps-bconf2mapsTests/Pods-bconf2maps-bconf2mapsTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-mapnnmobile-mapnnmobileTests/Pods-mapnnmobile-mapnnmobileTests-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-bconf2maps-bconf2mapsTests/Pods-bconf2maps-bconf2mapsTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */ = {
@@ -361,15 +361,15 @@
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-mapnnmobile/Pods-mapnnmobile-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-bconf2maps/Pods-bconf2maps-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-mapnnmobile/Pods-mapnnmobile-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-bconf2maps/Pods-bconf2maps-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-mapnnmobile/Pods-mapnnmobile-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-bconf2maps/Pods-bconf2maps-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		46E277554CB0FF948EAB6446 /* [CP] Check Pods Manifest.lock */ = {
@@ -387,7 +387,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-mapnnmobile-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-bconf2maps-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -400,15 +400,15 @@
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-mapnnmobile-mapnnmobileTests/Pods-mapnnmobile-mapnnmobileTests-resources-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-bconf2maps-bconf2mapsTests/Pods-bconf2maps-bconf2mapsTests-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-mapnnmobile-mapnnmobileTests/Pods-mapnnmobile-mapnnmobileTests-resources-${CONFIGURATION}-output-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-bconf2maps-bconf2mapsTests/Pods-bconf2maps-bconf2mapsTests-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-mapnnmobile-mapnnmobileTests/Pods-mapnnmobile-mapnnmobileTests-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-bconf2maps-bconf2mapsTests/Pods-bconf2maps-bconf2mapsTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		CABEE22FC00AE4B3BEE3F150 /* [CP] Copy Pods Resources */ = {
@@ -417,15 +417,15 @@
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-mapnnmobile/Pods-mapnnmobile-resources-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-bconf2maps/Pods-bconf2maps-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-mapnnmobile/Pods-mapnnmobile-resources-${CONFIGURATION}-output-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-bconf2maps/Pods-bconf2maps-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-mapnnmobile/Pods-mapnnmobile-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-bconf2maps/Pods-bconf2maps-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		F5C84870BAB26E3C823F9791 /* [CP] Check Pods Manifest.lock */ = {
@@ -443,7 +443,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-mapnnmobile-mapnnmobileTests-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-bconf2maps-bconf2mapsTests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -476,7 +476,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				00E356F31AD99517003FC87E /* mapnnmobileTests.m in Sources */,
+				00E356F31AD99517003FC87E /* bconf2mapsTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -494,7 +494,7 @@
 /* Begin PBXTargetDependency section */
 		00E356F51AD99517003FC87E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 13B07F861A680F5B00A75B9A /* mapnnmobile */;
+			target = 13B07F861A680F5B00A75B9A /* bconf2maps */;
 			targetProxy = 00E356F41AD99517003FC87E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -502,14 +502,14 @@
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A9C1B8949BC064CF4F75FAB5 /* Pods-mapnnmobile-mapnnmobileTests.debug.xcconfig */;
+			baseConfigurationReference = A9C1B8949BC064CF4F75FAB5 /* Pods-bconf2maps-bconf2mapsTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				INFOPLIST_FILE = mapnnmobileTests/Info.plist;
+				INFOPLIST_FILE = bconf2mapsTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -523,17 +523,17 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/mapnnmobile.app/mapnnmobile";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/bconf2maps.app/bconf2maps";
 			};
 			name = Debug;
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EF8988E6EBBAF005BD73DC41 /* Pods-mapnnmobile-mapnnmobileTests.release.xcconfig */;
+			baseConfigurationReference = EF8988E6EBBAF005BD73DC41 /* Pods-bconf2maps-bconf2mapsTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
-				INFOPLIST_FILE = mapnnmobileTests/Info.plist;
+				INFOPLIST_FILE = bconf2mapsTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -547,19 +547,19 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/mapnnmobile.app/mapnnmobile";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/bconf2maps.app/bconf2maps";
 			};
 			name = Release;
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 87BC8DE10A611EFCA88EC6AB /* Pods-mapnnmobile.debug.xcconfig */;
+			baseConfigurationReference = 87BC8DE10A611EFCA88EC6AB /* Pods-bconf2maps.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_BITCODE = NO;
-				INFOPLIST_FILE = mapnnmobile/Info.plist;
+				INFOPLIST_FILE = bconf2maps/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -570,7 +570,7 @@
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = mapnnmobile;
+				PRODUCT_NAME = bconf2maps;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -579,12 +579,12 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8F012E3E52D82387EEC75710 /* Pods-mapnnmobile.release.xcconfig */;
+			baseConfigurationReference = 8F012E3E52D82387EEC75710 /* Pods-bconf2maps.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				INFOPLIST_FILE = mapnnmobile/Info.plist;
+				INFOPLIST_FILE = bconf2maps/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -595,7 +595,7 @@
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = mapnnmobile;
+				PRODUCT_NAME = bconf2maps;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -727,7 +727,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "mapnnmobileTests" */ = {
+		00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "bconf2mapsTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				00E356F61AD99517003FC87E /* Debug */,
@@ -736,7 +736,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "mapnnmobile" */ = {
+		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "bconf2maps" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
@@ -745,7 +745,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "mapnnmobile" */ = {
+		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "bconf2maps" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,

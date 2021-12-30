@@ -1,4 +1,4 @@
-package com.mapnnmobile;
+package com.bconf2maps;
 
 import android.content.Context;
 import android.os.Environment;
@@ -8,7 +8,6 @@ import com.google.gson.Gson;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;

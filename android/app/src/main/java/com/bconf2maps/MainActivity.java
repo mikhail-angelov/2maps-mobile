@@ -1,20 +1,12 @@
-package com.mapnnmobile;
+package com.bconf2maps;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.StrictMode;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
-import org.devio.rn.splashscreen.SplashScreen;
 
 import com.facebook.react.ReactActivity;
 
@@ -34,7 +26,7 @@ public class MainActivity extends ReactActivity {
      */
     @Override
     protected String getMainComponentName() {
-        return "mapnnmobile";
+        return "bconf2maps";
     }
 
      private void checkPermissions() {
