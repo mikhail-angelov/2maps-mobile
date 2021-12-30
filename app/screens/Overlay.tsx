@@ -113,7 +113,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
     const menuItems: MenuItem[] = [
         { title: 'Manage Account', onPress: () => { setShowAccount(true); setShowMenu(false) } },
         { title: 'Settings', onPress: () => { setShowSettings(true); setShowMenu(false) } },
-        { title: 'POI', onPress: () => { setShowMarkers(true); setShowMenu(false) } },
+        { title: 'Marks', onPress: () => { setShowMarkers(true); setShowMenu(false) } },
         { title: 'Tracks', onPress: () => { setShowTracks(true); setShowMenu(false) } },
         { title: 'About app', onPress: () => { setShowAbout(true); setShowMenu(false) } },
         { title: 'Cancel', containerStyle: { backgroundColor: purple }, titleStyle: { color: 'white' }, onPress: () => setShowMenu(false), }
@@ -192,7 +192,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         {showTracks && <Tracks close={() => setShowTracks(false)} />}
         {showMarkers && center && <Markers center={center} select={selectMark} close={() => setShowMarkers(false)} />}
         {showAuth && <Auth close={() => setShowAuth(false)} />}
-        {showSettings && <MapSettings close={() => setShowSettings(false)} />}
+        {showSettings && <MapSettings close={() => setShowSettings(false)} showAuth={() => {setShowSettings(false); setShowAuth(true)}} />}
         {!!resetToken && <ResetPassword close={()=> storeResetToken('')} />}
         {showAccount && <Account close={() => setShowAccount(false)} showAuth={() => {setShowAccount(false); setShowAuth(true)}} />}
         {showAbout && <About close={() => setShowAbout(false)} />}

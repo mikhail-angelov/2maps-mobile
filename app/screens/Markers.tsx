@@ -1,9 +1,16 @@
 import React, { FC, useMemo, useState } from "react";
-import { View, TextInput, StyleSheet, Alert, Modal, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, StyleSheet, Alert, Modal, TouchableOpacity } from "react-native";
 import { connect, ConnectedProps } from "react-redux";
 import { Button, ListItem } from 'react-native-elements';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import {
+    MenuProvider,
+    Menu,
+    MenuOptions,
+    MenuOption,
+    MenuTrigger,
+} from 'react-native-popup-menu';
 import { Position } from '@turf/helpers';
 import distance from '@turf/distance';
 import { orderBy } from 'lodash'
@@ -14,7 +21,7 @@ import { importPoisAction, exportPoisAction, removeAllPoisAction, syncMarksActio
 import { useTranslation } from "react-i18next";
 import Advertisement from "../components/AdMob";
 import { renderColor } from "../utils/formats";
-import { purple } from "../constants/color";
+import { purple, red } from "../constants/color";
 
 interface OwnProps {
     center: Position;
@@ -80,7 +87,7 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
             ]
         );
     }
-    
+
     const onFilterMarks = (text?: string) => {
         setFilterText(text || '');
         const newMarkList = text
@@ -103,11 +110,11 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
             onPress={() => select(item.mark)}
         >
             <View style={{ minHeight: '100%', justifyContent: 'center', paddingRight: 10 }}>
-                <Icon style={{color: renderColor(item.rate)}} size={30} name="location-pin" />
+                <Icon style={{ color: renderColor(item.rate) }} size={30} name="location-pin" />
             </View>
             <ListItem.Content>
                 <ListItem.Title>{item.title}</ListItem.Title>
-                <ListItem.Subtitle style={{color: '#aaa'}}>{item.subtitle}</ListItem.Subtitle>
+                <ListItem.Subtitle style={{ color: '#aaa' }}>{item.subtitle}</ListItem.Subtitle>
             </ListItem.Content>
         </TouchableOpacity>
     )
@@ -115,13 +122,13 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
         <View style={{ flexDirection: "row", marginLeft: 'auto', maxWidth: 150 }}>
             <Button
                 icon={{ name: 'edit', color: 'white' }}
-                buttonStyle={{ minHeight: '100%', backgroundColor: '#6666FF', borderRadius: 0 }}
+                buttonStyle={{ minHeight: '100%', backgroundColor: purple, borderRadius: 0 }}
                 containerStyle={{ flex: 1, borderRadius: 0 }}
                 onPress={() => editMark(item.mark)}
             />
             <Button
                 icon={{ name: 'delete', color: 'white' }}
-                buttonStyle={{ minHeight: '100%', backgroundColor: '#CC6666', borderRadius: 0 }}
+                buttonStyle={{ minHeight: '100%', backgroundColor: red, borderRadius: 0 }}
                 containerStyle={{ flex: 1, borderRadius: 0 }}
                 onPress={() => onRemoveMark(item.mark.id)}
             />
@@ -130,43 +137,77 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
     const memoizedValue = useMemo(() => renderItem, [markers]);
     const memoizedHiddenValue = useMemo(() => renderHiddenItem, [markers]);
     return <Modal style={styles.container} visible onRequestClose={close}>
-        <View style={styles.wrapper}>
-            <View style={styles.buttons}>
-                {isFilterMarks ? (
-                    <View style={styles.filterContainer}>
-                        <TextInput
-                            placeholder={t('filter')}
-                            style={styles.filterInput}
-                            onChangeText={(value) => onFilterMarks(value)}
-                            value={filterText}
-                        />
-                        <Button buttonStyle={styles.btn} titleStyle={styles.inlineBtn} type='clear' onPress={setFilterReset} title='&#215;' />
+        <MenuProvider>
+            <View style={styles.wrapper}>
+                <View style={styles.buttons}>
+                    <View style={styles.buttonsContainer}>
+                        <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="arrow-back-ios" onPress={close} />
+                        {isFilterMarks ? (
+                            <View style={styles.filterContainer}>
+                                <TextInput
+                                    placeholder={t('filter')}
+                                    style={styles.filterInput}
+                                    onChangeText={(value) => onFilterMarks(value)}
+                                    value={filterText}
+                                />
+                                <Button buttonStyle={styles.btn} titleStyle={styles.inlineBtn} type='clear' onPress={setFilterReset} title='&#215;' />
+                            </View>
+                        ) : (
+                            <View style={styles.buttonsWithoutClose}>
+                                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="search" onPress={() => setIsFilterMarks(!isFilterMarks)} />
+                                <Menu >
+                                    <MenuTrigger><Icon style={styles.menuMainIcon} name="menu" /></MenuTrigger>
+                                    <MenuOptions >
+                                        <MenuOption onSelect={exportPois}>
+                                            <View style={styles.menuOptionContainer}>
+                                                <Icon style={styles.menuIcon} name="file-download" />
+                                                <Text style={styles.menuText}>{t('Export Marks')}</Text>
+                                            </View>
+                                        </MenuOption>
+                                        <MenuOption onSelect={importPois}>
+                                            <View style={styles.menuOptionContainer}>
+                                                <Icon style={styles.menuIcon} name="file-upload" />
+                                                <Text style={styles.menuText}>{t('Import Mark')}</Text>
+                                            </View>
+                                        </MenuOption>
+                                        {isAuthenticated &&
+                                            <MenuOption onSelect={syncMarks}>
+                                                <View style={styles.menuOptionContainer}>
+                                                    <Icon style={styles.menuIcon} name="import-export" />
+                                                    <Text style={styles.menuText}>{t('Sync Mark')}</Text>
+                                                </View>
+                                            </MenuOption>
+                                        }
+                                        <MenuOption onSelect={onRemoveAll}>
+                                            <View style={styles.menuOptionContainer}>
+                                                <Icon style={styles.menuIcon} name="delete" />
+                                                <Text style={styles.menuText}>{t('Remove Marks')}</Text>
+                                            </View>
+                                        </MenuOption>
+                                    </MenuOptions>
+                                </Menu>
+                            </View>
+                        )}
                     </View>
-                ) : (
-                    <View style={styles.buttonsWithoutClose}>
-                        <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="search" onPress={() => setIsFilterMarks(!isFilterMarks)} />
-                        <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-download" onPress={exportPois} />
-                        <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="file-upload" onPress={importPois} />
-                        {isAuthenticated && <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="import-export" onPress={syncMarks} />}
-                        <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="delete" onPress={onRemoveAll} />
+                    <View style={styles.headerTitleContainer}>
+                        <Text style={styles.title}>{t('Marks')}</Text>
                     </View>
-                )}
-                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="close" onPress={close} />
+                </View>
+                <View style={styles.scroll}>
+                    <SwipeListView
+                        data={filterList}
+                        renderItem={memoizedValue}
+                        renderHiddenItem={memoizedHiddenValue}
+                        leftOpenValue={0}
+                        rightOpenValue={-150}
+                        previewRowKey={filterList[0] ? filterList[0].mark.id : undefined}
+                        previewOpenValue={-40}
+                        previewOpenDelay={1000}
+                    />
+                </View>
             </View>
-            <View style={styles.scroll}>
-                <SwipeListView
-                    data={filterList}
-                    renderItem={memoizedValue}
-                    renderHiddenItem={memoizedHiddenValue}
-                    leftOpenValue={0}
-                    rightOpenValue={-150}
-                    previewRowKey={filterList[0] ? filterList[0].mark.id : undefined}
-                    previewOpenValue={-40}
-                    previewOpenDelay={1000}
-                />
-            </View>
-        </View>
-        <Advertisement />
+            <Advertisement />
+        </MenuProvider>
     </Modal>
 }
 
@@ -195,11 +236,21 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
     },
     buttons: {
-        flexDirection: 'row',
+        maxWidth: '100%',
+        flexDirection: 'column',
         textAlign: 'center',
-        justifyContent: "space-between",
         padding: 5,
         backgroundColor: purple,
+    },
+    buttonsContainer: {
+        flexDirection: 'row',
+    },
+    headerTitleContainer: {
+        width: '100%',
+        position: 'absolute',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 5,
     },
     buttonsWithoutClose: {
         flexDirection: 'row',
@@ -245,5 +296,37 @@ const styles = StyleSheet.create({
     inlineBtn: {
         color: purple,
         fontSize: 20,
-    }
+    },
+    title: {
+        marginTop: 12,
+        color: 'white',
+        fontSize: 24,
+        fontWeight: '700',
+    },
+    menuMainIcon: {
+        textAlign: 'center',
+        alignContent: 'center',
+        padding: 10,
+        margin: 10,
+        marginBottom: 5,
+        fontSize: 22,
+        fontWeight: '700',
+        color: 'white',
+    },
+    menuOptionContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    menuIcon: {
+        padding: 10,
+        margin: 10,
+        fontSize: 22,
+        fontWeight: '700',
+        color: purple,
+    },
+    menuText: {
+        color: 'black',
+        fontSize: 16,
+        fontWeight: '700',
+    },
 });

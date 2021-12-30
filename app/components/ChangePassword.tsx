@@ -40,7 +40,7 @@ const PasswordReset: FC<Props> = ({ error, changePassword, close, isAuthInProgre
     return <MapModal onRequestClose={close}>
         <Spinner show={isAuthInProgress} />
         <View style={styles.content}>
-            <Text style={styles.subTitle}>{t('Change your password')}</Text>
+            <Text style={styles.title}>{t('Change your password')}</Text>
             <View style={styles.formField}>
                 <TextInput
                     textContentType="password"
@@ -85,10 +85,13 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         display: 'flex',
     },
-    subTitle: {
-        marginVertical: 10,
+    title: {
+        maxWidth: '90%',
+        marginTop: -30,
+        marginBottom: 10,
         color: 'black',
-        fontSize: 20,
+        fontSize: 24,
+        fontWeight: '700',
     },
     modalInput: {
         borderRadius: 5,

@@ -37,7 +37,7 @@ const Login: FC<LoginProps> = ({ error, login, setSignUp, setPasswordReset }) =>
     const { t } = useTranslation();
 
     return <View style={styles.content}>
-        <Text style={styles.subTitle}>{t('Login')}</Text>
+        <Text style={styles.title}>{t('Login')}</Text>
         <View style={styles.formField}>
             <Text style={styles.label}>{t('Email')}</Text>
             <TextInput
@@ -92,7 +92,7 @@ const SignUp: FC<SignUpProps> = ({ error, signUp, back, isAuthInProgress }) => {
     }, [isAuthInProgress])
 
     return <View style={styles.content}>
-        <Text style={styles.subTitle}>{t('Sign Up')}</Text>
+        <Text style={styles.title}>{t('Sign Up')}</Text>
         <View style={styles.formField}>
             <Text style={styles.label}>{t('Name')}</Text>
             <TextInput
@@ -183,7 +183,7 @@ const ForgetPassword: FC<PasswordResetProps> = ({ error, passwordReset, back, se
         }
     }, [isAuthInProgress])
     return <View style={styles.content}>
-        <Text style={styles.subTitle}>{t('Reset your password')}</Text>
+        <Text style={styles.title}>{t('Reset your password')}</Text>
         <View style={styles.formField}>
             <Text style={styles.label}>{t('Enter your user account\'s verified email address and we will send you a password reset link')}</Text>
             <TextInput
@@ -235,10 +235,13 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         display: 'flex',
     },
-    subTitle: {
-        marginVertical: 10,
+    title: {
+        maxWidth: '90%',
+        marginTop: -8,
+        marginBottom: 10,
         color: 'black',
-        fontSize: 20,
+        fontSize: 24,
+        fontWeight: '700',
     },
     modalInput: {
         borderRadius: 5,

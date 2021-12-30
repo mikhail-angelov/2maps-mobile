@@ -2,7 +2,7 @@
     "Login": "Войти",
     "Account": "Аккаунт",
     "Settings": "Настройки",
-    "POI": "Места",
+    "Marks": "Метки",
     "Tracks": "Треки",
     "Cancel": "Отмена",
     "Forgot password?":"Забыли пароль?",
@@ -22,7 +22,7 @@
     "loading...": "загрузка...",
     "Primary Map": "Основная Карта",
     "Secondary Map": "Дополнительная Карта",
-    "You need to be logged in to download maps": "Вам нужно войти, чтобы скачивать карты",
+    "Login to download maps": "Авторизуйтесь, чтобы скачивать карты",
     "Don't know how to open this URL": "Невозможно открыть этот URL",
     "Warning!": "Внимание!",
     "Description": "Описание",
@@ -57,5 +57,10 @@
     "Help": "Помощь",
     "no description": "нет описания",
     "filter": "фильтр",
-    "Privacy Policy": "Политика конфиденциальности"
+    "Privacy Policy": "Политика конфиденциальности",
+    "Import Track": "Импорт Трека",
+    "Export Marks": "Экспорт Меток",
+    "Import Mark": "Импорт Метки",
+    "Sync Mark": "Синхронизация",
+    "Remove Marks": "Удалить Метки"
 }
