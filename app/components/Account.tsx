@@ -29,6 +29,7 @@ const Account: FC<Props> = ({ close, showAuth, isAuthenticated, purchases, resto
     const { t } = useTranslation()
 
     return <MapModal onRequestClose={close}>
+        <Text style={styles.title}>{t('Manage Account')}</Text>
         <View style={styles.content}>
             {purchases && <Text style={styles.subTitle}>{t('Premium version!')}</Text> }
             <View style={styles.row}>
@@ -50,12 +51,19 @@ export default connector(Account)
 
 
 const styles = StyleSheet.create({
+    title: {
+        marginTop: -8,
+        marginBottom: 10,
+        color: 'black',
+        fontSize: 24,
+        fontWeight: '700',
+    },
     content: {
         width: '100%',
-        marginTop: 40,
+        marginTop: 10,
     },
     subTitle: {
-        width: "100%",
+        width: '100%',
         marginBottom: 20,
         color: 'black',
         fontSize: 18,

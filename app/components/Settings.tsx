@@ -8,7 +8,7 @@ import { logoutAction } from "../actions/auth-actions";
 import {selectUser} from '../reducers/auth'
 import ChangePassword from "./ChangePassword";
 import { useTranslation } from "react-i18next";
-import { purple } from "../constants/color";
+import { purple, red } from "../constants/color";
 
 const mapStateToProps = (state: State) => ({
     user: selectUser(state)
@@ -24,6 +24,7 @@ const Settings: FC<Props> = ({ logout, user }) => {
     const { t } = useTranslation()
 
     return <View style={styles.content}>
+        <Text style={styles.title}>{t('Account')}</Text>
         <Text style={styles.subTitle}>{`${t('Hello')} ${user?.email}`}</Text>
         <View style={styles.row}>
         <Button buttonStyle={styles.btn} onPress={() => setShowQRReader(true)} title={t('Download map')} disabled/>
@@ -45,6 +46,13 @@ const styles = StyleSheet.create({
         width:'100%',
         alignItems:'flex-start',
     },
+    title: {
+        marginTop: -5,
+        marginBottom: 10,
+        color: 'black',
+        fontSize: 24,
+        fontWeight: '700',
+    },
     subTitle: {
         marginVertical: 10,
         color: 'black',
@@ -59,8 +67,10 @@ const styles = StyleSheet.create({
     btn: {
         // paddingHorizontal: 20,
         backgroundColor: purple,
+        minWidth: '100%',
     },
     inlineBtn: {
-        color: purple,
+        minWidth: '100%',
+        color: red,
     }
 });

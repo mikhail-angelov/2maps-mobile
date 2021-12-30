@@ -14,7 +14,7 @@ import { importPoisAction, exportPoisAction, removeAllPoisAction, syncMarksActio
 import { useTranslation } from "react-i18next";
 import Advertisement from "../components/AdMob";
 import { renderColor } from "../utils/formats";
-import { purple } from "../constants/color";
+import { purple, red } from "../constants/color";
 
 interface OwnProps {
     center: Position;
@@ -115,13 +115,13 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
         <View style={{ flexDirection: "row", marginLeft: 'auto', maxWidth: 150 }}>
             <Button
                 icon={{ name: 'edit', color: 'white' }}
-                buttonStyle={{ minHeight: '100%', backgroundColor: '#6666FF', borderRadius: 0 }}
+                buttonStyle={{ minHeight: '100%', backgroundColor: purple, borderRadius: 0 }}
                 containerStyle={{ flex: 1, borderRadius: 0 }}
                 onPress={() => editMark(item.mark)}
             />
             <Button
                 icon={{ name: 'delete', color: 'white' }}
-                buttonStyle={{ minHeight: '100%', backgroundColor: '#CC6666', borderRadius: 0 }}
+                buttonStyle={{ minHeight: '100%', backgroundColor: red, borderRadius: 0 }}
                 containerStyle={{ flex: 1, borderRadius: 0 }}
                 onPress={() => onRemoveMark(item.mark.id)}
             />

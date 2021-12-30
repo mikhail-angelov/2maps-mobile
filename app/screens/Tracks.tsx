@@ -13,7 +13,7 @@ import { selectTrackAction, startTrackingAction, stopTrackingAction, exportTrack
 import { SvgXml } from "react-native-svg";
 import { useTranslation } from "react-i18next";
 import Advertisement from "../components/AdMob";
-import { purple } from "../constants/color";
+import { green, purple, red } from "../constants/color";
 
 export enum MENU {
     Cancel,
@@ -104,19 +104,19 @@ const Tracks: FC<Props> = ({ tracks, isTracking, startTracking, stopTracking, se
         <View style={{ flexDirection: "row", marginLeft: 'auto', maxWidth: 200 }}>
             <Button
                 icon={{ name: 'file-download', color: 'white' }}
-                buttonStyle={{ minHeight: '100%', backgroundColor: '#6666FF', borderRadius: 0 }}
+                buttonStyle={{ minHeight: '100%', backgroundColor: purple, borderRadius: 0 }}
                 containerStyle={{ flex: 1, borderRadius: 0 }}
                 onPress={() => exportTrack(item.id)}
             />
             <Button
                 icon={{ name: 'delete', color: 'white' }}
-                buttonStyle={{ minHeight: '100%', backgroundColor: '#CC6666', borderRadius: 0 }}
+                buttonStyle={{ minHeight: '100%', backgroundColor: red, borderRadius: 0 }}
                 containerStyle={{ flex: 1, borderRadius: 0 }}
                 onPress={() => onRemoveTrack(item.id)}
             />
             <Button
                 icon={{ name: 'visibility', color: 'white' }}
-                buttonStyle={{ minHeight: '100%', backgroundColor: '#669966', borderRadius: 0 }}
+                buttonStyle={{ minHeight: '100%', backgroundColor: green, borderRadius: 0 }}
                 containerStyle={{ flex: 1, borderRadius: 0 }}
                 onPress={() => onSelectTrack(item.id)}
             />
