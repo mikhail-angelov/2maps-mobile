@@ -62,6 +62,22 @@ const getTrackFromFile = async (trackId: string): Promise<Track> => {
   const data = await RNFS.readFile(`${PATH}/${trackId}${TRACKS_EXT}`, 'utf8');
   return JSON.parse(data);
 };
+const writeTrackToFile = async (activeTrack: Track) => {
+  const filepath = `${PATH}/${activeTrack.id}`;
+  activeTrack.distance = distance(
+    activeTrack.track[0],
+    activeTrack.track[activeTrack.track.length - 1],
+  ).toFixed(3);
+  await RNFS.writeFile(
+    decodeURI(filepath + TRACKS_EXT),
+    JSON.stringify(activeTrack),
+    'utf8',
+  );
+  const svgThumbnail = renderTrackIcon(activeTrack) || '';
+  if (svgThumbnail) {
+    await RNFS.writeFile(decodeURI(filepath + SVG_EXT), svgThumbnail, 'utf8');
+  }
+};
 export const selectTrackAction = (track: Track | undefined): AppThunk => {
   return async dispatch => {
     if (!track) {
@@ -134,25 +150,8 @@ export const stopTrackingAction = (): AppThunk => {
   return async (dispatch, getState) => {
     const activeTrack = getState().tracker.activeTrack;
     if (activeTrack) {
-      const filepath = `${PATH}/${activeTrack.id}`;
       try {
-        activeTrack.distance = distance(
-          activeTrack.track[0],
-          activeTrack.track[activeTrack.track.length - 1],
-        ).toFixed(3);
-        await RNFS.writeFile(
-          decodeURI(filepath + TRACKS_EXT),
-          JSON.stringify(activeTrack),
-          'utf8',
-        );
-        const svgThumbnail = renderTrackIcon(activeTrack) || '';
-        if (svgThumbnail) {
-          await RNFS.writeFile(
-            decodeURI(filepath + SVG_EXT),
-            svgThumbnail,
-            'utf8',
-          );
-        }
+        await writeTrackToFile(activeTrack);
       } catch (e) {
         console.log(e);
       }
@@ -250,7 +249,8 @@ export const importTrackAction = (): AppThunk => {
         name: trackFromKml.name,
         track: trackFromKml.coordinates,
       };
-      dispatch(addTrackAction(newTrack));
+      await writeTrackToFile(newTrack)
+      dispatch(updateTrackListAction());
     } catch (err: any) {
       if (DocumentPicker.isCancel(err)) {
         // User cancelled the picker, exit any dialogs or menus and move on
