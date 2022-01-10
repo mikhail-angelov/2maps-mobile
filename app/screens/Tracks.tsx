@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useEffect } from "react";
 import { View, StyleSheet, Modal, Alert, TouchableOpacity } from "react-native";
 import { connect, ConnectedProps } from "react-redux";
 import { Button, ListItem, Text } from 'react-native-elements';
@@ -15,7 +15,7 @@ import {
 } from 'react-native-popup-menu';
 import { State } from '../store/types'
 import { selectSelectedTrack, selectTracks } from '../reducers/tracker'
-import { selectTrackAction, exportTrackAction, removeTrackAction, importTrackAction } from "../actions/tracker-actions";
+import { selectTrackAction, exportTrackAction, removeTrackAction, importTrackAction, updateTrackListAction, clearTrackListAction } from "../actions/tracker-actions";
 import { SvgXml } from "react-native-svg";
 import { useTranslation } from "react-i18next";
 import Advertisement from "../components/AdMob";
@@ -45,11 +45,13 @@ const mapDispatchToProps = {
     exportTrack: exportTrackAction,
     removeTrack: removeTrackAction,
     importTrack: importTrackAction,
+    updateTrackList: updateTrackListAction,
+    clearTrackList: clearTrackListAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
 
-const Tracks: FC<Props> = ({ tracks, selectedTrack, selectTrack, close, exportTrack, removeTrack, importTrack }) => {
+const Tracks: FC<Props> = ({ tracks, selectedTrack, selectTrack, close, exportTrack, removeTrack, importTrack, updateTrackList, clearTrackList }) => {
     const { t } = useTranslation();
 
     const onSelectTrack = (id: string) => {
@@ -122,7 +124,12 @@ const Tracks: FC<Props> = ({ tracks, selectedTrack, selectTrack, close, exportTr
             />
         </View>
     );
-        
+    
+    useEffect(() => {
+        updateTrackList()
+        return () => {clearTrackList()}
+    }, [])
+
     return <Modal style={styles.container} visible onRequestClose={close}>
         <MenuProvider>
             <View style={styles.wrapper}>

@@ -159,7 +159,6 @@ export const stopTrackingAction = (): AppThunk => {
     }
 
     dispatch({type: ActionTypeEnum.EndTracking});
-    dispatch(updateTrackListAction());
   };
 };
 
@@ -195,6 +194,8 @@ export const updateTrackListAction = (): AppThunk => async dispatch => {
     console.log('Update tracks error', e);
   }
 };
+
+export const clearTrackListAction = () => ({type: ActionTypeEnum.SetTracks, payload: []})
 
 export const exportTrackAction = (trackId: string): AppThunk => {
   return async (dispatch, getState) => {
