@@ -22,7 +22,7 @@ import * as _ from 'lodash';
 import i18next from 'i18next';
 import distance from '@turf/distance';
 
-const PATH = RNFS.TemporaryDirectoryPath;
+const PATH = `${RNFS.CachesDirectoryPath}/tracks`;
 const TRACKS_EXT = '.track';
 const SVG_EXT = '.svg';
 
@@ -63,6 +63,11 @@ const getTrackFromFile = async (trackId: string): Promise<Track> => {
   return JSON.parse(data);
 };
 const writeTrackToFile = async (activeTrack: Track) => {
+  try{
+    await RNFS.readDir(PATH)
+  } catch (e) {
+    await RNFS.mkdir(PATH)
+  }
   const filepath = `${PATH}/${activeTrack.id}`;
   activeTrack.distance = distance(
     activeTrack.track[0],
@@ -118,7 +123,7 @@ export const startTrackingAction = (): AppThunk => {
     const location = selectLocation(getState());
     const startPoint = [location.coords.longitude, location.coords.latitude];
     const track: Track = {
-      id: `${Date.now()}`,
+      id: uuid(),
       start: Date.now(),
       end: Date.now(),
       name: '',
@@ -151,6 +156,7 @@ export const stopTrackingAction = (): AppThunk => {
     const activeTrack = getState().tracker.activeTrack;
     if (activeTrack) {
       try {
+        activeTrack.end = Date.now()
         await writeTrackToFile(activeTrack);
       } catch (e) {
         console.log(e);
