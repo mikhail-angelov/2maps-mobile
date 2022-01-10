@@ -53,11 +53,15 @@ export const addTrackAction = (track: Track) => {
 };
 export const removeTrackAction =
   (trackId: string): AppThunk =>
-  async (dispatch) => {
+  async dispatch => {
     await removeFile(`${PATH}/${trackId}${TRACKS_EXT}`);
     await removeFile(`${PATH}/${trackId}${SVG_EXT}`);
     dispatch({type: ActionTypeEnum.RemoveTrack, payload: trackId});
   };
+const getTrackFromFile = async (trackId: string): Promise<Track> => {
+  const data = await RNFS.readFile(`${PATH}/${trackId}${TRACKS_EXT}`, 'utf8');
+  return JSON.parse(data);
+};
 export const selectTrackAction = (track: Track | undefined): AppThunk => {
   return async dispatch => {
     if (!track) {
@@ -67,11 +71,7 @@ export const selectTrackAction = (track: Track | undefined): AppThunk => {
     }
     let trackFromFile;
     try {
-      const data = await RNFS.readFile(
-        `${PATH}/${track.id}${TRACKS_EXT}`,
-        'utf8',
-      );
-      trackFromFile = JSON.parse(data) as Track;
+      trackFromFile = await getTrackFromFile(track.id);
     } catch (e) {
       console.log(e);
       Alert.alert('Can not read track file');
@@ -195,35 +195,35 @@ export const updateTrackListAction = (): AppThunk => async dispatch => {
   }
 };
 
-export const clearTrackListAction = () => ({type: ActionTypeEnum.SetTracks, payload: []})
+export const clearTrackListAction = () => ({
+  type: ActionTypeEnum.SetTracks,
+  payload: [],
+});
 
-export const exportTrackAction = (trackId: string): AppThunk => {
-  return async (dispatch, getState) => {
-    const tracks = selectTracks(getState());
-    const exportedTrack = tracks.find(item => item.id === trackId);
-    let url = '';
-    try {
-      if (!exportedTrack) {
-        throw 'can not find track by id';
-      }
-      const compiledKml = createKml(exportedTrack);
-      url = RNFS.DownloadDirectoryPath + `/${compiledKml.name}.kml`;
-      console.log('writing kml to:', url, '\n');
-      await RNFS.writeFile(decodeURI(url), compiledKml.data, 'utf8');
-      Alert.alert(i18next.t('Track is saved'), `${i18next.t('to')} ${url}`);
-    } catch (err: any) {
-      console.log('Error write to:', url, '\n', err);
-      Alert.alert(
-        i18next.t('Oops'),
-        `${i18next.t('do not manage to save it')} ${url}`,
-      );
-      if (DocumentPicker.isCancel(err)) {
-        // User cancelled the picker, exit any dialogs or menus and move on
-      } else {
-        throw err;
-      }
+export const exportTrack = async (trackId: string) => {
+  let url = '';
+  try {
+    const exportedTrack = await getTrackFromFile(trackId);
+    if (!exportedTrack) {
+      throw 'can not find track by id';
     }
-  };
+    const compiledKml = createKml(exportedTrack);
+    url = RNFS.DownloadDirectoryPath + `/${compiledKml.name}.kml`;
+    console.log('writing kml to:', url, '\n');
+    await RNFS.writeFile(decodeURI(url), compiledKml.data, 'utf8');
+    Alert.alert(i18next.t('Track is saved'), `${i18next.t('to')} ${url}`);
+  } catch (err: any) {
+    console.log('Error write to:', url, '\n', err);
+    Alert.alert(
+      i18next.t('Oops'),
+      `${i18next.t('do not manage to save it')} ${url}`,
+    );
+    if (DocumentPicker.isCancel(err)) {
+      // User cancelled the picker, exit any dialogs or menus and move on
+    } else {
+      throw err;
+    }
+  }
 };
 export const restartTrackingAction = (): AppThunk => {
   return async (dispatch, getState) => {

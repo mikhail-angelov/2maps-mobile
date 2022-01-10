@@ -15,7 +15,7 @@ import {
 } from 'react-native-popup-menu';
 import { State } from '../store/types'
 import { selectSelectedTrack, selectTracks } from '../reducers/tracker'
-import { selectTrackAction, exportTrackAction, removeTrackAction, importTrackAction, updateTrackListAction, clearTrackListAction } from "../actions/tracker-actions";
+import { selectTrackAction, exportTrack, removeTrackAction, importTrackAction, updateTrackListAction, clearTrackListAction } from "../actions/tracker-actions";
 import { SvgXml } from "react-native-svg";
 import { useTranslation } from "react-i18next";
 import Advertisement from "../components/AdMob";
@@ -42,7 +42,6 @@ const mapStateToProps = (state: State) => ({
 });
 const mapDispatchToProps = {
     selectTrack: selectTrackAction,
-    exportTrack: exportTrackAction,
     removeTrack: removeTrackAction,
     importTrack: importTrackAction,
     updateTrackList: updateTrackListAction,
@@ -51,7 +50,7 @@ const mapDispatchToProps = {
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
 
-const Tracks: FC<Props> = ({ tracks, selectedTrack, selectTrack, close, exportTrack, removeTrack, importTrack, updateTrackList, clearTrackList }) => {
+const Tracks: FC<Props> = ({ tracks, selectedTrack, selectTrack, close, removeTrack, importTrack, updateTrackList, clearTrackList }) => {
     const { t } = useTranslation();
 
     const onSelectTrack = (id: string) => {
