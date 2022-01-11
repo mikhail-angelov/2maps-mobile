@@ -1,5 +1,5 @@
-import React, { FC } from "react";
-import { View, Text, StyleSheet, Linking } from "react-native";
+import React, { FC, useEffect, useState } from "react";
+import { View, Text, StyleSheet, Linking, NativeModules } from "react-native";
 import { Button } from 'react-native-elements';
 import { useTranslation } from "react-i18next";
 import MapModal from "./Modal";
@@ -11,8 +11,14 @@ interface AboutProps {
 }
 
 const About: FC<AboutProps> = ({ close }) => {
+    const [version, setVersion] = useState('')
     const { t, i18n } = useTranslation()
     const termsUrl = i18n.language === 'ru-RU' ? { tos: TERMS_OF_SERVICE_RU_URL, privacy: PRIVACY_POLICY_RU_URL } : { tos: TERMS_OF_SERVICE_EN_URL, privacy: PRIVACY_POLICY_EN_URL }
+    useEffect(()=>{
+        NativeModules.MapsModule.getVersion().then((value: string)=>{
+            setVersion(value)
+        });
+    },[])
     return <MapModal onRequestClose={close}>
         <Text style={styles.title}>{t('About app')}</Text>
         <View style={styles.content}>
@@ -28,6 +34,7 @@ const About: FC<AboutProps> = ({ close }) => {
             <View style={styles.lastRow}>
                 <Button buttonStyle={styles.btn} title={t('Help')} onPress={() => Linking.openURL(HELP_URL)} />
             </View></View>
+        <Text style={styles.text}>{version}</Text>
     </MapModal>
 }
 
@@ -57,5 +64,10 @@ const styles = StyleSheet.create({
         color: 'black',
         fontSize: 24,
         fontWeight: '700',
+    },
+    text: {
+        marginTop: 20,
+        width: "100%",
+        textAlign: "center"
     }
 });
