@@ -8,6 +8,8 @@ import android.util.Log;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.util.LongSparseArray;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -28,6 +30,7 @@ public class MapsModule extends ReactContextBaseJavaModule {
     private static final String TAG = "MapsModule";
     private Downloader downloader;
     private LongSparseArray<Callback> appDownloads;
+    private final ReactApplicationContext reactContext;
     BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -53,6 +56,7 @@ public class MapsModule extends ReactContextBaseJavaModule {
 
     MapsModule(ReactApplicationContext reactContext) {
         super(reactContext);
+        this.reactContext = reactContext;
         downloader = new Downloader(reactContext);
         appDownloads = new LongSparseArray<>();
         IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
@@ -123,6 +127,21 @@ public class MapsModule extends ReactContextBaseJavaModule {
         Log.d(TAG, "removeMap " + name);
         LocalHost.getInstance().removeMap(name);
         promise.resolve("ok");
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @ReactMethod
+    public void getVersion(Promise promise) {
+        String packageName = this.reactContext.getPackageName();
+        PackageManager packageManager = this.reactContext.getPackageManager();
+        Object versionName = "";
+        Object versionCode = "";
+        try {
+            versionName = packageManager.getPackageInfo(packageName, 0).versionName;
+            versionCode = packageManager.getPackageInfo(packageName, 0).versionCode;
+        } catch (NameNotFoundException e) {          
+        }
+        promise.resolve(versionName + " - " + versionCode);
     }
 
     //use it to notify
