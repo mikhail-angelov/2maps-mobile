@@ -63,10 +63,21 @@ const getTrackFromFile = async (trackId: string): Promise<Track> => {
   return JSON.parse(data);
 };
 const writeTrackToFile = async (activeTrack: Track) => {
-  try{
-    await RNFS.readDir(PATH)
+  try {
+    await RNFS.readDir(PATH);
   } catch (e) {
-    await RNFS.mkdir(PATH)
+    if (_.get(e, 'message') === 'Folder does not exist') {
+      await RNFS.mkdir(PATH);
+    } else {
+      const title = i18next.t('Can not save track!');
+      const message = `${i18next.t('Directory unreachable')}: ${PATH}; ${_.get(
+        e,
+        'message',
+        '',
+      )}`;
+      Alert.alert(title, message);
+      throw e;
+    }
   }
   const filepath = `${PATH}/${activeTrack.id}`;
   activeTrack.distance = distance(
@@ -156,7 +167,7 @@ export const stopTrackingAction = (): AppThunk => {
     const activeTrack = getState().tracker.activeTrack;
     if (activeTrack) {
       try {
-        activeTrack.end = Date.now()
+        activeTrack.end = Date.now();
         await writeTrackToFile(activeTrack);
       } catch (e) {
         console.log(e);
@@ -255,7 +266,7 @@ export const importTrackAction = (): AppThunk => {
         name: trackFromKml.name,
         track: trackFromKml.coordinates,
       };
-      await writeTrackToFile(newTrack)
+      await writeTrackToFile(newTrack);
       dispatch(updateTrackListAction());
     } catch (err: any) {
       if (DocumentPicker.isCancel(err)) {
