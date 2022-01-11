@@ -8,7 +8,7 @@ import Config from 'react-native-config';
 const itemSkus =
   Platform.select({
     ios: [],
-    android: [Config.ANDROID_PURCHASE_APP_ID || ''],
+    android: [Config.ANDROID_PURCHASE_ITEM_SKU || ''],
   }) || [];
 
 export const requestPurchase = async () => {
