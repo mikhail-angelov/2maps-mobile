@@ -1,10 +1,9 @@
-import React, { FC } from "react";
+import React, { FC, useEffect } from "react";
 import { View, StyleSheet, Modal, Alert, TouchableOpacity } from "react-native";
 import { connect, ConnectedProps } from "react-redux";
 import { Button, ListItem, Text } from 'react-native-elements';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import distance from '@turf/distance';
 import { orderBy } from 'lodash'
 import dayjs from 'dayjs'
 import {
@@ -16,7 +15,7 @@ import {
 } from 'react-native-popup-menu';
 import { State } from '../store/types'
 import { selectSelectedTrack, selectTracks } from '../reducers/tracker'
-import { selectTrackAction, exportTrackAction, removeTrackAction, importTrackAction } from "../actions/tracker-actions";
+import { selectTrackAction, exportTrack, removeTrackAction, importTrackAction, updateTrackListAction, clearTrackListAction } from "../actions/tracker-actions";
 import { SvgXml } from "react-native-svg";
 import { useTranslation } from "react-i18next";
 import Advertisement from "../components/AdMob";
@@ -43,14 +42,15 @@ const mapStateToProps = (state: State) => ({
 });
 const mapDispatchToProps = {
     selectTrack: selectTrackAction,
-    exportTrack: exportTrackAction,
     removeTrack: removeTrackAction,
     importTrack: importTrackAction,
+    updateTrackList: updateTrackListAction,
+    clearTrackList: clearTrackListAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
 
-const Tracks: FC<Props> = ({ tracks, selectedTrack, selectTrack, close, exportTrack, removeTrack, importTrack }) => {
+const Tracks: FC<Props> = ({ tracks, selectedTrack, selectTrack, close, removeTrack, importTrack, updateTrackList, clearTrackList }) => {
     const { t } = useTranslation();
 
     const onSelectTrack = (id: string) => {
@@ -75,9 +75,8 @@ const Tracks: FC<Props> = ({ tracks, selectedTrack, selectTrack, close, exportTr
         );
     }
 
-    const list: Item[] = orderBy(tracks, 'start', 'desc').map(({ id, name, start, end, track, thumbnail }) => {
-        const l = distance(track[0], track[track.length - 1]).toFixed(3)
-        const subtitle = `T: ${dayjs(end - start).format('HH:mm')}, L: ${l} km.`
+    const list: Item[] = orderBy(tracks, 'start', 'desc').map(({ id, name, start, end, distance, thumbnail }) => {
+        const subtitle = `T: ${dayjs(end - start).format('HH:mm')}, L: ${distance} km.`
         return {
             id,
             key: id,
@@ -124,6 +123,11 @@ const Tracks: FC<Props> = ({ tracks, selectedTrack, selectTrack, close, exportTr
             />
         </View>
     );
+    
+    useEffect(() => {
+        updateTrackList()
+        return () => {clearTrackList()}
+    }, [])
 
     return <Modal style={styles.container} visible onRequestClose={close}>
         <MenuProvider>

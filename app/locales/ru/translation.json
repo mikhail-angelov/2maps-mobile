@@ -62,5 +62,7 @@
     "Export Marks": "Экспорт Меток",
     "Import Mark": "Импорт Метки",
     "Sync Mark": "Синхронизация",
-    "Remove Marks": "Удалить Метки"
+    "Remove Marks": "Удалить Метки",
+    "Can not save track!": "Не получилось сохранить трек!",
+    "Directory unreachable": "Путь недоступен"
 }
