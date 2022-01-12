@@ -5,30 +5,33 @@ import i18next from 'i18next';
 import * as _ from 'lodash';
 import Config from 'react-native-config';
 
-const itemSkus =
-  Platform.select({
-    ios: [],
-    android: [Config.ANDROID_PURCHASE_ITEM_SKU || ''],
-  }) || [];
-
 export const requestPurchase = async () => {
-  const [purchases, products] = await Promise.all([
-    RNIap.getAvailablePurchases(),
-    RNIap.getProducts(itemSkus),
-  ]);
-  const purchaseProductId = _.get(purchases, '[0].productId', null);
-  const availableProductId = _.get(products, '[0].productId', undefined);
-  if (_.isEqual(purchaseProductId, availableProductId)) {
-    return Alert.alert(i18next.t('You already bought the app!'));
-  }
-
-  if (_.isEmpty(availableProductId)) {
-    return Alert.alert(i18next.t('No Products Available'));
-  }
+  const itemSkus =
+    Platform.select({
+      ios: [''],
+      android: [Config.ANDROID_PURCHASE_ITEM_SKU || ''],
+    }) || [''];
   try {
-    await RNIap.requestPurchase(availableProductId);
+    const [purchases, products] = await Promise.all([
+      RNIap.getAvailablePurchases(),
+      RNIap.getProducts(itemSkus),
+    ]);
+    const purchaseProductId = _.get(purchases, '[0].productId', null);
+    const availableProductId = _.get(products, '[0].productId', undefined);
+    if (_.isEqual(purchaseProductId, availableProductId)) {
+      return Alert.alert(i18next.t('You already bought the app!'));
+    }
+
+    if (_.isEmpty(availableProductId)) {
+      return Alert.alert(i18next.t('No Products Available'));
+    }
+      await RNIap.requestPurchase(availableProductId);
   } catch (err: any) {
-    console.warn(err.code, err.message);
+    console.log(err.code, err.message);
+    Alert.alert(
+      i18next.t('Something goes wrong :('),
+      i18next.t('Please try one more time'),
+    );
   }
 };
 
