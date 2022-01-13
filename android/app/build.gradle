@@ -1,5 +1,4 @@
 apply plugin: "com.android.application"
-apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
 
 project.ext.vectoricons = [
     iconFontNames: [ 'MaterialIcons.ttf', 'FontAwesome.ttf', 'EvilIcons.ttf' ] // Name of the font files you want to copy
