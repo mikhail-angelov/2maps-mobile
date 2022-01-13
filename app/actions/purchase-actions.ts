@@ -9,8 +9,8 @@ export const requestPurchase = async () => {
   const itemSkus =
     Platform.select({
       ios: [''],
-      android: [Config.ANDROID_PURCHASE_ITEM_SKU || ''],
-    }) || [''];
+      android: [Config.ANDROID_PURCHASE_ITEM_SKU || 'disable_ads'],
+    }) || ['disable_ads'];
   try {
     const [purchases, products] = await Promise.all([
       RNIap.getAvailablePurchases(),
