@@ -20,59 +20,61 @@ const connector = connect(null, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector>
 
 const InAppPurchaseManager: FC<Props> = ({ addPurchase, setPurchaseConnectionFlag }) => {
-    const initGoogleStoreConnection = async () => {
-        try {
-            await RNIap.initConnection();
-            if (Platform.OS === 'android') {
-                await RNIap.flushFailedPurchasesCachedAsPendingAndroid();
-            } else {
-                await RNIap.clearTransactionIOS();
-            }
-            setPurchaseConnectionFlag(true)
-        } catch (err: any) {
-            console.warn(err.code, err.message);
-            setPurchaseConnectionFlag(false)
-        }
-        purchaseUpdateSubscription = purchaseUpdatedListener(
-            async (purchase: any) => {
-                console.info('purchase', purchase);
-                const receipt = purchase.transactionReceipt
-                    ? purchase.transactionReceipt
-                    : purchase.originalJson;
-
-                if (receipt) {
-                    try {
-                        const ackResult = await finishTransaction(purchase);
-                        console.info('ackResult', ackResult);
-                    } catch (ackErr) {
-                        console.warn('ackErr', ackErr);
-                    }
-                    addPurchase(purchase)
-                }
-            },
-        );
-
-        purchaseErrorSubscription = purchaseErrorListener(
-            (error: PurchaseError) => {
-                console.log('purchaseErrorListener', error);
-                Alert.alert('Purchase error', error?.message || '');
-            },
-        );
-    };
-
-    const closeGoogleStoreConnection = async () => {
-        if (purchaseUpdateSubscription) {
-            purchaseUpdateSubscription.remove();
-            purchaseUpdateSubscription = null;
-        }
-        if (purchaseErrorSubscription) {
-            purchaseErrorSubscription.remove();
-            purchaseErrorSubscription = null;
-        }
-        await RNIap.endConnection();
-    };
+    
 
     useEffect(() => {
+        const initGoogleStoreConnection = async () => {
+            console.info('initGoogleStoreConnection');
+            try {
+                await RNIap.initConnection();
+                if (Platform.OS === 'android') {
+                    await RNIap.flushFailedPurchasesCachedAsPendingAndroid();
+                } else {
+                    await RNIap.clearTransactionIOS();
+                }
+                purchaseUpdateSubscription = purchaseUpdatedListener(
+                    async (purchase: any) => {
+                        console.info('purchase', purchase);
+                        const receipt = purchase.transactionReceipt
+                            ? purchase.transactionReceipt
+                            : purchase.originalJson;
+        
+                        if (receipt) {
+                            try {
+                                const ackResult = await finishTransaction(purchase);
+                                console.info('ackResult', ackResult);
+                            } catch (ackErr) {
+                                console.warn('ackErr', ackErr);
+                            }
+                            addPurchase(purchase)
+                        }
+                    },
+                );
+        
+                purchaseErrorSubscription = purchaseErrorListener(
+                    (error: PurchaseError) => {
+                        console.log('purchaseErrorListener', error);
+                        Alert.alert('Purchase error', error?.message || '');
+                    },
+                );
+                setPurchaseConnectionFlag(true)
+            } catch (err: any) {
+                console.info(err.code, err.message);
+                setPurchaseConnectionFlag(false)
+            }
+        };
+    
+        const closeGoogleStoreConnection = async () => {
+            if (purchaseUpdateSubscription) {
+                purchaseUpdateSubscription.remove();
+                purchaseUpdateSubscription = null;
+            }
+            if (purchaseErrorSubscription) {
+                purchaseErrorSubscription.remove();
+                purchaseErrorSubscription = null;
+            }
+            await RNIap.endConnection();
+        };
         initGoogleStoreConnection()
         return () => { closeGoogleStoreConnection() }
     }, [])
