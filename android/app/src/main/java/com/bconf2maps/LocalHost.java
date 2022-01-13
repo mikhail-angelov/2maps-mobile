@@ -103,21 +103,31 @@ public class LocalHost extends NanoHTTPD {
             // /map/mende/{z}/{x}/{y}.jpg
             String lastPart = parts[5].substring(0, parts[5].lastIndexOf('.'));
             String path = parts[2];
+            int z = Integer.parseInt(parts[3]);
             DB db = maps.get(path);
-            if (!Method.GET.equals(method) || parts.length != 6 || db == null) {
-                Log.d(TAG, "invalid params" + path + " url " + method + "-" + url);
-                return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "SERVER INTERNAL ERROR: invalid map: " + path);
+            if (db == null)  {
+                Log.d(TAG, "invalid params" + path + " url " + method + "-" + url );
+                return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "SERVER INTERNAL ERROR: invalid map: " + path);
             }
-            byte[] data = db.getTile(parts[3], parts[4], lastPart);
+            if (db.minzoom > 0 ){
+                // mercator to Locus Map zoom format
+                z = 17-z; 
+                if ( db.minzoom > z || db.maxzoom < z) {
+                    Log.d(TAG, "invalid params" + path + " url " + method + "-" + url + "-" + parts[3]);
+                    return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "SERVER INTERNAL ERROR: invalid map: " + path);
+                }
+            }
+            
+            byte[] data = db.getTile(z, parts[4], lastPart);
             if (data == null) {
                 Log.d(TAG, "no tile -" + parts[2] + parts[3] + parts[4] + lastPart);
-                return newFixedLengthResponse(Response.Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "nod");
+                return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "nod");
             }
             InputStream targetStream = new ByteArrayInputStream(data);
             return newFixedLengthResponse(Response.Status.OK, "image/jpeg", targetStream, data.length);
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
-            return newFixedLengthResponse(Response.Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "nod");
+            return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "nod");
         }
     }
 

@@ -12,12 +12,15 @@ public class DB extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 1;
     public final String name;
     public final String path;
+    public int minzoom = 0;
+    public int maxzoom = 0;
 
     public DB(Context context, String path, String name) {
         // 3rd argument to be passed is CursorFactory instance
         super(context, path, null, DATABASE_VERSION);
         this.name = name;
         this.path = path;
+        getInfo();
     }
 
     public void onCreate(SQLiteDatabase db) {
@@ -36,13 +39,13 @@ public class DB extends SQLiteOpenHelper {
     }
 
 
-    public byte[] getTile(String z, String x, String y) {
+    public byte[] getTile(int z, String x, String y) {
         SQLiteDatabase db = this.getReadableDatabase();
 
 //        z="7";x="636";y="321";
         String selection = "z=? AND x=? AND y=?";
-        String[] selectionArgs = {z, x, y};
-        Log.d(TAG, String.format("query %s: %s %s %s ", this.name, z, x, y));
+        String[] selectionArgs = {String.valueOf(z), x, y};
+        Log.d(TAG, String.format("query %s: %d %s %s ", this.name, z, x, y));
         Cursor cursor = db.query(
                 "tiles",
                 null,
@@ -53,12 +56,34 @@ public class DB extends SQLiteOpenHelper {
                 null
         );
         if (cursor.moveToNext()) {
-            Log.d(TAG, String.format("yooo %s: %s", this.name, z));
+            Log.d(TAG, String.format("have tile %s: %s", this.name, z));
             return cursor.getBlob(cursor.getColumnIndex("image"));
         }
 
         Log.d(TAG, String.format("no record %s: %s %s %s", this.name, z, x, y));
         return null;
+    }
+
+    public void getInfo() {
+        try{
+            SQLiteDatabase db = this.getReadableDatabase();
+            Cursor cursor = db.query(
+                    "info",
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+            );
+            if (cursor.moveToNext()) {
+                this.minzoom = cursor.getInt(cursor.getColumnIndex("minzoom"));
+                this.maxzoom = cursor.getInt(cursor.getColumnIndex("maxzoom"));  
+            }
+        }
+        catch(Exception e) {
+            Log.d(TAG, String.format("no info %s: %s", this.name, e.getMessage()));
+        }
 
     }
 }
