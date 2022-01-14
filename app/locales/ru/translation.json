@@ -64,5 +64,8 @@
     "Sync Mark": "Синхронизация",
     "Remove Marks": "Удалить Метки",
     "Can not save track!": "Не получилось сохранить трек!",
-    "Directory unreachable": "Путь недоступен"
+    "Directory unreachable": "Путь недоступен",
+    "Version": "Версия",
+    "Mark info": "Информация о метке",
+    "Edit Mark": "Редактирование метки"
 }

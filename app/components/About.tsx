@@ -19,8 +19,9 @@ const About: FC<AboutProps> = ({ close }) => {
             setVersion(value)
         });
     },[])
-    return <MapModal onRequestClose={close}>
+    return <MapModal onRequestClose={close} accessibilityLabel={t('About app')}>
         <Text style={styles.title}>{t('About app')}</Text>
+        <Text style={styles.version}>{t('Version')}: {version}</Text>
         <View style={styles.content}>
             <View style={styles.row}>
                 <Button buttonStyle={styles.btn} title={t('Contact Developer')} onPress={() => Linking.openURL(`mailto:${CONTACT_EMAIL}`)} />
@@ -34,7 +35,6 @@ const About: FC<AboutProps> = ({ close }) => {
             <View style={styles.lastRow}>
                 <Button buttonStyle={styles.btn} title={t('Help')} onPress={() => Linking.openURL(HELP_URL)} />
             </View></View>
-        <Text style={styles.text}>{version}</Text>
     </MapModal>
 }
 
@@ -55,6 +55,7 @@ const styles = StyleSheet.create({
     btn: {
         paddingHorizontal: 20,
         width: '100%',
+        minHeight: 48,
         backgroundColor: purple,
     },
     title: {
@@ -65,8 +66,8 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: '700',
     },
-    text: {
-        marginTop: 20,
+    version: {
+        marginBottom: 10,
         width: "100%",
         textAlign: "center"
     }

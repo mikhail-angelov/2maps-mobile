@@ -28,7 +28,7 @@ type Props = ConnectedProps<typeof connector> & AccountProps
 const Account: FC<Props> = ({ close, showAuth, isAuthenticated, purchases, restorePurchase, isPurchaseConnected }) => {
     const { t } = useTranslation()
 
-    return <MapModal onRequestClose={close}>
+    return <MapModal onRequestClose={close} accessibilityLabel={t('Manage Account')}>
         <Text style={styles.title}>{t('Manage Account')}</Text>
         <View style={styles.content}>
             {purchases && <Text style={styles.subTitle}>{t('Premium version!')}</Text> }
@@ -80,6 +80,7 @@ const styles = StyleSheet.create({
     btn: {
         paddingHorizontal: 20,
         minWidth: '100%',
+        minHeight: 48,
         backgroundColor: purple,
     },
 });

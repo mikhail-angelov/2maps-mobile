@@ -83,6 +83,7 @@ const styles = StyleSheet.create({
     btn: {
         paddingHorizontal: 20,
         backgroundColor: purple,
+        minHeight: 48,
     },
     formField: {
         flexDirection: 'column',

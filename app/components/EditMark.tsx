@@ -1,5 +1,5 @@
 import React, { FC, useState, useCallback } from "react";
-import { View, Linking, TextInput, Text, Alert, StyleSheet } from "react-native";
+import { View, Linking, TextInput, Text, Alert, StyleSheet, Pressable } from "react-native";
 import { Button } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Mark } from '../store/types'
@@ -60,16 +60,19 @@ const EditMark: FC<Props> = ({ mark,center, save, cancel, remove }) => {
 
     const distance = markToDistance(center)(mark)
 
-    return <MapModal onRequestClose={cancel}>
+    return <MapModal onRequestClose={cancel} accessibilityLabel={isEdit ? t('Edit Mark'): t('Mark info')}>
         {!isEdit && <View style={styles.header}>
             <Text style={styles.title}>{name}</Text>
             <View style={styles.ratingAndDistance}>
-                <AirbnbRating
-                    showRating={false}
-                    isDisabled={true}
-                    size={20}
-                    defaultRating={rate}
-                /><Text style={styles.distanceText}>{distance}</Text>
+                <Pressable disabled={true}>
+                    <AirbnbRating
+                        showRating={false}
+                        isDisabled={true}
+                        size={20}
+                        defaultRating={rate}
+                    />
+                </Pressable>
+                <Text style={styles.distanceText}>{distance}</Text>
             </View>
         </View>}
         {isEdit ? <View style={styles.content}>

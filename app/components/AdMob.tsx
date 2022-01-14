@@ -15,7 +15,7 @@ type Props = ConnectedProps<typeof connector>
 
 const AdMob: FC<Props> = ({showAdMob}) => {
   return <View>
-    {!!showAdMob && <BannerAd size={BannerAdSize.ADAPTIVE_BANNER} unitId={unitId} />}
+    {!!showAdMob && <BannerAd size={BannerAdSize.ADAPTIVE_BANNER} unitId={unitId} onAdFailedToLoad={(error) => console.error(error)} />}
   </View>
 };
 

@@ -21,7 +21,7 @@ const Settings: FC<Props> = ({ logout, user }: Props) => {
     const [showChangePassword, setShowChangePassword] = useState(false)
     const { t } = useTranslation()
 
-    return <View style={styles.content}>
+    return <View style={styles.content} accessibilityLabel={t('Account')}>
         <Text style={styles.title}>{t('Account')}</Text>
         <Text style={styles.subTitle}>{`${t('Hello')} ${user?.email}`}</Text>
         <View style={styles.row}>
@@ -63,6 +63,7 @@ const styles = StyleSheet.create({
         // paddingHorizontal: 20,
         backgroundColor: purple,
         minWidth: '100%',
+        minHeight: 48,
     },
     inlineBtn: {
         minWidth: '100%',
