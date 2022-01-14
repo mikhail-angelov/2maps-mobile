@@ -21,7 +21,8 @@ import { importPoisAction, exportPoisAction, removeAllPoisAction, syncMarksActio
 import { useTranslation } from "react-i18next";
 import Advertisement from "../components/AdMob";
 import { renderColor } from "../utils/formats";
-import { purple, red } from "../constants/color";
+import { emptyListText, purple, red } from "../constants/color";
+import * as _ from 'lodash';
 
 interface OwnProps {
     center: Position;
@@ -193,6 +194,11 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
                         <Text style={styles.title}>{t('Marks')}</Text>
                     </View>
                 </View>
+                {_.isEmpty(list) ? 
+                <View style={styles.scroll} accessibilityLabel={t('No Items')}>
+                    <Text style={styles.sheetText}>{t('No Items')}</Text>
+                </View>
+                : 
                 <View style={styles.scroll} accessibilityLabel={t('Marks')}>
                     <SwipeListView
                         data={filterList}
@@ -205,6 +211,7 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
                         previewOpenDelay={1000}
                     />
                 </View>
+                }
             </View>
             <Advertisement />
         </MenuProvider>
@@ -329,4 +336,12 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '700',
     },
+    sheetText: {
+        color: emptyListText,
+        textAlignVertical: "center",
+        textAlign: "center",
+        height: "100%",
+        width: "100%",
+        fontSize: 16,
+    }
 });

@@ -19,7 +19,8 @@ import { selectTrackAction, exportTrack, removeTrackAction, importTrackAction, u
 import { SvgXml } from "react-native-svg";
 import { useTranslation } from "react-i18next";
 import Advertisement from "../components/AdMob";
-import { green, purple, red } from "../constants/color";
+import { emptyListText, green, purple, red } from "../constants/color";
+import * as _ from 'lodash';
 
 export enum MENU {
     Cancel,
@@ -147,6 +148,11 @@ const Tracks: FC<Props> = ({ tracks, selectedTrack, selectTrack, close, removeTr
                         </MenuOptions>
                     </Menu>
                 </View>
+                {_.isEmpty(list) ? 
+                <View style={styles.scroll} accessibilityLabel={t('No Items')}>
+                    <Text style={styles.sheetText}>{t('No Items')}</Text>
+                </View>
+                : 
                 <View style={styles.scroll} accessibilityLabel={t('Tracks')}>
                     <SwipeListView
                         data={list}
@@ -159,6 +165,8 @@ const Tracks: FC<Props> = ({ tracks, selectedTrack, selectTrack, close, removeTr
                         previewOpenDelay={1000}
                     />
                 </View>
+                }
+                
             </View>
             <Advertisement />
         </MenuProvider>
@@ -235,4 +243,12 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '700',
     },
+    sheetText: {
+        color: emptyListText,
+        textAlignVertical: "center",
+        textAlign: "center",
+        height: "100%",
+        width: "100%",
+        fontSize: 16,
+    }
 });
