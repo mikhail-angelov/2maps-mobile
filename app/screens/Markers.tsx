@@ -193,7 +193,7 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
                         <Text style={styles.title}>{t('Marks')}</Text>
                     </View>
                 </View>
-                <View style={styles.scroll}>
+                <View style={styles.scroll} accessibilityLabel={t('Marks')}>
                     <SwipeListView
                         data={filterList}
                         renderItem={memoizedValue}

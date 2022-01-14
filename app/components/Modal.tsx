@@ -63,15 +63,16 @@ const styles = StyleSheet.create({
         minWidth: '80%',
     },
     button: {
-        borderRadius: 20,
+        borderRadius: 24,
         padding: 10,
     },
     buttonClose: {
         backgroundColor: "white",
         position: "absolute",
-        top: 20,
-        right: 20,
-        width: 40,
+        top: 16,
+        right: 16,
+        width: 48,
+        height: 48,
     },
     textStyle: {
         color: purple,

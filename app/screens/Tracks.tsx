@@ -147,7 +147,7 @@ const Tracks: FC<Props> = ({ tracks, selectedTrack, selectTrack, close, removeTr
                         </MenuOptions>
                     </Menu>
                 </View>
-                <View style={styles.scroll}>
+                <View style={styles.scroll} accessibilityLabel={t('Tracks')}>
                     <SwipeListView
                         data={list}
                         renderItem={renderItem}

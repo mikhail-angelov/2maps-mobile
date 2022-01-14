@@ -56,7 +56,7 @@ const Buttons = styled(View)`
     bottom:50px;
     left:10px;
 `
-const MenuButton =  ({icon, onPress, color}: {icon: string, onPress:()=>void, color?:string})=>(<Icon.Button name={icon} color={color||"white"} backgroundColor="#00f5"  style={{width:40, height: 40, padding:0, justifyContent:'center'}} iconStyle={{marginLeft:10, width:20}} borderRadius={20} onPress={onPress} />)
+const MenuButton =  ({icon, onPress, color}: {icon: string, onPress:()=>void, color?:string})=>(<Icon.Button name={icon} color={color||"white"} backgroundColor="#00f5"  style={{width:48, height: 48, padding:0, justifyContent:'center'}} iconStyle={{marginLeft:10, width:20}} borderRadius={24} onPress={onPress} />)
 
 const mapStateToProps = (state: State) => ({
     marks: selectMarks(state),

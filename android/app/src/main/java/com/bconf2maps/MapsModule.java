@@ -141,7 +141,7 @@ public class MapsModule extends ReactContextBaseJavaModule {
             versionCode = packageManager.getPackageInfo(packageName, 0).versionCode;
         } catch (NameNotFoundException e) {          
         }
-        promise.resolve(versionName + " - " + versionCode);
+        promise.resolve(versionName + " (" + versionCode + ")");
     }
 
     //use it to notify

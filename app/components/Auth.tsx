@@ -36,7 +36,7 @@ const Login: FC<LoginProps> = ({ error, login, setSignUp, setPasswordReset }) =>
     const [password, setPassword] = useState<string>('')
     const { t } = useTranslation();
 
-    return <View style={styles.content}>
+    return <View style={styles.content} accessibilityLabel={t('Login')}>
         <Text style={styles.title}>{t('Login')}</Text>
         <View style={styles.formField}>
             <Text style={styles.label}>{t('Email')}</Text>
@@ -51,7 +51,7 @@ const Login: FC<LoginProps> = ({ error, login, setSignUp, setPasswordReset }) =>
         <View style={styles.formField}>
             <View style={[styles.passwordWrapper, styles.label]}>
                 <Text>{t('Password')}</Text>
-                <Button titleStyle={styles.inlineBtn} type='clear' onPress={setPasswordReset} title={t('Forgot password?')} />
+                <Button titleStyle={[styles.inlineBtn, styles.inlineBtnPwd]} type='clear' onPress={setPasswordReset} title={t('Forgot password?')} />
             </View>
             <TextInput
                 secureTextEntry={true}
@@ -91,7 +91,7 @@ const SignUp: FC<SignUpProps> = ({ error, signUp, back, isAuthInProgress }) => {
         }
     }, [isAuthInProgress])
 
-    return <View style={styles.content}>
+    return <View style={styles.content} accessibilityLabel={t('Sign Up')}>
         <Text style={styles.title}>{t('Sign Up')}</Text>
         <View style={styles.formField}>
             <Text style={styles.label}>{t('Name')}</Text>
@@ -182,7 +182,7 @@ const ForgetPassword: FC<PasswordResetProps> = ({ error, passwordReset, back, se
             back()
         }
     }, [isAuthInProgress])
-    return <View style={styles.content}>
+    return <View style={styles.content} accessibilityLabel={t('Reset your password')}>
         <Text style={styles.title}>{t('Reset your password')}</Text>
         <View style={styles.formField}>
             <Text style={styles.label}>{t('Enter your user account\'s verified email address and we will send you a password reset link')}</Text>
@@ -216,13 +216,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginVertical: 20,
+        marginVertical: 12,
         marginBottom: 10,
-    },
-    buttonsRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 20,
     },
     btn: {
         // paddingHorizontal: 20,
@@ -253,13 +248,18 @@ const styles = StyleSheet.create({
     passwordWrapper: {
         display: "flex",
         flexDirection: "row",
-        alignItems: "center",
+        alignItems: "baseline",
         justifyContent: "space-between",
     },
     inlineBtn: {
         fontSize: 14,
         color: purple,
-    }
+        minHeight: 48,
+        textAlignVertical: "center",
+    },
+    inlineBtnPwd: {
+        textAlignVertical: "bottom",
+    },
 });
 
 
