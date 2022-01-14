@@ -72,7 +72,7 @@ public class MapsModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void getMapsEvent(Promise promise) {
         Log.d(TAG, "getMapsEvent");
-        Set<String> maps = LocalHost.getInstance().getMaps();
+        Set<String> maps = LocalHost.getInstance().getMapNames();
         String response = String.join(",", maps);
         promise.resolve(response);
     }
