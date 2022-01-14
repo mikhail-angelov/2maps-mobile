@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import Config from 'react-native-config'
 import { connect, ConnectedProps } from "react-redux";
 import { State, Mark } from '../store/types'
 import { featureToMark, editMarkAction } from '../actions/marks-actions'
@@ -17,7 +16,7 @@ import Wikimapia from "../components/Wikimapia";
 import SelectedMark from "../components/SelectedMark";
 import * as _ from 'lodash'
 
-MapboxGL.setAccessToken(Config.MAPBOX_PUB_KEY || 'pk.eyJ1IjoibWlraGFpbGFuZ2Vsb3YiLCJhIjoiY2tpa2FnbnM5MDg5ejJ3bDQybWN3eWRsdSJ9.vK_kqebrJaO7MdIg4ilaFQ');
+MapboxGL.setAccessToken(process.env.MAPBOX_PUB_KEY || 'pk.eyJ1IjoibWlraGFpbGFuZ2Vsb3YiLCJhIjoiY2tpa2FnbnM5MDg5ejJ3bDQybWN3eWRsdSJ9.vK_kqebrJaO7MdIg4ilaFQ');
 
 const rasterSourceProps: RasterSourceProps = {
     id: 'stamenWatercolorSource',

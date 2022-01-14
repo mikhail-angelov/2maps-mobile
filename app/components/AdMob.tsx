@@ -1,12 +1,11 @@
 import React, { FC } from "react";
 import { View } from 'react-native';
-import { BannerAd, TestIds, BannerAdSize } from '@react-native-admob/admob';
+import { BannerAd, BannerAdSize } from '@react-native-admob/admob';
 import { State } from "../store/types";
 import { connect, ConnectedProps } from "react-redux";
 import { selectShowAdMob } from "../reducers/auth";
-import Config from 'react-native-config';
 
-const unitId = Config.ADMOB_BANNER_UNIT_ID || ''
+const unitId = process.env.ADMOB_BANNER_UNIT_ID || ''
 
 const mapStateToProps = (state: State) => ({
   showAdMob: selectShowAdMob(state),

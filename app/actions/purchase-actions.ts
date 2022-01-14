@@ -3,13 +3,12 @@ import RNIap, {InAppPurchase} from 'react-native-iap';
 import {ActionTypeEnum, AppThunk} from '.';
 import i18next from 'i18next';
 import * as _ from 'lodash';
-import Config from 'react-native-config';
 
 export const requestPurchase = async () => {
   const itemSkus =
     Platform.select({
       ios: [''],
-      android: [Config.ANDROID_PURCHASE_ITEM_SKU || 'disable_ads'],
+      android: [process.env.ANDROID_PURCHASE_ITEM_SKU || 'disable_ads'],
     }) || ['disable_ads'];
   try {
     const [purchases, products] = await Promise.all([
