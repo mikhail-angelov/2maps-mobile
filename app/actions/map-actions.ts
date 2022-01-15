@@ -5,6 +5,7 @@ import { MapInfo } from "../store/types";
 import { getLocal, get, post, HOST, HOST_LOCAL } from './api'
 import { selectToken } from '../reducers/auth'
 import { selectDownloadId } from '../reducers/map'
+import { AxiosResponse } from "axios";
 
 export const setCenterAction = (center: Position) => {
   //todo: validate params
@@ -29,9 +30,9 @@ export const getLocalMapListAction = (): AppThunk => {
     try {
       console.log('get maps');
       dispatch({ type: ActionTypeEnum.GetMapList });
-      const res = await getLocal('maps');
+      const res: AxiosResponse<{[key: string]: MapInfo}> = await getLocal('maps');
       console.log('get maps', res.data);
-      const list = res.data.map((name: string) => ({ name, url: `${HOST_LOCAL}/map/${name}/{z}/{x}/{y}.png` }));
+      const list = Object.values(res.data).map(({name, size}) => ({ name, url: `${HOST_LOCAL}/map/${name}/{z}/{x}/{y}.png`, size: size || 0 }));
       dispatch({ type: ActionTypeEnum.GetMapListSuccess, payload: list });
     } catch (err) {
       console.log("error", err);
@@ -101,7 +102,7 @@ export const downloadMapAction = ({ id, name }: { id: string, name: string }): A
       const response = await download(url, config);
 
       console.log('download map', response);
-      dispatch({ type: ActionTypeEnum.DownloadMapSuccess, payload: response });
+      dispatch({ type: ActionTypeEnum.DownloadMapSuccess });
       dispatch(getLocalMapListAction());
     } catch (err) {
       console.log("download map failure", err);

@@ -58,7 +58,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
         }
     }, [])
     const allMaps: MapItem[] = [
-        ...list.map(({ name, url }: MapInfo) => ({ id: name, name: `${name} (${(0 / 1000000).toFixed(3)}M)`, file: url, loaded: true })),
+        ...list.map(({ name, url, size = 0 }: MapInfo) => ({ id: name, name: `${name} (${(size / 1000000).toFixed(3)}M)`, file: url, loaded: true })),
         ...availableMapList.filter(({ name }) => !list.find((item) => item.name === name)).map(({ id, name, url, size }) => {
             return { id, name: `${name} (${(size / 1000000).toFixed(3)}M)`, file: url, loaded: false }
         })]
@@ -72,11 +72,14 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
         setSecondaryMap(list.find(x => x.name === value))
     }
 
-    const renderItem = ({ item }: { item: MapItem }) => (
-        <View style={styles.row}>
-            <Text>{item.name}</Text>
-            {item.loaded ? <Button titleStyle={{color: purple}} type='clear' onPress={() => removeLocalMap(item.id)} title="remove" /> : <Button titleStyle={{color: purple}} type='clear' onPress={() => downloadMap({ id: item.id, name: item.file })} title="download" />}
-        </View>
+    const renderItem = (item: MapItem, isAuthenticated: boolean ) => (
+        (isAuthenticated || item.loaded) &&
+            <View style={styles.row}>
+                <Text>{item.name}</Text>
+                {item.loaded && <Button titleStyle={{color: purple}} type='clear' onPress={() => removeLocalMap(item.id)} title="remove" />}
+                {!item.loaded && isAuthenticated && <Button titleStyle={{color: purple}} type='clear' onPress={() => downloadMap({ id: item.id, name: item.file })} title="download" />}
+            </View>
+        || null
     );
 
     return <Modal style={styles.container} visible onRequestClose={close}>
@@ -118,17 +121,16 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                     {list.map(({ name }: MapInfo) => (<Picker.Item key={name} label={name} value={name} />))}
                 </Picker>
             </View>
-
-            {isAuthenticated ?
-                <View style={styles.availableMaps}>
-                    <FlatList
-                        data={allMaps}
-                        renderItem={renderItem}
-                        keyExtractor={(item: MapItem) => item.name}
-                    />
-                </View> : <View style={styles.availableMaps}>
+            <View style={styles.availableMaps}>
+                <FlatList
+                    data={allMaps}
+                    renderItem={({item}) => renderItem(item, isAuthenticated)}
+                    keyExtractor={(item: MapItem) => item.name}
+                />
+                {!isAuthenticated &&
                     <Button buttonStyle={styles.btn} title={t('Login to download maps')} onPress={showAuth} />
-                </View>}
+                }
+            </View>
             {!!error && <Text style={styles.errors}>{error}</Text>}
         </View>
     </Modal>

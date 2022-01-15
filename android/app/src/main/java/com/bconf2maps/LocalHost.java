@@ -43,9 +43,10 @@ public class LocalHost extends NanoHTTPD {
                 continue; // skip no sqlite files
             }
             String name = mapFile.getName().split("\\.", -1)[0];
-            DB db = new DB(context, mapFile.getAbsolutePath(), name);
+            long size = mapFile.length();
+            DB db = new DB(context, mapFile.getAbsolutePath(), name, size);
             maps.put(name, db);
-            Log.d(TAG, String.format("map file is added: %s %s | %s", db.name, mapFile.getName(), mapFile.getAbsolutePath()));
+            Log.d(TAG, String.format("map file is added: %s %s | %s | size: %d", db.name, mapFile.getName(), mapFile.getAbsolutePath(), db.size));
         }
 
         mapDir = new File("/sdcard/Download/map/");
@@ -65,9 +66,10 @@ public class LocalHost extends NanoHTTPD {
                 continue; // skip no sqlite files
             }
             String name = mapFile.getName().split("\\.", -1)[0];
-            DB db = new DB(context, mapFile.getAbsolutePath(), name);
+            long size = mapFile.length();
+            DB db = new DB(context, mapFile.getAbsolutePath(), name, size);
             maps.put(name, db);
-            Log.d(TAG, String.format("map file is added: %s %s | %s", db.name, mapFile.getName(), mapFile.getAbsolutePath()));
+            Log.d(TAG, String.format("map file is added: %s %s | %s | size: %d", db.name, mapFile.getName(), mapFile.getAbsolutePath(), db.size));
         }
     }
 
@@ -148,8 +150,14 @@ public class LocalHost extends NanoHTTPD {
         }
     }
 
-    public Set<String> getMaps() {
+    public Set<String> getMapNames() {
         init(ctx); //reload list
         return maps.keySet();
     }
+
+    public Map<String, DB> getMaps() {
+        init(ctx); //reload list
+        return maps;
+    }
+
 }

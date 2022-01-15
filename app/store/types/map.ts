@@ -5,6 +5,7 @@ import MapboxGL from "@react-native-mapbox-gl/maps";
 export interface MapInfo {
   name: string;
   url: string;
+  size?: number;
   type?: string;
   style?: string;
 }
