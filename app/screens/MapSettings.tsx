@@ -1,5 +1,5 @@
-import React, { FC, useEffect } from "react";
-import { View, Text, Modal, StyleSheet, FlatList } from "react-native";
+import React, { FC, useEffect, useState } from "react";
+import { View, Text, Modal, StyleSheet, FlatList, NativeModules } from "react-native";
 import { Button } from "react-native-elements";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import { Picker } from "@react-native-community/picker";
@@ -7,7 +7,7 @@ import ProgressBar from '../components/ProgressBar';
 import { connect, ConnectedProps } from "react-redux";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { State, MapInfo } from '../store/types'
-import { getLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction, removeLocalMapAction, cancelDownloadMapAction } from '../actions/map-actions'
+import { getLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction, removeLocalMapAction, cancelDownloadMapAction, getAvailableInternalMemorySize, getTotalInternalMemorySize, getAvailableExternalMemorySize, externalMemoryAvailable, getTotalExternalMemorySize } from '../actions/map-actions'
 import { selectPrimaryMap, selectSecondaryMap, selectMapList, selectMapIsLoading, onLineMapList, selectAvailableMapList, selectMapError, selectDownloadProgress, selectMapIsDownLoading } from '../reducers/map'
 import { selectIsAuthenticated } from '../reducers/auth'
 import { ItemValue } from "@react-native-community/picker/typings/Picker";
@@ -51,8 +51,26 @@ type Props = ConnectedProps<typeof connector> & {
 
 const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoading, list, availableMapList, isAuthenticated, error, progress, cancelDownloadMap, close, getLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap, showAuth }) => {
     const { t } = useTranslation()
+    const [availableInternalMemory, setAvailableInternalMemory] = useState("")
+    const [totalInternalMemory, setTotalInternalMemory] = useState("")
+    const [availableExternalMemory, setAvailableExternalMemory] = useState("")
+    const [totalExternalMemory, setTotalExternalMemory] = useState("")
+    const [isSDCArdExist, setIsSDCArdExist] = useState(false)
+
     useEffect(() => {
         getLocalMapList()
+
+        getAvailableInternalMemorySize().then(setAvailableInternalMemory)
+        getTotalInternalMemorySize().then(setTotalInternalMemory)
+        externalMemoryAvailable().then((externalMemoryAvailable) => {
+            if(externalMemoryAvailable){
+                setIsSDCArdExist(true)
+                getAvailableExternalMemorySize().then(setAvailableExternalMemory)
+                getTotalExternalMemorySize().then(setTotalExternalMemory)
+            }else{
+                setIsSDCArdExist(false)
+            }
+        })
         if(isAuthenticated) {
             loadMapList()
         }
@@ -120,6 +138,12 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                     <Picker.Item label="None" value={''} />
                     {list.map(({ name }: MapInfo) => (<Picker.Item key={name} label={name} value={name} />))}
                 </Picker>
+            </View>
+            <View style={styles.row}>
+                <Text>{t('Phone')}: {availableInternalMemory} {t('free of')} {totalInternalMemory}</Text>
+            </View>
+            <View style={styles.row}>
+                <Text>{t('SD card')}: {isSDCArdExist ? `${availableExternalMemory} ${t('free of')} ${totalExternalMemory}`: t('Not Available')}</Text>
             </View>
             <View style={styles.availableMaps}>
                 <FlatList

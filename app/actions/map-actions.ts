@@ -138,3 +138,19 @@ export const removeLocalMapAction = (name: string): AppThunk => {
     }
   };
 };
+
+export const getAvailableInternalMemorySize = async(): Promise<string> => {
+    return NativeModules.MapsModule.getAvailableInternalMemorySize()
+}
+export const getTotalInternalMemorySize = async(): Promise<string> => {
+    return NativeModules.MapsModule.getTotalInternalMemorySize()
+}
+export const getAvailableExternalMemorySize = async(): Promise<string> => {
+    return NativeModules.MapsModule.getAvailableExternalMemorySize()
+}
+export const getTotalExternalMemorySize = async(): Promise<string> => {
+    return NativeModules.MapsModule.getTotalExternalMemorySize()
+}
+export const externalMemoryAvailable = async(): Promise<boolean> => {
+    return NativeModules.MapsModule.externalMemoryAvailable()
+}

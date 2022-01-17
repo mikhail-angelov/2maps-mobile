@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
+import android.os.StatFs;
+import android.os.Environment;
 import android.util.Log;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
@@ -24,13 +26,20 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.Set;
+
+import androidx.core.content.ContextCompat;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 
 public class MapsModule extends ReactContextBaseJavaModule {
     private static final String TAG = "MapsModule";
     private Downloader downloader;
     private LongSparseArray<Callback> appDownloads;
     private final ReactApplicationContext reactContext;
+
     BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -147,5 +156,82 @@ public class MapsModule extends ReactContextBaseJavaModule {
     //use it to notify
     private void sendEvent(ReactContext reactContext, String eventName, @Nullable WritableMap params) {
         reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @ReactMethod
+    public void getAvailableInternalMemorySize(Promise promise) {
+        File path = Environment.getDataDirectory();
+        Log.d("INTERNAL", path.getPath().toString());
+        StatFs stat = new StatFs(path.getPath());
+        long blockSize = stat.getBlockSizeLong();
+        long availableBlocks = stat.getAvailableBlocksLong();
+        promise.resolve(formatSize(availableBlocks * blockSize));
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @ReactMethod
+    public void getTotalInternalMemorySize(Promise promise) {
+        File path = Environment.getDataDirectory();
+        StatFs stat = new StatFs(path.getPath());
+        long blockSize = stat.getBlockSizeLong();
+        long totalBlocks = stat.getBlockCountLong();
+        promise.resolve(formatSize(totalBlocks * blockSize));
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @ReactMethod
+    public void getAvailableExternalMemorySize(Promise promise) {
+        File path = Environment.getExternalStorageDirectory();
+        Log.d("EXTERNAL", path.getPath().toString());
+        StatFs stat = new StatFs(path.getPath());
+        long blockSize = stat.getBlockSizeLong();
+        long availableBlocks = stat.getAvailableBlocksLong();
+        promise.resolve(formatSize(availableBlocks * blockSize));
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @ReactMethod
+    public void getTotalExternalMemorySize(Promise promise) {
+        File path = Environment.getExternalStorageDirectory();
+        StatFs stat = new StatFs(path.getPath());
+        long blockSize = stat.getBlockSizeLong();
+        long totalBlocks = stat.getBlockCountLong();
+        promise.resolve(formatSize(totalBlocks * blockSize));
+    }
+
+    private static String formatSize(long size) {
+        String suffix = null;
+        if (size >= 1024) {
+            suffix = "KB";
+            size /= 1024;
+            if (size >= 1024) {
+                suffix = "MB";
+                size /= 1024;
+                if (size >= 1024) {
+                    suffix = "GB";
+                    size /= 1024;
+                }
+            }
+        }
+        StringBuilder resultBuffer = new StringBuilder(Long.toString(size));
+        int commaOffset = resultBuffer.length() - 3;
+        while (commaOffset > 0) {
+            resultBuffer.insert(commaOffset, ',');
+            commaOffset -= 3;
+        }
+        if (suffix != null) resultBuffer.append(suffix);
+        return resultBuffer.toString();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @ReactMethod
+    public void externalMemoryAvailable(Promise promise) {
+        File[] storages = ContextCompat.getExternalFilesDirs(reactContext, null);
+        if (storages.length > 1 && storages[0] != null && storages[1] != null) {
+            promise.resolve(true);
+        } else {
+            promise.resolve(false);
+        }
     }
 }
