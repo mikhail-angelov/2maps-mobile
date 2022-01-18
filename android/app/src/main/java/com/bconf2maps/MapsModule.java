@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
-import android.os.StatFs;
 import android.os.Environment;
 import android.util.Log;
 import android.app.DownloadManager;
