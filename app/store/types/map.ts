@@ -32,3 +32,10 @@ export interface MapState {
   downloadId?: string;
   error?: string;
 }
+
+export interface StorageMemory {
+  internalFree: string;
+  internalTotal:string;
+  sdFree?: string;
+  sdTotal?: string;
+}

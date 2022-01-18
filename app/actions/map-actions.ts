@@ -1,7 +1,7 @@
 import { ActionTypeEnum, AppThunk } from ".";
 import { Position } from 'geojson';
 import { NativeModules } from "react-native";
-import { MapInfo } from "../store/types";
+import { MapInfo, StorageMemory } from "../store/types";
 import { getLocal, get, post, HOST, HOST_LOCAL } from './api'
 import { selectToken } from '../reducers/auth'
 import { selectDownloadId } from '../reducers/map'
@@ -139,18 +139,7 @@ export const removeLocalMapAction = (name: string): AppThunk => {
   };
 };
 
-export const getAvailableInternalMemorySize = async(): Promise<string> => {
-    return NativeModules.MapsModule.getAvailableInternalMemorySize()
-}
-export const getTotalInternalMemorySize = async(): Promise<string> => {
-    return NativeModules.MapsModule.getTotalInternalMemorySize()
-}
-export const getAvailableExternalMemorySize = async(): Promise<string> => {
-    return NativeModules.MapsModule.getAvailableExternalMemorySize()
-}
-export const getTotalExternalMemorySize = async(): Promise<string> => {
-    return NativeModules.MapsModule.getTotalExternalMemorySize()
-}
-export const externalMemoryAvailable = async(): Promise<boolean> => {
-    return NativeModules.MapsModule.externalMemoryAvailable()
+export const getStorageMemoryInfo = async(): Promise<StorageMemory> => {
+  const response: string = await NativeModules.MapsModule.getStorageMemoryInfo()
+  return JSON.parse(response)
 }

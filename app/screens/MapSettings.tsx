@@ -2,15 +2,15 @@ import React, { FC, useEffect, useState } from "react";
 import { View, Text, Modal, StyleSheet, FlatList, NativeModules } from "react-native";
 import { Button } from "react-native-elements";
 import MapboxGL from "@react-native-mapbox-gl/maps";
-import { Picker } from "@react-native-community/picker";
+import { Picker } from "@react-native-picker/picker";
 import ProgressBar from '../components/ProgressBar';
 import { connect, ConnectedProps } from "react-redux";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { State, MapInfo } from '../store/types'
-import { getLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction, removeLocalMapAction, cancelDownloadMapAction, getAvailableInternalMemorySize, getTotalInternalMemorySize, getAvailableExternalMemorySize, externalMemoryAvailable, getTotalExternalMemorySize } from '../actions/map-actions'
+import { getLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction, removeLocalMapAction, cancelDownloadMapAction, getStorageMemoryInfo } from '../actions/map-actions'
 import { selectPrimaryMap, selectSecondaryMap, selectMapList, selectMapIsLoading, onLineMapList, selectAvailableMapList, selectMapError, selectDownloadProgress, selectMapIsDownLoading } from '../reducers/map'
 import { selectIsAuthenticated } from '../reducers/auth'
-import { ItemValue } from "@react-native-community/picker/typings/Picker";
+import { ItemValue } from "@react-native-picker/picker/typings/Picker";
 import Spinner from "../components/Spinner";
 import { useTranslation } from "react-i18next";
 import { purple } from "../constants/color";
@@ -55,22 +55,27 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
     const [totalInternalMemory, setTotalInternalMemory] = useState("")
     const [availableExternalMemory, setAvailableExternalMemory] = useState("")
     const [totalExternalMemory, setTotalExternalMemory] = useState("")
-    const [isSDCArdExist, setIsSDCArdExist] = useState(false)
+    const [isSDCArdExist, setIsSDCArdExist] = useState(true)
+    const [isMemoryAvailable, setIsMemoryAvailable] = useState(true)
 
     useEffect(() => {
         getLocalMapList()
 
-        getAvailableInternalMemorySize().then(setAvailableInternalMemory)
-        getTotalInternalMemorySize().then(setTotalInternalMemory)
-        externalMemoryAvailable().then((externalMemoryAvailable) => {
-            if(externalMemoryAvailable){
-                setIsSDCArdExist(true)
-                getAvailableExternalMemorySize().then(setAvailableExternalMemory)
-                getTotalExternalMemorySize().then(setTotalExternalMemory)
-            }else{
-                setIsSDCArdExist(false)
-            }
-        })
+        getStorageMemoryInfo()
+            .then((response) => {
+                setAvailableInternalMemory(response.internalFree)
+                setTotalInternalMemory(response.internalTotal)
+                if(response.sdFree && response.sdTotal) {
+                    setAvailableExternalMemory(response.sdFree)
+                    setTotalExternalMemory(response.sdTotal)
+                } else {
+                    setIsSDCArdExist(false)
+                }
+            })
+            .catch(() => {
+                setIsMemoryAvailable(false)
+            })
+
         if(isAuthenticated) {
             loadMapList()
         }
@@ -140,10 +145,10 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                 </Picker>
             </View>
             <View style={styles.row}>
-                <Text>{t('Phone')}: {availableInternalMemory} {t('free of')} {totalInternalMemory}</Text>
+                <Text>{t('Phone')}: {isMemoryAvailable ? `${availableInternalMemory} ${t('free of')} ${totalInternalMemory}`: t('Not Available')}</Text>
             </View>
             <View style={styles.row}>
-                <Text>{t('SD card')}: {isSDCArdExist ? `${availableExternalMemory} ${t('free of')} ${totalExternalMemory}`: t('Not Available')}</Text>
+                <Text>{t('SD card')}: {isSDCArdExist && isMemoryAvailable ? `${availableExternalMemory} ${t('free of')} ${totalExternalMemory}`: t('Not Available')}</Text>
             </View>
             <View style={styles.availableMaps}>
                 <FlatList

@@ -27,12 +27,13 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import androidx.core.content.ContextCompat;
-import android.os.storage.StorageManager;
-import android.os.storage.StorageVolume;
+
+import com.google.gson.Gson;
 
 public class MapsModule extends ReactContextBaseJavaModule {
     private static final String TAG = "MapsModule";
@@ -158,46 +159,25 @@ public class MapsModule extends ReactContextBaseJavaModule {
         reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    @ReactMethod
-    public void getAvailableInternalMemorySize(Promise promise) {
-        File path = Environment.getDataDirectory();
-        Log.d("INTERNAL", path.getPath().toString());
-        StatFs stat = new StatFs(path.getPath());
-        long blockSize = stat.getBlockSizeLong();
-        long availableBlocks = stat.getAvailableBlocksLong();
-        promise.resolve(formatSize(availableBlocks * blockSize));
+    private static String getUsableSpace(File path) {
+        return formatSize(path.getUsableSpace());
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    @ReactMethod
-    public void getTotalInternalMemorySize(Promise promise) {
-        File path = Environment.getDataDirectory();
-        StatFs stat = new StatFs(path.getPath());
-        long blockSize = stat.getBlockSizeLong();
-        long totalBlocks = stat.getBlockCountLong();
-        promise.resolve(formatSize(totalBlocks * blockSize));
+    private static String getTotalSpace(File path) {
+        return formatSize(path.getTotalSpace());
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    @ReactMethod
-    public void getAvailableExternalMemorySize(Promise promise) {
-        File path = Environment.getExternalStorageDirectory();
-        Log.d("EXTERNAL", path.getPath().toString());
-        StatFs stat = new StatFs(path.getPath());
-        long blockSize = stat.getBlockSizeLong();
-        long availableBlocks = stat.getAvailableBlocksLong();
-        promise.resolve(formatSize(availableBlocks * blockSize));
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    @ReactMethod
-    public void getTotalExternalMemorySize(Promise promise) {
-        File path = Environment.getExternalStorageDirectory();
-        StatFs stat = new StatFs(path.getPath());
-        long blockSize = stat.getBlockSizeLong();
-        long totalBlocks = stat.getBlockCountLong();
-        promise.resolve(formatSize(totalBlocks * blockSize));
+    private File getSDCardPath() {
+        File[] files = ContextCompat.getExternalFilesDirs(reactContext, null);
+        try {
+            for (File file:files) {
+                if (Environment.isExternalStorageRemovable(file)) {
+                    return file;
+                }
+            }
+        } catch (Exception e) {
+        }
+        return null;
     }
 
     private static String formatSize(long size) {
@@ -226,12 +206,31 @@ public class MapsModule extends ReactContextBaseJavaModule {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @ReactMethod
-    public void externalMemoryAvailable(Promise promise) {
-        File[] storages = ContextCompat.getExternalFilesDirs(reactContext, null);
-        if (storages.length > 1 && storages[0] != null && storages[1] != null) {
-            promise.resolve(true);
-        } else {
-            promise.resolve(false);
+    public void getStorageMemoryInfo(Promise promise) {
+        Map<String, String> summary = new HashMap<>();
+        String result = "";
+        try {
+            File internalPath = Environment.getExternalStorageDirectory();
+            String availableInternalMemorySize = getUsableSpace(internalPath);
+            String totalInternalMemorySize = getTotalSpace(internalPath);
+
+            summary.put("internalFree", availableInternalMemorySize);
+            summary.put("internalTotal", totalInternalMemorySize);
+
+            File sdCardPath = getSDCardPath();
+            if (sdCardPath != null) {
+                String availableSDCardMemorySize = getUsableSpace(sdCardPath);
+                String totalSDCardMemorySize = getTotalSpace(sdCardPath);
+
+                summary.put("sdFree", availableSDCardMemorySize);
+                summary.put("sdTotal", totalSDCardMemorySize);
+            }
+            
+            result = new Gson().toJson(summary);
+            Log.d(TAG, result);
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
         }
+        promise.resolve(result);
     }
 }
