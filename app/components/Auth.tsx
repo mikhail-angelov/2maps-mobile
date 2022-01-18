@@ -41,6 +41,9 @@ const Login: FC<LoginProps> = ({ error, login, setSignUp, setPasswordReset }) =>
         <View style={styles.formField}>
             <Text style={styles.label}>{t('Email')}</Text>
             <TextInput
+                testID="com.bconf2maps:id/loginId"
+                accessibilityLabel="loginId"
+                accessible
                 keyboardType="email-address"
                 style={styles.modalInput}
                 onChangeText={(value) => setEmail(value)}
@@ -54,6 +57,9 @@ const Login: FC<LoginProps> = ({ error, login, setSignUp, setPasswordReset }) =>
                 <Button titleStyle={[styles.inlineBtn, styles.inlineBtnPwd]} type='clear' onPress={setPasswordReset} title={t('Forgot password?')} />
             </View>
             <TextInput
+                testID="com.bconf2maps:id/passwordId"
+                accessibilityLabel="passwordId"
+                accessible
                 secureTextEntry={true}
                 style={styles.modalInput}
                 onChangeText={(value) => setPassword(value)}
