@@ -79,6 +79,9 @@ export enum ActionTypeEnum {
   DeleteMap = 'map/DELETE_MAP',
   DeleteMapSuccess = 'map/DELETE_MAP_SUCCESS',
   DeleteMapFailure = 'map/DELETE_MAP_FAILED',
+  ImportMap = 'map/IMPORT_MAP',
+  ImportMapSuccess = 'map/IMPORT_MAP_SUCCESS',
+  ImportMapFailure = 'map/IMPORT_MAP_FAILED',
   //wiki
   WikiRequest = 'wiki/REQUEST',
   WikiSuccess = 'wiki/REQUEST_SUCCESS',

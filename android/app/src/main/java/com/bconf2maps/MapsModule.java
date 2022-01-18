@@ -187,10 +187,6 @@ public class MapsModule extends ReactContextBaseJavaModule {
             if (size >= 1024) {
                 suffix = "MB";
                 size /= 1024;
-                if (size >= 1024) {
-                    suffix = "GB";
-                    size /= 1024;
-                }
             }
         }
         StringBuilder resultBuffer = new StringBuilder(Long.toString(size));
