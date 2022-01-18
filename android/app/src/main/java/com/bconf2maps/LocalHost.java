@@ -15,6 +15,8 @@ import java.util.Set;
 
 import fi.iki.elonen.NanoHTTPD;
 
+import androidx.core.content.ContextCompat;
+
 public class LocalHost extends NanoHTTPD {
 
     private static volatile LocalHost INSTANCE;
@@ -27,6 +29,19 @@ public class LocalHost extends NanoHTTPD {
         super("127.0.0.1", 5555);
         ctx = context;
         init(context);
+    }
+
+    private File getSDCardPath() {
+        File[] files = ContextCompat.getExternalFilesDirs(ctx, null);
+        try {
+            for (File file:files) {
+                if (Environment.isExternalStorageRemovable(file)) {
+                    return file;
+                }
+            }
+        } catch (Exception e) {
+        }
+        return null;
     }
 
     private void init(Context context) {
@@ -49,27 +64,28 @@ public class LocalHost extends NanoHTTPD {
             Log.d(TAG, String.format("map file is added: %s %s | %s | size: %d", db.name, mapFile.getName(), mapFile.getAbsolutePath(), db.size));
         }
 
-        mapDir = new File("/sdcard/Download/map/");
+        String sdCardPath = getSDCardPath().getPath().concat("/map");
+        mapDir = new File(sdCardPath);
         if (!mapDir.exists()) {
-            Log.d(TAG, String.format("sd card dir is not exist: %s", Environment.getExternalStorageDirectory() + "/Download/map/"));
+            Log.d(TAG, String.format("sd card dir is not exist: %s", sdCardPath));
             //add dir
             mapDir.mkdirs();
         }
         files = mapDir.listFiles();
         if (files == null) {
-            Log.d(TAG, String.format("sd card no files: %s", Environment.getExternalStorageDirectory() + "/Download/map/"));
+            Log.d(TAG, String.format("sd card no files: %s", sdCardPath));
             return;
         }
         for (File mapFile : files) {
             if (mapFile.isDirectory() || !mapFile.canRead() || !mapFile.getName().endsWith(".sqlitedb")) {
-                Log.d(TAG, String.format("sd card dir is not exist: %s %b %b", Environment.getExternalStorageDirectory() + "/Download/map/", mapFile.canRead(), mapFile.canWrite()));
+                Log.d(TAG, String.format("sd card dir is not exist: %s %b %b", sdCardPath, mapFile.canRead(), mapFile.canWrite()));
                 continue; // skip no sqlite files
             }
             String name = mapFile.getName().split("\\.", -1)[0];
             long size = mapFile.length();
             DB db = new DB(context, mapFile.getAbsolutePath(), name, size);
             maps.put(name, db);
-            Log.d(TAG, String.format("map file is added: %s %s | %s | size: %d", db.name, mapFile.getName(), mapFile.getAbsolutePath(), db.size));
+            Log.d(TAG, String.format("map sd card file is added: %s %s | %s | size: %d", db.name, mapFile.getName(), mapFile.getAbsolutePath(), db.size));
         }
     }
 
