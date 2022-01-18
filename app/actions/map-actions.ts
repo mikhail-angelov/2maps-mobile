@@ -1,7 +1,7 @@
 import { ActionTypeEnum, AppThunk } from ".";
 import { Position } from 'geojson';
 import { NativeModules } from "react-native";
-import { MapInfo } from "../store/types";
+import { MapInfo, StorageMemory } from "../store/types";
 import { getLocal, get, post, HOST, HOST_LOCAL } from './api'
 import { selectToken } from '../reducers/auth'
 import { selectDownloadId } from '../reducers/map'
@@ -138,3 +138,8 @@ export const removeLocalMapAction = (name: string): AppThunk => {
     }
   };
 };
+
+export const getStorageMemoryInfo = async(): Promise<StorageMemory> => {
+  const response: string = await NativeModules.MapsModule.getStorageMemoryInfo()
+  return JSON.parse(response)
+}

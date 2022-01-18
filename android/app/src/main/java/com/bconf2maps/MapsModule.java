@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
+import android.os.Environment;
 import android.util.Log;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
@@ -24,13 +25,21 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
+import java.io.File;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
+
+import androidx.core.content.ContextCompat;
+
+import com.google.gson.Gson;
 
 public class MapsModule extends ReactContextBaseJavaModule {
     private static final String TAG = "MapsModule";
     private Downloader downloader;
     private LongSparseArray<Callback> appDownloads;
     private final ReactApplicationContext reactContext;
+
     BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -147,5 +156,80 @@ public class MapsModule extends ReactContextBaseJavaModule {
     //use it to notify
     private void sendEvent(ReactContext reactContext, String eventName, @Nullable WritableMap params) {
         reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
+    }
+
+    private static String getUsableSpace(File path) {
+        return formatSize(path.getUsableSpace());
+    }
+
+    private static String getTotalSpace(File path) {
+        return formatSize(path.getTotalSpace());
+    }
+
+    private File getSDCardPath() {
+        File[] files = ContextCompat.getExternalFilesDirs(reactContext, null);
+        try {
+            for (File file:files) {
+                if (Environment.isExternalStorageRemovable(file)) {
+                    return file;
+                }
+            }
+        } catch (Exception e) {
+        }
+        return null;
+    }
+
+    private static String formatSize(long size) {
+        String suffix = null;
+        if (size >= 1024) {
+            suffix = "KB";
+            size /= 1024;
+            if (size >= 1024) {
+                suffix = "MB";
+                size /= 1024;
+                if (size >= 1024) {
+                    suffix = "GB";
+                    size /= 1024;
+                }
+            }
+        }
+        StringBuilder resultBuffer = new StringBuilder(Long.toString(size));
+        int commaOffset = resultBuffer.length() - 3;
+        while (commaOffset > 0) {
+            resultBuffer.insert(commaOffset, ',');
+            commaOffset -= 3;
+        }
+        if (suffix != null) resultBuffer.append(suffix);
+        return resultBuffer.toString();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @ReactMethod
+    public void getStorageMemoryInfo(Promise promise) {
+        Map<String, String> summary = new HashMap<>();
+        String result = "";
+        try {
+            File internalPath = Environment.getExternalStorageDirectory();
+            String availableInternalMemorySize = getUsableSpace(internalPath);
+            String totalInternalMemorySize = getTotalSpace(internalPath);
+
+            summary.put("internalFree", availableInternalMemorySize);
+            summary.put("internalTotal", totalInternalMemorySize);
+
+            File sdCardPath = getSDCardPath();
+            if (sdCardPath != null) {
+                String availableSDCardMemorySize = getUsableSpace(sdCardPath);
+                String totalSDCardMemorySize = getTotalSpace(sdCardPath);
+
+                summary.put("sdFree", availableSDCardMemorySize);
+                summary.put("sdTotal", totalSDCardMemorySize);
+            }
+            
+            result = new Gson().toJson(summary);
+            Log.d(TAG, result);
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+        promise.resolve(result);
     }
 }
