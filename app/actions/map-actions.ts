@@ -164,7 +164,10 @@ const findUniqName = async(path: string, fileName: string): Promise<string> => {
   }catch(e){}  
   return fileName
 }
-
+const isFileValid = (fileName: string): boolean => {
+  const regex = /\.sqlitedb$/
+  return regex.test(fileName)
+}
 export const importMapAction = (): AppThunk => {
   return async dispatch => {
     dispatch({ type: ActionTypeEnum.ImportMap });
@@ -172,6 +175,9 @@ export const importMapAction = (): AppThunk => {
       const res = await DocumentPicker.pick({
         type: [DocumentPicker.types.allFiles]
       });
+      if(!isFileValid(res.name)){
+        throw new Error()
+      }
       const storagePaths = await RNFS.getAllExternalFilesDirs()
       const primaryStoragePath = storagePaths.find(path => path.includes(RNFS.ExternalStorageDirectoryPath))
       if(!primaryStoragePath) {
