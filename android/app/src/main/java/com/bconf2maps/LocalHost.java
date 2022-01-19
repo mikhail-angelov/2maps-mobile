@@ -31,7 +31,7 @@ public class LocalHost extends NanoHTTPD {
         init(context);
     }
 
-    private File getSDCardPath() {
+    public File getSDCardPath() {
         File[] files = ContextCompat.getExternalFilesDirs(ctx, null);
         try {
             for (File file:files) {

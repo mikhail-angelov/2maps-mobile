@@ -1,5 +1,7 @@
 {
     "Are you sure to remove marker?": "Are you sure to remove marker {{name}}?",
     "Successfully restored purchases!": "Successfully restored: {{count}} purchases!",
-    "Are you sure to remove the map?": "Are you sure to remove the map {{name}}?"
+    "Are you sure to remove the map?": "Are you sure to remove the map {{name}}?",
+    "Move to SD Card": "Move {{name}} to SD Card",
+    "Move to Phone": "Move {{name}} to Phone"
 }

@@ -74,5 +74,7 @@
     "free of": "свободно из",
     "Not Available": "Недоступно",
     "Import Map": "Импорт Карты",
-    "Are you sure to remove the map?": "Вы точно хотите удалить карту {{name}}?"
+    "Are you sure to remove the map?": "Вы точно хотите удалить карту {{name}}?",
+    "Move to SD Card": "Переместить {{name}} на SD карту",
+    "Move to Phone": "Переместить {{name}} в память телефона"
 }

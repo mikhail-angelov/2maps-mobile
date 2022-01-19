@@ -199,14 +199,17 @@ export const importMapAction = (): AppThunk => {
 
 const changeMapStorage = (cb: ()=>void): AppThunk => {
   return async dispatch => {    
-    try{
-      dispatch({ type: ActionTypeEnum.ChangeMapStorage });
-      await cb()
-      dispatch({type: ActionTypeEnum.ChangeMapStorageSuccess})
-      dispatch(getLocalMapListAction())
-    }catch(e){
-      dispatch({type: ActionTypeEnum.ChangeMapStorageFailure, payload: 'change map storage failure'})
-    }
+    dispatch({ type: ActionTypeEnum.ChangeMapStorage });
+    // hack because of NativeModules doesn't allow previous dispatch happen
+     setTimeout(async() => {
+      try {
+        await cb()
+        dispatch({type: ActionTypeEnum.ChangeMapStorageSuccess})
+        dispatch(getLocalMapListAction())
+      } catch(e) {
+        dispatch({type: ActionTypeEnum.ChangeMapStorageFailure, payload: 'change map storage failure'})
+      }
+    }, 0) 
   }
 }
 

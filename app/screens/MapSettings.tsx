@@ -114,7 +114,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
     const confirmMovementMapToSdCard = (item: MapItem) => {
         Alert.alert(
             "",
-            t(`Move ${item.name} to SD Card`),
+            t('Move to SD Card', {name: item.name}),
             [
                 { text: t('No'), style: "cancel" },
                 { text: t('Yes'), onPress: () => {moveMapToSdCard(item.id)} }
@@ -125,7 +125,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
     const confirmMovementMapToPhoneStorage = (item: MapItem) => {
         Alert.alert(
             "",
-            t(`Move ${item.name} to Phone`),
+            t('Move to Phone', {name: item.name}),
             [
                 { text: t('No'), style: "cancel" },
                 { text: t('Yes'), onPress: () => {moveMapToPhoneStorage(item.id) } }
