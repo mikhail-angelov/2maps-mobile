@@ -123,6 +123,21 @@ export default createReducer<MapState>(initialState, {
     loading: false,
     error,
   }),
+  [ActionTypeEnum.ImportMap]: () => (state: MapState) => ({
+    ...state,
+    loading: true,
+    error: undefined,
+  }),
+  [ActionTypeEnum.ImportMapSuccess]: () => (state: MapState) => ({
+    ...state,
+    loading: false,
+    error: undefined,
+  }),
+  [ActionTypeEnum.ImportMapFailure]: (error: string) => (state: MapState) => ({
+    ...state,
+    loading: false,
+    error,
+  }),
 });
 export const selectMapState = (state: State) => state.map;
 export const selectOpacity = createSelector(
