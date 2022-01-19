@@ -1,18 +1,18 @@
 import React, { FC, useEffect, useState } from "react";
-import { View, Text, Modal, StyleSheet, FlatList } from "react-native";
+import { View, Text, Modal, StyleSheet, FlatList, Alert } from "react-native";
 import { Button } from "react-native-elements";
 import { Picker } from "@react-native-picker/picker";
 import ProgressBar from '../components/ProgressBar';
 import { connect, ConnectedProps } from "react-redux";
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { State, MapInfo } from '../store/types'
-import { getLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction, removeLocalMapAction, cancelDownloadMapAction, getStorageMemoryInfo, importMapAction } from '../actions/map-actions'
+import { State, MapInfo, Storage } from '../store/types'
+import { getLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction, removeLocalMapAction, cancelDownloadMapAction, getStorageMemoryInfo, importMapAction, moveMapToSdCardAction, moveMapToPhoneStorageAction } from '../actions/map-actions'
 import { selectPrimaryMap, selectSecondaryMap, selectMapList, selectMapIsLoading, onLineMapList, selectAvailableMapList, selectMapError, selectDownloadProgress, selectMapIsDownLoading } from '../reducers/map'
 import { selectIsAuthenticated } from '../reducers/auth'
 import { ItemValue } from "@react-native-picker/picker/typings/Picker";
 import Spinner from "../components/Spinner";
 import { useTranslation } from "react-i18next";
-import { purple } from "../constants/color";
+import { purple, red } from "../constants/color";
 import {
     MenuProvider,
     Menu,
@@ -21,11 +21,16 @@ import {
     MenuTrigger,
 } from 'react-native-popup-menu';
 
+const internalStorage: Storage = "internal"
+const sdCardStorage: Storage = "sd-card"
+const removeStorageFromNamePattern = new RegExp(`:(${internalStorage}|${sdCardStorage})`)
+
 interface MapItem {
     id: string;
     name: string;
     file: string;
     loaded: boolean;
+    storage?: Storage;
 }
 
 const mapStateToProps = (state: State) => ({
@@ -48,6 +53,8 @@ const mapDispatchToProps = {
     removeLocalMap: removeLocalMapAction,
     cancelDownloadMap: cancelDownloadMapAction,
     importMap: importMapAction,
+    moveMapToSdCard: moveMapToSdCardAction,
+    moveMapToPhoneStorage: moveMapToPhoneStorageAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & {
@@ -56,7 +63,7 @@ type Props = ConnectedProps<typeof connector> & {
 }
 
 
-const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoading, list, availableMapList, isAuthenticated, error, progress, cancelDownloadMap, close, getLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap, showAuth, importMap }) => {
+const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoading, list, availableMapList, isAuthenticated, error, progress, cancelDownloadMap, close, getLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap, showAuth, importMap, moveMapToSdCard, moveMapToPhoneStorage }) => {
     const { t } = useTranslation()
     const [availableInternalMemory, setAvailableInternalMemory] = useState("")
     const [totalInternalMemory, setTotalInternalMemory] = useState("")
@@ -90,7 +97,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
     },[list])
 
     const allMaps: MapItem[] = [
-        ...list.map(({ name, url, size = 0 }: MapInfo) => ({ id: name, name: `${name} (${(size / 1000000).toFixed(3)}M)`, file: url, loaded: true })),
+        ...list.map(({ name, url, size = 0, storage }: MapInfo) => ({ id: name, name: `${name.replace(removeStorageFromNamePattern,"")} (${(size / 1000000).toFixed(3)}M)`, file: url, loaded: true, storage })),
         ...availableMapList.filter(({ name }) => !list.find((item) => item.name === name)).map(({ id, name, url, size }) => {
             return { id, name: `${name} (${(size / 1000000).toFixed(3)}M)`, file: url, loaded: false }
         })]
@@ -104,11 +111,50 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
         setSecondaryMap(list.find(x => x.name === value))
     }
 
+    const confirmMovementMapToSdCard = (item: MapItem) => {
+        Alert.alert(
+            "",
+            t(`Move ${item.name} to SD Card`),
+            [
+                { text: t('No'), style: "cancel" },
+                { text: t('Yes'), onPress: () => {moveMapToSdCard(item.id)} }
+            ]
+        );
+    }
+
+    const confirmMovementMapToPhoneStorage = (item: MapItem) => {
+        Alert.alert(
+            "",
+            t(`Move ${item.name} to Phone`),
+            [
+                { text: t('No'), style: "cancel" },
+                { text: t('Yes'), onPress: () => {moveMapToPhoneStorage(item.id) } }
+            ]
+        );
+    }
+
+    const confirmRemoving = (item: MapItem) => {
+        Alert.alert(
+            t('Warning!'),
+            t('Are you sure to remove the map?', {name: item.name}),
+            [
+                { text: t('No'), style: "cancel" },
+                { text: t('Yes'), onPress: () => {removeLocalMap(item.id)} }
+            ]
+        );
+    }
+
     const renderItem = (item: MapItem, isAuthenticated: boolean ) => (
         (isAuthenticated || item.loaded) &&
             <View style={styles.row}>
                 <Text>{item.name}</Text>
-                {item.loaded && <Button titleStyle={{color: purple}} type='clear' onPress={() => removeLocalMap(item.id)} title="remove" />}
+                {item.loaded && (
+                    <View style={styles.listButtonsContainer}>
+                        {item.storage === internalStorage && <Icon.Button style={styles.listButton} iconStyle={styles.listIconStorage} size={22} backgroundColor="transparent" name="phone-android" accessibilityLabel="move to sd card" onPress={() => confirmMovementMapToSdCard(item)}/>}
+                        {item.storage === sdCardStorage && <Icon.Button style={styles.listButton} iconStyle={styles.listIconStorage} size={22} backgroundColor="transparent" name="sd-card" accessibilityLabel="move to mobile" onPress={() => confirmMovementMapToPhoneStorage(item)}/>}
+                        <Icon.Button style={styles.listButton} iconStyle={styles.listIconRemove} size={22} backgroundColor="transparent" name="delete-outline" accessibilityLabel="remove" onPress={() => confirmRemoving(item)}/>
+                    </View>
+                )}
                 {!item.loaded && isAuthenticated && <Button titleStyle={{color: purple}} type='clear' onPress={() => downloadMap({ id: item.id, name: item.file })} title="download" />}
             </View>
         || null
@@ -175,7 +221,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                     <FlatList
                         data={allMaps}
                         renderItem={({item}) => renderItem(item, isAuthenticated)}
-                        keyExtractor={(item: MapItem) => item.name}
+                        keyExtractor={(item: MapItem) => item.id}
                     />
                     {!isAuthenticated &&
                         <Button buttonStyle={styles.btn} title={t('Login to download maps')} onPress={showAuth} />
@@ -311,4 +357,18 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '700',
     },
+    listButtonsContainer: {
+        flexDirection: "row",
+    },
+    listIconStorage: {
+        color: purple,
+    },
+    listIconRemove: {
+        color: red,
+    },
+    listButton: {
+        minHeight: 48,
+        minWidth: 48,
+        marginLeft: 10,
+    }
 });

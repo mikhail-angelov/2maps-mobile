@@ -82,6 +82,9 @@ export enum ActionTypeEnum {
   ImportMap = 'map/IMPORT_MAP',
   ImportMapSuccess = 'map/IMPORT_MAP_SUCCESS',
   ImportMapFailure = 'map/IMPORT_MAP_FAILED',
+  ChangeMapStorage = 'map/CHANGE_MAP_STORAGE',
+  ChangeMapStorageSuccess = 'map/CHANGE_MAP_STORAGE_SUCCESS',
+  ChangeMapStorageFailure = 'map/CHANGE_MAP_STORAGE_FAILED',
   //wiki
   WikiRequest = 'wiki/REQUEST',
   WikiSuccess = 'wiki/REQUEST_SUCCESS',

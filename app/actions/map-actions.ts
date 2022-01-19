@@ -35,7 +35,7 @@ export const getLocalMapListAction = (): AppThunk => {
       dispatch({ type: ActionTypeEnum.GetMapList });
       const res: AxiosResponse<{[key: string]: MapInfo}> = await getLocal('maps');
       console.log('get maps', res.data);
-      const list = Object.values(res.data).map(({name, size}) => ({ name, url: `${HOST_LOCAL}/map/${name}/{z}/{x}/{y}.png`, size: size || 0 }));
+      const list = Object.values(res.data).map(({name, size, storage}) => ({ name, url: `${HOST_LOCAL}/map/${name}/{z}/{x}/{y}.png`, size: size || 0, storage }));
       dispatch({ type: ActionTypeEnum.GetMapListSuccess, payload: list });
     } catch (err) {
       console.log("error", err);
@@ -196,3 +196,20 @@ export const importMapAction = (): AppThunk => {
     }
   };
 };
+
+const changeMapStorage = (cb: ()=>void): AppThunk => {
+  return async dispatch => {    
+    try{
+      dispatch({ type: ActionTypeEnum.ChangeMapStorage });
+      await cb()
+      dispatch({type: ActionTypeEnum.ChangeMapStorageSuccess})
+      dispatch(getLocalMapListAction())
+    }catch(e){
+      dispatch({type: ActionTypeEnum.ChangeMapStorageFailure, payload: 'change map storage failure'})
+    }
+  }
+}
+
+export const moveMapToSdCardAction = (path: string) => (changeMapStorage(() => NativeModules.MapsModule.moveMapToSDCard(path)))
+
+export const moveMapToPhoneStorageAction = (path: string) => (changeMapStorage(() => NativeModules.MapsModule.moveMapToPhoneStorage(path)))

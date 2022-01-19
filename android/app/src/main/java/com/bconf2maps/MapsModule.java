@@ -228,4 +228,40 @@ public class MapsModule extends ReactContextBaseJavaModule {
         }
         promise.resolve(result);
     }
+
+    private boolean changeMapStorage(String name, String targetPath) {
+        Map<String, DB> maps = LocalHost.getInstance().getMapsOnly();
+        String path = maps.get(name).path;
+        File file = new File(path);
+
+        String[] splittedDestFileName = path.split("/", 0);
+        String destFileName = splittedDestFileName[splittedDestFileName.length - 1];
+
+        String destPath = targetPath.concat("/map/" + destFileName);
+        return downloader.moveFile(file, destPath);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @ReactMethod
+    public void moveMapToSDCard(String name, Promise promise) {
+        String targetPath = getSDCardPath().getPath();
+        boolean result = changeMapStorage(name, targetPath);
+        if (result) {
+            promise.resolve(String.valueOf(result));
+        } else {
+            promise.reject("", String.valueOf(result));
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @ReactMethod
+    public void moveMapToPhoneStorage(String name, Promise promise) {
+        String targetPath = reactContext.getExternalFilesDir("").getPath();
+        boolean result = changeMapStorage(name, targetPath);
+        if (result) {
+            promise.resolve(String.valueOf(result));
+        } else {
+            promise.reject("", String.valueOf(result));
+        }
+    }
 }

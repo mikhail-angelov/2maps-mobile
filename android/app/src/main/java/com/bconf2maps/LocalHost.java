@@ -57,11 +57,12 @@ public class LocalHost extends NanoHTTPD {
             if (mapFile.isDirectory() || !mapFile.canRead() || !mapFile.getName().endsWith(".sqlitedb")) {
                 continue; // skip no sqlite files
             }
-            String name = mapFile.getName().split("\\.", -1)[0];
+            String storage = "internal";
+            String name = mapFile.getName().split("\\.", -1)[0].concat(":" + storage);
             long size = mapFile.length();
-            DB db = new DB(context, mapFile.getAbsolutePath(), name, size);
+            DB db = new DB(context, mapFile.getAbsolutePath(), name, size, storage);
             maps.put(name, db);
-            Log.d(TAG, String.format("map file is added: %s %s | %s | size: %d", db.name, mapFile.getName(), mapFile.getAbsolutePath(), db.size));
+            Log.d(TAG, String.format("map file is added: %s %s | %s | size: %d | storage: %s", db.name, mapFile.getName(), mapFile.getAbsolutePath(), db.size, db.storage));
         }
 
         String sdCardPath = getSDCardPath().getPath().concat("/map");
@@ -81,11 +82,12 @@ public class LocalHost extends NanoHTTPD {
                 Log.d(TAG, String.format("sd card dir is not exist: %s %b %b", sdCardPath, mapFile.canRead(), mapFile.canWrite()));
                 continue; // skip no sqlite files
             }
-            String name = mapFile.getName().split("\\.", -1)[0];
+            String storage = "sd-card";
+            String name = mapFile.getName().split("\\.", -1)[0].concat(":" + storage);
             long size = mapFile.length();
-            DB db = new DB(context, mapFile.getAbsolutePath(), name, size);
+            DB db = new DB(context, mapFile.getAbsolutePath(), name, size, storage);
             maps.put(name, db);
-            Log.d(TAG, String.format("map sd card file is added: %s %s | %s | size: %d", db.name, mapFile.getName(), mapFile.getAbsolutePath(), db.size));
+            Log.d(TAG, String.format("map sd card file is added: %s %s | %s | size: %d | storage: %s", db.name, mapFile.getName(), mapFile.getAbsolutePath(), db.size, db.storage));
         }
     }
 
@@ -176,4 +178,7 @@ public class LocalHost extends NanoHTTPD {
         return maps;
     }
 
+    public Map<String, DB> getMapsOnly() {
+        return maps;
+    }
 }

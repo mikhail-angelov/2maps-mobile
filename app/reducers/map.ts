@@ -138,6 +138,21 @@ export default createReducer<MapState>(initialState, {
     loading: false,
     error,
   }),
+  [ActionTypeEnum.ChangeMapStorage]: () => (state: MapState) => ({
+    ...state,
+    loading: true,
+    error: undefined,
+  }),
+  [ActionTypeEnum.ChangeMapStorageSuccess]: () => (state: MapState) => ({
+    ...state,
+    loading: false,
+    error: undefined,
+  }),
+  [ActionTypeEnum.ChangeMapStorageFailure]: (error: string) => (state: MapState) => ({
+    ...state,
+    loading: false,
+    error,
+  }),
 });
 export const selectMapState = (state: State) => state.map;
 export const selectOpacity = createSelector(

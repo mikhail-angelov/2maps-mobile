@@ -73,5 +73,6 @@
     "SD card": "SD карта",
     "free of": "свободно из",
     "Not Available": "Недоступно",
-    "Import Map": "Импорт Карты"
+    "Import Map": "Импорт Карты",
+    "Are you sure to remove the map?": "Вы точно хотите удалить карту {{name}}?"
 }
