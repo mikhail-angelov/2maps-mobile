@@ -6,6 +6,9 @@ import { getLocal, get, post, HOST, HOST_LOCAL } from './api'
 import { selectToken } from '../reducers/auth'
 import { selectDownloadId } from '../reducers/map'
 import { AxiosResponse } from "axios";
+import DocumentPicker from "react-native-document-picker";
+import RNFS from 'react-native-fs';
+import * as _ from 'lodash';
 
 export const setCenterAction = (center: Position) => {
   //todo: validate params
@@ -143,3 +146,53 @@ export const getStorageMemoryInfo = async(): Promise<StorageMemory> => {
   const response: string = await NativeModules.MapsModule.getStorageMemoryInfo()
   return JSON.parse(response)
 }
+
+const createNewFileName = (name: string): string => {
+  const ext = '.sqlitedb'
+  const changeableName = name.replace(ext, '')
+  const regex = /\((\d+)\)$/
+  const newName = changeableName.replace(regex, (str, p1)=>(`(${+p1 + 1})`))
+  return changeableName === newName ? newName + '(1)' + ext : newName + ext
+}
+
+const findUniqName = async(path: string, fileName: string): Promise<string> => {
+  try{
+    const statResult = await RNFS.stat(path + fileName)
+    if(statResult.isFile()) {
+      return findUniqName(path, createNewFileName(fileName))
+    }
+  }catch(e){}  
+  return fileName
+}
+const isFileValid = (fileName: string): boolean => {
+  const regex = /\.sqlitedb$/
+  return regex.test(fileName)
+}
+export const importMapAction = (): AppThunk => {
+  return async dispatch => {
+    dispatch({ type: ActionTypeEnum.ImportMap });
+    try {
+      const res = await DocumentPicker.pick({
+        type: [DocumentPicker.types.allFiles]
+      });
+      if(!isFileValid(res.name)){
+        throw new Error()
+      }
+      const storagePaths = await RNFS.getAllExternalFilesDirs()
+      const primaryStoragePath = storagePaths.find(path => path.includes(RNFS.ExternalStorageDirectoryPath))
+      if(!primaryStoragePath) {
+        return
+      }
+      const destinationPath = `${primaryStoragePath}/map/`
+      const fileName = await findUniqName(destinationPath, res.name)
+      await RNFS.copyFile(res.fileCopyUri, destinationPath + fileName)
+      dispatch({ type: ActionTypeEnum.ImportMapSuccess });
+      dispatch(getLocalMapListAction())
+    } catch (err: any) {
+      if (DocumentPicker.isCancel(err)) {
+        // User cancelled the picker, exit any dialogs or menus and move on
+      }
+      dispatch({ type: ActionTypeEnum.ImportMapFailure, payload: 'import map failure' });
+    }
+  };
+};
