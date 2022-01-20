@@ -69,7 +69,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
     const [totalInternalMemory, setTotalInternalMemory] = useState("")
     const [availableExternalMemory, setAvailableExternalMemory] = useState("")
     const [totalExternalMemory, setTotalExternalMemory] = useState("")
-    const [isSDCArdExist, setIsSDCArdExist] = useState(true)
+    const [isSDCardExist, setIsSDCardExist] = useState(true)
     const [isMemoryAvailable, setIsMemoryAvailable] = useState(true)
 
     useEffect(() => {
@@ -88,7 +88,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                     setAvailableExternalMemory(response.sdFree)
                     setTotalExternalMemory(response.sdTotal)
                 } else {
-                    setIsSDCArdExist(false)
+                    setIsSDCardExist(false)
                 }
             })
             .catch(() => {
@@ -112,14 +112,24 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
     }
 
     const confirmMovementMapToSdCard = (item: MapItem) => {
-        Alert.alert(
-            "",
-            t('Move to SD Card', {name: item.name}),
-            [
-                { text: t('No'), style: "cancel" },
-                { text: t('Yes'), onPress: () => {moveMapToSdCard(item.id)} }
-            ]
-        );
+        if(isSDCardExist){
+            Alert.alert(
+                "",
+                t('Move to SD Card', {name: item.name}),
+                [
+                    { text: t('No'), style: "cancel" },
+                    { text: t('Yes'), onPress: () => {moveMapToSdCard(item.id)} }
+                ]
+            );
+        } else {
+            Alert.alert(
+                "",
+                t('No SD Card'),
+                [
+                    { text: t('Ok'), style: "default" },
+                ]
+            );
+        }
     }
 
     const confirmMovementMapToPhoneStorage = (item: MapItem) => {
@@ -215,7 +225,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                     <Text>{t('Phone')}: {isMemoryAvailable ? `${availableInternalMemory} ${t('free of')} ${totalInternalMemory}`: t('Not Available')}</Text>
                 </View>
                 <View style={styles.row}>
-                    <Text>{t('SD card')}: {isSDCArdExist && isMemoryAvailable ? `${availableExternalMemory} ${t('free of')} ${totalExternalMemory}`: t('Not Available')}</Text>
+                    <Text>{t('SD card')}: {isSDCardExist && isMemoryAvailable ? `${availableExternalMemory} ${t('free of')} ${totalExternalMemory}`: t('Not Available')}</Text>
                 </View>
                 <View style={styles.availableMaps}>
                     <FlatList

@@ -65,8 +65,11 @@ public class LocalHost extends NanoHTTPD {
             Log.d(TAG, String.format("map file is added: %s %s | %s | size: %d | storage: %s", db.name, mapFile.getName(), mapFile.getAbsolutePath(), db.size, db.storage));
         }
 
-        String sdCardPath = getSDCardPath().getPath().concat("/map");
-        mapDir = new File(sdCardPath);
+        File sdCardPath = getSDCardPath();
+        if (sdCardPath == null) {
+            return;
+        }
+        mapDir = new File(sdCardPath.getPath().concat("/map"));
         if (!mapDir.exists()) {
             Log.d(TAG, String.format("sd card dir is not exist: %s", sdCardPath));
             //add dir

@@ -76,5 +76,6 @@
     "Import Map": "Импорт Карты",
     "Are you sure to remove the map?": "Вы точно хотите удалить карту {{name}}?",
     "Move to SD Card": "Переместить {{name}} на SD карту",
-    "Move to Phone": "Переместить {{name}} в память телефона"
+    "Move to Phone": "Переместить {{name}} в память телефона",
+    "No SD Card": "Нет карты памяти"
 }

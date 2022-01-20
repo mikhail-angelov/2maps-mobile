@@ -231,12 +231,17 @@ public class MapsModule extends ReactContextBaseJavaModule {
     @RequiresApi(api = Build.VERSION_CODES.O)
     @ReactMethod
     public void moveMapToSDCard(String name, Promise promise) {
-        String targetPath = LocalHost.getInstance().getSDCardPath().getPath();
+        File sdCardPath = LocalHost.getInstance().getSDCardPath();
+        if (sdCardPath == null) {
+            promise.reject("No SD card path", "Can not find sd card");
+            return;
+        }        
+        String targetPath = sdCardPath.getPath();
         boolean result = changeMapStorage(name, targetPath);
         if (result) {
             promise.resolve(String.valueOf(result));
         } else {
-            promise.reject("", String.valueOf(result));
+            promise.reject("file moving error", String.valueOf(result));
         }
     }
 
@@ -248,7 +253,7 @@ public class MapsModule extends ReactContextBaseJavaModule {
         if (result) {
             promise.resolve(String.valueOf(result));
         } else {
-            promise.reject("", String.valueOf(result));
+            promise.reject("file moving error", String.valueOf(result));
         }
     }
 }
