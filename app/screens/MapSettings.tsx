@@ -97,8 +97,8 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
     },[list])
 
     const allMaps: MapItem[] = [
-        ...list.map(({ name, url, size = 0, storage }: MapInfo) => ({ id: name, name: `${name.replace(removeStorageFromNamePattern,"")} (${(size / 1000000).toFixed(3)}M)`, file: url, loaded: true, storage })),
-        ...availableMapList.filter(({ name }) => !list.find((item) => item.name === name)).map(({ id, name, url, size }) => {
+        ...list.map(({ name, url, size = 0, storage }: MapInfo) => ({ id: name, name: `${name.replace(removeStorageFromNamePattern, "")} (${(size / 1000000).toFixed(3)}M)`, file: url, loaded: true, storage })),
+        ...availableMapList.filter(({ name }) => !list.find((item) => item.name.replace(removeStorageFromNamePattern, "") === name)).map(({ id, name, url, size }) => {
             return { id, name: `${name} (${(size / 1000000).toFixed(3)}M)`, file: url, loaded: false }
         })]
     const primaryList = [...onLineMapList, ...list]
