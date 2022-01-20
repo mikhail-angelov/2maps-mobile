@@ -35,7 +35,7 @@ export const getLocalMapListAction = (): AppThunk => {
       dispatch({ type: ActionTypeEnum.GetMapList });
       const res: AxiosResponse<{[key: string]: MapInfo}> = await getLocal('maps');
       console.log('get maps', res.data);
-      const list = Object.values(res.data).map(({name, size}) => ({ name, url: `${HOST_LOCAL}/map/${name}/{z}/{x}/{y}.png`, size: size || 0 }));
+      const list = Object.values(res.data).map(({name, size, storage}) => ({ name, url: `${HOST_LOCAL}/map/${name}/{z}/{x}/{y}.png`, size: size || 0, storage }));
       dispatch({ type: ActionTypeEnum.GetMapListSuccess, payload: list });
     } catch (err) {
       console.log("error", err);
@@ -196,3 +196,35 @@ export const importMapAction = (): AppThunk => {
     }
   };
 };
+
+export const moveMapToSdCardAction = (path: string): AppThunk => {
+  return async dispatch => {    
+    dispatch({ type: ActionTypeEnum.ChangeMapStorage });
+    // hack because of NativeModules doesn't allow previous dispatch happen
+     setTimeout(async() => {
+      try {
+        await NativeModules.MapsModule.moveMapToSDCard(path)
+        dispatch({type: ActionTypeEnum.ChangeMapStorageSuccess})
+        dispatch(getLocalMapListAction())
+      } catch(e) {
+        dispatch({type: ActionTypeEnum.ChangeMapStorageFailure, payload: 'change map storage failure'})
+      }
+    }, 0) 
+  }
+}
+
+export const moveMapToPhoneStorageAction = (path: string): AppThunk => {
+  return async dispatch => {    
+    dispatch({ type: ActionTypeEnum.ChangeMapStorage });
+    // hack because of NativeModules doesn't allow previous dispatch happen
+     setTimeout(async() => {
+      try {
+        await NativeModules.MapsModule.moveMapToPhoneStorage(path)
+        dispatch({type: ActionTypeEnum.ChangeMapStorageSuccess})
+        dispatch(getLocalMapListAction())
+      } catch(e) {
+        dispatch({type: ActionTypeEnum.ChangeMapStorageFailure, payload: 'change map storage failure'})
+      }
+    }, 0) 
+  }
+}

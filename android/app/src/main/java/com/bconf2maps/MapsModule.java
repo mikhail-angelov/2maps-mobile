@@ -166,19 +166,6 @@ public class MapsModule extends ReactContextBaseJavaModule {
         return formatSize(path.getTotalSpace());
     }
 
-    private File getSDCardPath() {
-        File[] files = ContextCompat.getExternalFilesDirs(reactContext, null);
-        try {
-            for (File file:files) {
-                if (Environment.isExternalStorageRemovable(file)) {
-                    return file;
-                }
-            }
-        } catch (Exception e) {
-        }
-        return null;
-    }
-
     private static String formatSize(long size) {
         String suffix = null;
         if (size >= 1024) {
@@ -212,7 +199,7 @@ public class MapsModule extends ReactContextBaseJavaModule {
             summary.put("internalFree", availableInternalMemorySize);
             summary.put("internalTotal", totalInternalMemorySize);
 
-            File sdCardPath = getSDCardPath();
+            File sdCardPath = LocalHost.getInstance().getSDCardPath();
             if (sdCardPath != null) {
                 String availableSDCardMemorySize = getUsableSpace(sdCardPath);
                 String totalSDCardMemorySize = getTotalSpace(sdCardPath);
@@ -227,5 +214,46 @@ public class MapsModule extends ReactContextBaseJavaModule {
             Log.e(TAG, e.getMessage());
         }
         promise.resolve(result);
+    }
+
+    private boolean changeMapStorage(String name, String targetPath) {
+        Map<String, DB> maps = LocalHost.getInstance().getMapsOnly();
+        String path = maps.get(name).path;
+        File file = new File(path);
+
+        String[] splittedDestFileName = path.split("/", 0);
+        String destFileName = splittedDestFileName[splittedDestFileName.length - 1];
+
+        String destPath = targetPath.concat("/map/" + destFileName);
+        return downloader.moveFile(file, destPath);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @ReactMethod
+    public void moveMapToSDCard(String name, Promise promise) {
+        File sdCardPath = LocalHost.getInstance().getSDCardPath();
+        if (sdCardPath == null) {
+            promise.reject("No SD card path", "Can not find sd card");
+            return;
+        }        
+        String targetPath = sdCardPath.getPath();
+        boolean result = changeMapStorage(name, targetPath);
+        if (result) {
+            promise.resolve(String.valueOf(result));
+        } else {
+            promise.reject("file moving error", String.valueOf(result));
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @ReactMethod
+    public void moveMapToPhoneStorage(String name, Promise promise) {
+        String targetPath = reactContext.getExternalFilesDir("").getPath();
+        boolean result = changeMapStorage(name, targetPath);
+        if (result) {
+            promise.resolve(String.valueOf(result));
+        } else {
+            promise.reject("file moving error", String.valueOf(result));
+        }
     }
 }

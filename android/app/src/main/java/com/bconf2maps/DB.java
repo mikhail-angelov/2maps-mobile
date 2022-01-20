@@ -13,15 +13,17 @@ public class DB extends SQLiteOpenHelper {
     public final String name;
     public final String path;
     public final long size;
+    public final String storage;
     public int minzoom = 0;
     public int maxzoom = 0;
 
-    public DB(Context context, String path, String name, long size) {
+    public DB(Context context, String path, String name, long size, String storage) {
         // 3rd argument to be passed is CursorFactory instance
         super(context, path, null, DATABASE_VERSION);
         this.name = name;
         this.path = path;
         this.size = size;
+        this.storage = storage;
         getInfo();
     }
 
