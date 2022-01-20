@@ -66,16 +66,19 @@ public class LocalHost extends NanoHTTPD {
         }
 
         File sdCardPath = getSDCardPath();
-        if (sdCardPath == null) {
-            return;
-        }
-        mapDir = new File(sdCardPath.getPath().concat("/map"));
+        if (sdCardPath != null) {
+            initSdCard(context, sdCardPath);
+        }        
+    }
+
+    private void initSdCard(Context context, File sdCardPath) {
+        File mapDir = new File(sdCardPath.getPath().concat("/map"));
         if (!mapDir.exists()) {
             Log.d(TAG, String.format("sd card dir is not exist: %s", sdCardPath));
             //add dir
             mapDir.mkdirs();
         }
-        files = mapDir.listFiles();
+        File[] files = mapDir.listFiles();
         if (files == null) {
             Log.d(TAG, String.format("sd card no files: %s", sdCardPath));
             return;
@@ -92,7 +95,7 @@ public class LocalHost extends NanoHTTPD {
             maps.put(name, db);
             Log.d(TAG, String.format("map sd card file is added: %s %s | %s | size: %d | storage: %s", db.name, mapFile.getName(), mapFile.getAbsolutePath(), db.size, db.storage));
         }
-    }
+    } 
 
     public static LocalHost createInstance(Context context) {
         synchronized (LocalHost.class) {
