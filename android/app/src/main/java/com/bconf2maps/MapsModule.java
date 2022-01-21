@@ -12,6 +12,8 @@ import android.util.LongSparseArray;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 
+import android.provider.Settings;
+
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
@@ -255,5 +257,12 @@ public class MapsModule extends ReactContextBaseJavaModule {
         } else {
             promise.reject("file moving error", String.valueOf(result));
         }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @ReactMethod
+    public void isTestDevice(Promise promise) {
+        String testLabSetting = Settings.System.getString(reactContext.getContentResolver(), "firebase.test.lab");
+        promise.resolve("true".equals(testLabSetting));
     }
 }
