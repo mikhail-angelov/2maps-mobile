@@ -29,7 +29,7 @@ public class MainActivity extends ReactActivity {
         return "bconf2maps";
     }
 
-     private void checkPermissions() {
+     public void checkPermissions() {
          // API 23: we have to check if ACCESS_FINE_LOCATION and/or ACCESS_COARSE_LOCATION permission are granted
          if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                  || ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -49,7 +49,7 @@ public class MainActivity extends ReactActivity {
              case 100: {
                  if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                      // permission was granted
-                     Log.d(TAG, "respone Permissions");
+                     Log.d(TAG, "response Permissions");
                  } else {
                      // permission denied
                      Log.e(TAG, "response Permissions negative");

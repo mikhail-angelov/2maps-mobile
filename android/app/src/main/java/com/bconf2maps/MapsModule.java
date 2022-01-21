@@ -1,5 +1,5 @@
 package com.bconf2maps;
-
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -11,7 +11,7 @@ import android.content.BroadcastReceiver;
 import android.util.LongSparseArray;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-
+import android.app.Activity;
 import android.provider.Settings;
 
 import androidx.annotation.Nullable;
@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import androidx.core.content.ContextCompat;
+import androidx.core.app.ActivityCompat;
 
 import com.google.gson.Gson;
 
@@ -41,6 +42,7 @@ public class MapsModule extends ReactContextBaseJavaModule {
     private Downloader downloader;
     private LongSparseArray<Callback> appDownloads;
     private final ReactApplicationContext reactContext;
+    private HashMap<String, Callback> appPermissions;
 
     BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
         @Override
@@ -72,6 +74,7 @@ public class MapsModule extends ReactContextBaseJavaModule {
         appDownloads = new LongSparseArray<>();
         IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
         reactContext.registerReceiver(downloadReceiver, filter);
+        appPermissions = new HashMap<>();
     }
 
     @Override
@@ -264,5 +267,24 @@ public class MapsModule extends ReactContextBaseJavaModule {
     public void isTestDevice(Promise promise) {
         String testLabSetting = Settings.System.getString(reactContext.getContentResolver(), "firebase.test.lab");
         promise.resolve("true".equals(testLabSetting));
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @ReactMethod
+    public void getLocationPermission(Callback onDone) {
+        appPermissions.put("location", onDone);
+        (getActivity(MainActivity)).checkPermissions();
+    }
+
+    public void locationPermissionGranted() {
+        Callback appPermissionsOnDoneCb = appPermissions.get("location");
+        appPermissionsOnDoneCb.invoke();
+        appPermissions.remove("location");
+    }
+
+    public void locationPermissionDeny() {
+        Callback appPermissionsOnDoneCb = appPermissions.get("location");
+        appPermissionsOnDoneCb.invoke(true);
+        appPermissions.remove("location");
     }
 }

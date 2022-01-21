@@ -9,6 +9,7 @@ import { AxiosResponse } from "axios";
 import DocumentPicker from "react-native-document-picker";
 import RNFS from 'react-native-fs';
 import * as _ from 'lodash';
+import MapsModule from '../nativeModules/mapsModule';
 
 export const setCenterAction = (center: Position) => {
   //todo: validate params
@@ -142,8 +143,8 @@ export const removeLocalMapAction = (name: string): AppThunk => {
   };
 };
 
-export const getStorageMemoryInfo = async(): Promise<StorageMemory> => {
-  const response: string = await NativeModules.MapsModule.getStorageMemoryInfo()
+export const getStorageMemoryInfoAction = async(): Promise<StorageMemory> => {
+  const response: string = await MapsModule.getStorageMemoryInfo()
   return JSON.parse(response)
 }
 
@@ -203,7 +204,7 @@ export const moveMapToSdCardAction = (path: string): AppThunk => {
     // hack because of NativeModules doesn't allow previous dispatch happen
      setTimeout(async() => {
       try {
-        await NativeModules.MapsModule.moveMapToSDCard(path)
+        await MapsModule.moveMapToSDCard(path)
         dispatch({type: ActionTypeEnum.ChangeMapStorageSuccess})
         dispatch(getLocalMapListAction())
       } catch(e) {
@@ -219,7 +220,7 @@ export const moveMapToPhoneStorageAction = (path: string): AppThunk => {
     // hack because of NativeModules doesn't allow previous dispatch happen
      setTimeout(async() => {
       try {
-        await NativeModules.MapsModule.moveMapToPhoneStorage(path)
+        await MapsModule.moveMapToPhoneStorage(path)
         dispatch({type: ActionTypeEnum.ChangeMapStorageSuccess})
         dispatch(getLocalMapListAction())
       } catch(e) {

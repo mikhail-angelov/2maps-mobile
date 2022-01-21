@@ -21,6 +21,7 @@ import {makeSvg} from '../utils/svg';
 import * as _ from 'lodash';
 import i18next from 'i18next';
 import distance from '@turf/distance';
+import MapsModule from '../nativeModules/mapsModule';
 
 const PATH = `${RNFS.CachesDirectoryPath}/tracks`;
 const TRACKS_EXT = '.track';
@@ -131,16 +132,22 @@ export const selectTrackAction = (track: Track | undefined): AppThunk => {
 };
 export const startTrackingAction = (): AppThunk => {
   return async (dispatch, getState) => {
-    const location = selectLocation(getState());
-    const startPoint = [location.coords.longitude, location.coords.latitude];
-    const track: Track = {
-      id: uuid(),
-      start: Date.now(),
-      end: Date.now(),
-      name: '',
-      track: [startPoint, startPoint],
-    };
-    dispatch({type: ActionTypeEnum.StartTracking, payload: track});
+    MapsModule.getLocationPermission((error) => {
+      if (error) {
+        return
+      }
+      const location = selectLocation(getState());
+      const startPoint = [location.coords.longitude, location.coords.latitude];
+      const track: Track = {
+        id: uuid(),
+        start: Date.now(),
+        end: Date.now(),
+        name: '',
+        track: [startPoint, startPoint],
+      };
+      dispatch({type: ActionTypeEnum.StartTracking, payload: track});
+      });
+    
   };
 };
 

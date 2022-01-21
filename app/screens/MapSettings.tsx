@@ -6,7 +6,7 @@ import ProgressBar from '../components/ProgressBar';
 import { connect, ConnectedProps } from "react-redux";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { State, MapInfo, Storage } from '../store/types'
-import { getLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction, removeLocalMapAction, cancelDownloadMapAction, getStorageMemoryInfo, importMapAction, moveMapToSdCardAction, moveMapToPhoneStorageAction } from '../actions/map-actions'
+import { getLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction, removeLocalMapAction, cancelDownloadMapAction, getStorageMemoryInfoAction, importMapAction, moveMapToSdCardAction, moveMapToPhoneStorageAction } from '../actions/map-actions'
 import { selectPrimaryMap, selectSecondaryMap, selectMapList, selectMapIsLoading, onLineMapList, selectAvailableMapList, selectMapError, selectDownloadProgress, selectMapIsDownLoading } from '../reducers/map'
 import { selectIsAuthenticated } from '../reducers/auth'
 import { ItemValue } from "@react-native-picker/picker/typings/Picker";
@@ -80,7 +80,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
     }, [])
 
     useEffect(() => {
-        getStorageMemoryInfo()
+        getStorageMemoryInfoAction()
             .then((response) => {
                 setAvailableInternalMemory(response.internalFree)
                 setTotalInternalMemory(response.internalTotal)
