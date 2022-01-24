@@ -133,7 +133,7 @@ export const selectTrackAction = (track: Track | undefined): AppThunk => {
   };
 };
 
-const checkLocationPermissionsAction = async() => {
+const checkLocationPermissions = async() => {
   try {
     const isGrantedCoarse = await PermissionsAndroid.check(ACCESS_COARSE_LOCATION);
     const isGrantedFine = await PermissionsAndroid.check(ACCESS_FINE_LOCATION);  
@@ -157,7 +157,7 @@ const requestLocationPermissions = async () => {
 export const startTrackingAction = (): AppThunk => {
   return async (dispatch, getState) => {
     try {
-      await checkLocationPermissionsAction()
+      await checkLocationPermissions()
       await requestLocationPermissions()
       const location = selectLocation(getState());
       const startPoint = [location.coords.longitude, location.coords.latitude];
