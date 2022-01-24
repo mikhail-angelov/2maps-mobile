@@ -10,7 +10,7 @@ import {selectTracks} from '../reducers/tracker';
 import RNFS from 'react-native-fs';
 import DocumentPicker from 'react-native-document-picker';
 import {createKml, parseKml} from '../utils/kml';
-import {Alert} from 'react-native';
+import {Alert, PermissionsAndroid} from 'react-native';
 import {v4 as uuid} from '@lukeed/uuid';
 import {
   latLngToTileIndex,
@@ -129,19 +129,47 @@ export const selectTrackAction = (track: Track | undefined): AppThunk => {
     });
   };
 };
+
+const requestLocationPermissions = async () => {
+  const ACCESS_FINE_LOCATION = PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+  const ACCESS_COARSE_LOCATION = PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION
+  const check = await PermissionsAndroid.check( ACCESS_FINE_LOCATION);
+  console.log("🚀 ~ file: tracker-actions.ts ~ line 137 ~ requestLocationPermissions ~ check", check)
+  const check1 = await PermissionsAndroid.check( ACCESS_COARSE_LOCATION);
+  console.log("🚀 ~ file: tracker-actions.ts ~ line 139 ~ requestLocationPermissions ~ check1", check1)
+  
+  const granted = await PermissionsAndroid.request( ACCESS_FINE_LOCATION);
+  const granted1 = await PermissionsAndroid.request( ACCESS_COARSE_LOCATION);
+  console.log("You can use the Location");
+
+  if (granted !== PermissionsAndroid.RESULTS.GRANTED || granted1 !== PermissionsAndroid.RESULTS.GRANTED) {
+    console.log("Location permission denied");
+    throw "Location permission denied"
+  }
+}
+
 export const startTrackingAction = (): AppThunk => {
   return async (dispatch, getState) => {
-    const location = selectLocation(getState());
-    const startPoint = [location.coords.longitude, location.coords.latitude];
-    const track: Track = {
-      id: uuid(),
-      start: Date.now(),
-      end: Date.now(),
-      name: '',
-      track: [startPoint, startPoint],
-    };
+    console.log("🚀 ~ file: tracker-actions.ts ~ line 165 ~ startTrackingAction ~ startTrackingAction")
+    try {
+      await requestLocationPermissions()
+      const location = selectLocation(getState());
+      const startPoint = [location.coords.longitude, location.coords.latitude];
+      const track: Track = {
+        id: uuid(),
+        start: Date.now(),
+        end: Date.now(),
+        name: '',
+        track: [startPoint, startPoint],
+      };
     dispatch({type: ActionTypeEnum.StartTracking, payload: track});
+    } catch (err) {
+  console.log("🚀 ~ file: tracker-actions.ts ~ line 137 ~ requestLocationPermissions ~ granted")
+
+      console.warn(err);
+    }
   };
+  
 };
 
 export const addPointAction = (location: MapboxGL.Location) => ({
