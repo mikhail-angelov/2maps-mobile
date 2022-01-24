@@ -91,7 +91,8 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                     setIsSDCardExist(false)
                 }
             })
-            .catch(() => {
+            .catch((e) => {
+                console.error("getStorageMemoryInfo error", e)
                 setIsMemoryAvailable(false)
             })
     },[list])

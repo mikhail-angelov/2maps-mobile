@@ -11,7 +11,6 @@ import android.content.BroadcastReceiver;
 import android.util.LongSparseArray;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.app.Activity;
 import android.provider.Settings;
 
 import androidx.annotation.Nullable;
@@ -37,13 +36,17 @@ import androidx.core.app.ActivityCompat;
 
 import com.google.gson.Gson;
 
+import android.app.Activity;
+import com.facebook.react.bridge.ActivityEventListener;
+import com.facebook.react.bridge.BaseActivityEventListener;
+
 public class MapsModule extends ReactContextBaseJavaModule {
     private static final String TAG = "MapsModule";
     private Downloader downloader;
     private LongSparseArray<Callback> appDownloads;
     private final ReactApplicationContext reactContext;
     private HashMap<String, Callback> appPermissions;
-
+   
     BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -75,6 +78,8 @@ public class MapsModule extends ReactContextBaseJavaModule {
         IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
         reactContext.registerReceiver(downloadReceiver, filter);
         appPermissions = new HashMap<>();
+        reactContext.addActivityEventListener(mActivityEventListener);
+
     }
 
     @Override
@@ -90,7 +95,6 @@ public class MapsModule extends ReactContextBaseJavaModule {
         String response = String.join(",", maps);
         promise.resolve(response);
     }
-
 
     @ReactMethod
     public void download(String url, ReadableMap config, Callback onDone) {
@@ -273,7 +277,11 @@ public class MapsModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void getLocationPermission(Callback onDone) {
         appPermissions.put("location", onDone);
-        (getActivity(MainActivity)).checkPermissions();
+        MainActivity currentActivity = (MainActivity)reactContext.getCurrentActivity();
+
+        if (currentActivity != null) {
+            currentActivity.checkPermissions();
+        }
     }
 
     public void locationPermissionGranted() {
@@ -287,4 +295,11 @@ public class MapsModule extends ReactContextBaseJavaModule {
         appPermissionsOnDoneCb.invoke(true);
         appPermissions.remove("location");
     }
+
+    private final ActivityEventListener mActivityEventListener = new BaseActivityEventListener() {
+        @Override
+        public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent intent) {
+            Log.d(TAG, "onActivityResult");          
+        }
+      };
 }

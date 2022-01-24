@@ -10,7 +10,7 @@ import {selectTracks} from '../reducers/tracker';
 import RNFS from 'react-native-fs';
 import DocumentPicker from 'react-native-document-picker';
 import {createKml, parseKml} from '../utils/kml';
-import {Alert} from 'react-native';
+import {Alert, NativeModules} from 'react-native';
 import {v4 as uuid} from '@lukeed/uuid';
 import {
   latLngToTileIndex,
@@ -21,7 +21,6 @@ import {makeSvg} from '../utils/svg';
 import * as _ from 'lodash';
 import i18next from 'i18next';
 import distance from '@turf/distance';
-import MapsModule from '../nativeModules/mapsModule';
 
 const PATH = `${RNFS.CachesDirectoryPath}/tracks`;
 const TRACKS_EXT = '.track';
@@ -132,7 +131,7 @@ export const selectTrackAction = (track: Track | undefined): AppThunk => {
 };
 export const startTrackingAction = (): AppThunk => {
   return async (dispatch, getState) => {
-    MapsModule.getLocationPermission((error) => {
+    NativeModules.MapsModule.getLocationPermission((error: boolean) => {
       if (error) {
         return
       }

@@ -1,5 +1,6 @@
 package com.bconf2maps;
 
+import android.content.Intent;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -40,6 +41,10 @@ public class MainActivity extends ReactActivity {
              ActivityCompat.requestPermissions(this,
                      new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
                      100);
+         } else {
+            // Intent intent = new Intent();
+            // intent.putExtra("Permissions", true);
+            // startActivityForResult(intent, 1);
          }
      }
 
@@ -50,9 +55,15 @@ public class MainActivity extends ReactActivity {
                  if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                      // permission was granted
                      Log.d(TAG, "response Permissions");
+                    //  Intent intent = new Intent();
+                    //  intent.putExtra("Permissions", true);
+                    //  startActivityForResult(intent, 1);
                  } else {
                      // permission denied
                      Log.e(TAG, "response Permissions negative");
+                    //  Intent intent = new Intent();
+                    //  intent.putExtra("Permissions", false);
+                    //  startActivityForResult(intent, 1);
                  }
                  break;
              }
