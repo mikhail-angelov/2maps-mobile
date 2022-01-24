@@ -77,5 +77,9 @@
     "Are you sure to remove the map?": "Вы точно хотите удалить карту {{name}}?",
     "Move to SD Card": "Переместить {{name}} на SD карту",
     "Move to Phone": "Переместить {{name}} в память телефона",
-    "No SD Card": "Нет карты памяти"
+    "No SD Card": "Нет карты памяти",
+    "Permissions error!": "Ошибка получения разрешений!",
+    "Allow Location Permission otherwise tracking won't work": "Трекер не сможет работать без разрешений к местоположению устройства",
+    "Check location permissions error": "Ошибка проверки разрешений местоположения",
+    "Location permission denied": "Разрешите доступ к местоположению в настройках Android"
 }

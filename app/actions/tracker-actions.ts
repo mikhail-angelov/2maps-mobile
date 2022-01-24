@@ -26,6 +26,9 @@ const PATH = `${RNFS.CachesDirectoryPath}/tracks`;
 const TRACKS_EXT = '.track';
 const SVG_EXT = '.svg';
 
+const ACCESS_FINE_LOCATION = PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+const ACCESS_COARSE_LOCATION = PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION
+
 export const compassAngle = (magnetometer: any) => {
   let angle = 0.0;
   if (magnetometer) {
@@ -130,28 +133,31 @@ export const selectTrackAction = (track: Track | undefined): AppThunk => {
   };
 };
 
-const requestLocationPermissions = async () => {
-  const ACCESS_FINE_LOCATION = PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-  const ACCESS_COARSE_LOCATION = PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION
-  const check = await PermissionsAndroid.check( ACCESS_FINE_LOCATION);
-  console.log("🚀 ~ file: tracker-actions.ts ~ line 137 ~ requestLocationPermissions ~ check", check)
-  const check1 = await PermissionsAndroid.check( ACCESS_COARSE_LOCATION);
-  console.log("🚀 ~ file: tracker-actions.ts ~ line 139 ~ requestLocationPermissions ~ check1", check1)
-  
-  const granted = await PermissionsAndroid.request( ACCESS_FINE_LOCATION);
-  const granted1 = await PermissionsAndroid.request( ACCESS_COARSE_LOCATION);
-  console.log("You can use the Location");
+const checkLocationPermissionsAction = async() => {
+  try {
+    const isGrantedCoarse = await PermissionsAndroid.check(ACCESS_COARSE_LOCATION);
+    const isGrantedFine = await PermissionsAndroid.check(ACCESS_FINE_LOCATION);  
+    if (!isGrantedCoarse || !isGrantedFine) {
+      Alert.alert(i18next.t("Allow Location Permission otherwise tracking won't work"))
+    }
+  } catch(e) {
+    throw {message: i18next.t("Check location permissions error")}
+  }  
+}
 
-  if (granted !== PermissionsAndroid.RESULTS.GRANTED || granted1 !== PermissionsAndroid.RESULTS.GRANTED) {
-    console.log("Location permission denied");
-    throw "Location permission denied"
+const requestLocationPermissions = async () => {
+  const granted = await PermissionsAndroid.requestMultiple([ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION]);
+  
+  if (granted[ACCESS_FINE_LOCATION] !== PermissionsAndroid.RESULTS.GRANTED || granted[ACCESS_COARSE_LOCATION] !== PermissionsAndroid.RESULTS.GRANTED) {
+    throw {message: i18next.t("Location permission denied")}
   }
+  console.log("You can use the Location");
 }
 
 export const startTrackingAction = (): AppThunk => {
   return async (dispatch, getState) => {
-    console.log("🚀 ~ file: tracker-actions.ts ~ line 165 ~ startTrackingAction ~ startTrackingAction")
     try {
+      await checkLocationPermissionsAction()
       await requestLocationPermissions()
       const location = selectLocation(getState());
       const startPoint = [location.coords.longitude, location.coords.latitude];
@@ -162,11 +168,12 @@ export const startTrackingAction = (): AppThunk => {
         name: '',
         track: [startPoint, startPoint],
       };
-    dispatch({type: ActionTypeEnum.StartTracking, payload: track});
-    } catch (err) {
-  console.log("🚀 ~ file: tracker-actions.ts ~ line 137 ~ requestLocationPermissions ~ granted")
-
-      console.warn(err);
+      dispatch({type: ActionTypeEnum.StartTracking, payload: track});
+    } catch (e) {
+      console.log(e);
+      const title = i18next.t('Permissions error!')
+      const message = _.get(e, 'message', i18next.t('Something goes wrong :('))
+      Alert.alert(title, message)
     }
   };
   
