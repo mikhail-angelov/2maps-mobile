@@ -136,18 +136,17 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
     const toCurrentLocation = async () => {
         console.log('-toCurrentLocation-', location)
         try{
-            await requestLocationPermissions()
-            if (!location) {
-                return
+            const isGranted = await requestLocationPermissions()
+            if (!isGranted) {
+                return Alert.alert(t("Location permission denied"), t("Allow Location Permission otherwise tracking won't work"))
             }
-            map?.moveTo([location.coords.longitude, location.coords.latitude], 100)
         } catch (e) {
-            console.log(e);
-            const title = _.get(e, 'title', t('Permissions error!'))
-            const message = _.get(e, 'message', t('Check location permissions error'))
-            Alert.alert(title, message)
+            return Alert.alert(t('Permissions error!'), t('Check location permissions error'))
         }
-       
+        if (!location) {
+            return
+        }
+        map?.moveTo([location.coords.longitude, location.coords.latitude], 100)      
     }
     const toggleTracking = () => {
         if (tracking) {

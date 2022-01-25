@@ -134,7 +134,10 @@ export const selectTrackAction = (track: Track | undefined): AppThunk => {
 export const startTrackingAction = (): AppThunk => {
   return async (dispatch, getState) => {
     try {
-      await requestLocationPermissions()
+      const isGranted = await requestLocationPermissions()
+      if (!isGranted) {        
+        return Alert.alert(i18next.t("Location permission denied"), i18next.t("Allow Location Permission otherwise tracking won't work"))        
+      }
       const location = selectLocation(getState());
       const startPoint = [location.coords.longitude, location.coords.latitude];
       const track: Track = {
