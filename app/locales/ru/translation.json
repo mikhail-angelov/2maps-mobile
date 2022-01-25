@@ -86,5 +86,6 @@
     "Flip": "Сменить камеру",
     "Scan QR": "Сканировать QR",
     "File name is not valid:": "Не правильное имя файла: {{name}}",
-    "You have to try with \".sqlitedb\" files": "Попробуйте сканировать файлы \".sqlitedb\""
+    "You have to try with \".sqlitedb\" files": "Попробуйте сканировать файлы \".sqlitedb\"",
+    "Map file:": "Файл карты: {{name}}"
 }

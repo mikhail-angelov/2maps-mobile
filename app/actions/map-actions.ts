@@ -9,6 +9,7 @@ import { AxiosResponse } from "axios";
 import DocumentPicker from "react-native-document-picker";
 import RNFS from 'react-native-fs';
 import * as _ from 'lodash';
+import i18next from "i18next";
 
 export const setCenterAction = (center: Position) => {
   //todo: validate params
@@ -238,9 +239,8 @@ export const downloadMapByQRAction = ({ url, name }: { url: string, name: string
       dispatch({ type: ActionTypeEnum.DownloadMap });
 
       const config = {
-        downloadTitle: "Title that should appear in Native Download manager",
-        downloadDescription:
-          "Description that should appear in Native Download manager",
+        downloadTitle: name,
+        downloadDescription: i18next.t('Map file:', {name}),
         saveAsName: name,
         allowedInRoaming: true,
         allowedInMetered: true,
