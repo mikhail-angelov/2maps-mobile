@@ -7,7 +7,7 @@ import { State, Mark } from '../store/types'
 import { selectMarks, selectEditedMark } from '../reducers/marks'
 import { removeMarkAction, editMarkAction, saveMarkAction, markToFeature } from '../actions/marks-actions'
 import { selectActiveTrack, selectSelectedTrack, selectLocation, selectTracks, selectIsTracking } from '../reducers/tracker'
-import { View, StyleSheet, Text } from "react-native";
+import { View, StyleSheet, Text, Alert } from "react-native";
 import {  BottomSheet, ListItem } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import styled from 'styled-components/native'
@@ -29,6 +29,8 @@ import { useTranslation } from "react-i18next";
 import Account from "../components/Account";
 import About from "../components/About";
 import { purple } from "../constants/color";
+import { requestLocationPermissions } from "../utils/permissions";
+import * as _ from 'lodash';
 
 interface MenuItem {
     title: string;
@@ -133,10 +135,19 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
     }
     const toCurrentLocation = async () => {
         console.log('-toCurrentLocation-', location)
-        if (!location) {
-            return
+        try{
+            await requestLocationPermissions()
+            if (!location) {
+                return
+            }
+            map?.moveTo([location.coords.longitude, location.coords.latitude], 100)
+        } catch (e) {
+            console.log(e);
+            const title = _.get(e, 'title', t('Permissions error!'))
+            const message = _.get(e, 'message', t('Check location permissions error'))
+            Alert.alert(title, message)
         }
-        map?.moveTo([location.coords.longitude, location.coords.latitude], 100)
+       
     }
     const toggleTracking = () => {
         if (tracking) {

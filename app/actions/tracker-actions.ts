@@ -10,7 +10,7 @@ import {selectTracks} from '../reducers/tracker';
 import RNFS from 'react-native-fs';
 import DocumentPicker from 'react-native-document-picker';
 import {createKml, parseKml} from '../utils/kml';
-import {Alert} from 'react-native';
+import {Alert, PermissionsAndroid} from 'react-native';
 import {v4 as uuid} from '@lukeed/uuid';
 import {
   latLngToTileIndex,
@@ -21,6 +21,7 @@ import {makeSvg} from '../utils/svg';
 import * as _ from 'lodash';
 import i18next from 'i18next';
 import distance from '@turf/distance';
+import { requestLocationPermissions } from '../utils/permissions';
 
 const PATH = `${RNFS.CachesDirectoryPath}/tracks`;
 const TRACKS_EXT = '.track';
@@ -129,19 +130,29 @@ export const selectTrackAction = (track: Track | undefined): AppThunk => {
     });
   };
 };
+
 export const startTrackingAction = (): AppThunk => {
   return async (dispatch, getState) => {
-    const location = selectLocation(getState());
-    const startPoint = [location.coords.longitude, location.coords.latitude];
-    const track: Track = {
-      id: uuid(),
-      start: Date.now(),
-      end: Date.now(),
-      name: '',
-      track: [startPoint, startPoint],
-    };
-    dispatch({type: ActionTypeEnum.StartTracking, payload: track});
+    try {
+      await requestLocationPermissions()
+      const location = selectLocation(getState());
+      const startPoint = [location.coords.longitude, location.coords.latitude];
+      const track: Track = {
+        id: uuid(),
+        start: Date.now(),
+        end: Date.now(),
+        name: '',
+        track: [startPoint, startPoint],
+      };
+      dispatch({type: ActionTypeEnum.StartTracking, payload: track});
+    } catch (e) {
+      console.log(e);
+      const title = _.get(e, 'title', i18next.t('Permissions error!'))
+      const message = _.get(e, 'message', i18next.t("Allow Location Permission otherwise tracking won't work"))
+      Alert.alert(title, message)
+    }
   };
+  
 };
 
 export const addPointAction = (location: MapboxGL.Location) => ({
