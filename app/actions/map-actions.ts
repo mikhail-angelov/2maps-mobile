@@ -9,6 +9,7 @@ import { AxiosResponse } from "axios";
 import DocumentPicker from "react-native-document-picker";
 import RNFS from 'react-native-fs';
 import * as _ from 'lodash';
+import i18next from "i18next";
 
 export const setCenterAction = (center: Position) => {
   //todo: validate params
@@ -164,10 +165,12 @@ const findUniqName = async(path: string, fileName: string): Promise<string> => {
   }catch(e){}  
   return fileName
 }
-const isFileValid = (fileName: string): boolean => {
+
+export const isFileValid = (fileName: string): boolean => {
   const regex = /\.sqlitedb$/
   return regex.test(fileName)
 }
+
 export const importMapAction = (): AppThunk => {
   return async dispatch => {
     dispatch({ type: ActionTypeEnum.ImportMap });
@@ -228,3 +231,35 @@ export const moveMapToPhoneStorageAction = (path: string): AppThunk => {
     }, 0) 
   }
 }
+
+export const downloadMapByQRAction = ({ url, name }: { url: string, name: string }): AppThunk => {
+  return async (dispatch) => {
+    try {
+      console.log('download map by QR', url);
+      dispatch({ type: ActionTypeEnum.DownloadMap });
+
+      const config = {
+        downloadTitle: name,
+        downloadDescription: i18next.t('Map file:', {name}),
+        saveAsName: name,
+        allowedInRoaming: true,
+        allowedInMetered: true,
+        showInDownloads: true,
+        external: true,
+        path: "any",
+        id: name,
+      };
+      const response = await download(url, config);
+
+      console.log('download map', response);
+      dispatch({ type: ActionTypeEnum.DownloadMapSuccess });
+      dispatch(getLocalMapListAction());
+    } catch (err) {
+      console.log("download map failure", err);
+      dispatch({
+        type: ActionTypeEnum.DownloadMapFailure,
+        payload: "download map failure",
+      });
+    }
+  };
+};

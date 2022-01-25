@@ -81,5 +81,11 @@
     "Permissions error!": "Ошибка получения разрешений!",
     "Allow Location Permission otherwise tracking won't work": "Трекер не сможет работать без разрешений к местоположению устройства",
     "Check location permissions error": "Ошибка проверки разрешений местоположения",
-    "Location permission denied": "Разрешите доступ к местоположению в настройках Android"
+    "Location permission denied": "Разрешите доступ к местоположению в настройках Android",
+    "Scan map QR code form https://2map.xyz": "Сканируйте QR код карты с https://2map.xyz",
+    "Flip": "Сменить камеру",
+    "Scan QR": "Сканировать QR",
+    "File name is not valid:": "Не правильное имя файла: {{name}}",
+    "You have to try with \".sqlitedb\" files": "Попробуйте сканировать файлы \".sqlitedb\"",
+    "Map file:": "Файл карты: {{name}}"
 }
