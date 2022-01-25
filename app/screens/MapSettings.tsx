@@ -6,20 +6,15 @@ import ProgressBar from '../components/ProgressBar';
 import { connect, ConnectedProps } from "react-redux";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { State, MapInfo, Storage } from '../store/types'
-import { getLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction, removeLocalMapAction, cancelDownloadMapAction, getStorageMemoryInfo, importMapAction, moveMapToSdCardAction, moveMapToPhoneStorageAction } from '../actions/map-actions'
+import { getLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction, downloadMapByQRAction, removeLocalMapAction, cancelDownloadMapAction, getStorageMemoryInfo, importMapAction, moveMapToSdCardAction, moveMapToPhoneStorageAction, isFileValid } from '../actions/map-actions'
 import { selectPrimaryMap, selectSecondaryMap, selectMapList, selectMapIsLoading, onLineMapList, selectAvailableMapList, selectMapError, selectDownloadProgress, selectMapIsDownLoading } from '../reducers/map'
 import { selectIsAuthenticated } from '../reducers/auth'
 import { ItemValue } from "@react-native-picker/picker/typings/Picker";
 import Spinner from "../components/Spinner";
 import { useTranslation } from "react-i18next";
 import { purple, red } from "../constants/color";
-import {
-    MenuProvider,
-    Menu,
-    MenuOptions,
-    MenuOption,
-    MenuTrigger,
-} from 'react-native-popup-menu';
+import QR from "../components/QR";
+import * as _ from 'lodash';
 
 const internalStorage: Storage = "internal"
 const sdCardStorage: Storage = "sd-card"
@@ -55,6 +50,7 @@ const mapDispatchToProps = {
     importMap: importMapAction,
     moveMapToSdCard: moveMapToSdCardAction,
     moveMapToPhoneStorage: moveMapToPhoneStorageAction,
+    downloadMapByQR: downloadMapByQRAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & {
@@ -63,7 +59,7 @@ type Props = ConnectedProps<typeof connector> & {
 }
 
 
-const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoading, list, availableMapList, isAuthenticated, error, progress, cancelDownloadMap, close, getLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap, showAuth, importMap, moveMapToSdCard, moveMapToPhoneStorage }) => {
+const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoading, list, availableMapList, isAuthenticated, error, progress, cancelDownloadMap, close, getLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap, showAuth, importMap, moveMapToSdCard, moveMapToPhoneStorage, downloadMapByQR }) => {
     const { t } = useTranslation()
     const [availableInternalMemory, setAvailableInternalMemory] = useState("")
     const [totalInternalMemory, setTotalInternalMemory] = useState("")
@@ -71,6 +67,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
     const [totalExternalMemory, setTotalExternalMemory] = useState("")
     const [isSDCardExist, setIsSDCardExist] = useState(true)
     const [isMemoryAvailable, setIsMemoryAvailable] = useState(true)
+    const [showQRReader, setShowQRReader] = useState(false)
 
     useEffect(() => {
         getLocalMapList()
@@ -154,6 +151,21 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
         );
     }
 
+    const processCapturedQR = (link: string) => {
+        const fileName = _.last(link.split("/")) || ''
+        if (isFileValid(fileName)) {
+            downloadMapByQR({url: link, name: fileName})         
+        } else {
+            Alert.alert(
+                t('File name is not valid:', {name: fileName}),
+                t('You have to try with ".sqlitedb" files'),
+                [
+                    { text: t('Ok') }
+                ]
+            );
+        }
+    }
+
     const renderItem = (item: MapItem, isAuthenticated: boolean ) => (
         (isAuthenticated || item.loaded) &&
             <View style={styles.row}>
@@ -177,69 +189,69 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
             <Button title="Cancel" onPress={cancelDownloadMap} />
         </View>}
         <Spinner show={isLoading} />
-        <MenuProvider>
-            <View style={styles.header}>
-                <View style={styles.headerButton}>
-                    <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="arrow-back-ios" onPress={close} />
-                </View>
-                <View style={styles.headerText}>
-                    <Text style={styles.title}>{t('Settings')}</Text>
-                </View>
-                <Menu>
-                    <MenuTrigger><Icon style={styles.menuMainIcon} name="menu" /></MenuTrigger>
-                    <MenuOptions >
-                        <MenuOption onSelect={importMap}>
-                            <View style={styles.menuOptionContainer}>
-                                <Icon style={styles.menuIcon} name="file-upload" />
-                                <Text style={styles.menuText}>{t('Import Map')}</Text>
-                            </View>
-                        </MenuOption>
-                    </MenuOptions>
-                </Menu>
+        <View style={styles.header}>
+            <View style={styles.headerButton}>
+                <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="arrow-back-ios" onPress={close} />
             </View>
-            <View style={styles.content}>
-                <View style={styles.row}>
-                    <Text style={styles.label}>{t('Primary Map')}:</Text>
-                    <Picker
-                        selectedValue={primaryMap?.name}
-                        style={styles.picker}
-                        onValueChange={onSetPrimary}
-                        mode="dropdown"
-                    >
-                        {primaryList.map(({ name }: MapInfo) => (<Picker.Item key={name} label={name} value={name} />))}
-                    </Picker>
-                </View>
-                <View style={styles.row}>
-                    <Text style={styles.label}>{t('Secondary Map')}:</Text>
-                    <Picker
-                        selectedValue={secondaryMap?.name}
-                        style={styles.picker}
-                        onValueChange={onSetSecondary}
-                        mode="dropdown"
-                    >
-                        <Picker.Item label="None" value={''} />
-                        {list.map(({ name }: MapInfo) => (<Picker.Item key={name} label={name} value={name} />))}
-                    </Picker>
-                </View>
-                <View style={styles.row}>
-                    <Text>{t('Phone')}: {isMemoryAvailable ? `${availableInternalMemory} ${t('free of')} ${totalInternalMemory}`: t('Not Available')}</Text>
-                </View>
-                <View style={styles.row}>
-                    <Text>{t('SD card')}: {isSDCardExist && isMemoryAvailable ? `${availableExternalMemory} ${t('free of')} ${totalExternalMemory}`: t('Not Available')}</Text>
-                </View>
-                <View style={styles.availableMaps}>
-                    <FlatList
-                        data={allMaps}
-                        renderItem={({item}) => renderItem(item, isAuthenticated)}
-                        keyExtractor={(item: MapItem) => item.id}
-                    />
-                    {!isAuthenticated &&
-                        <Button buttonStyle={styles.btn} title={t('Login to download maps')} onPress={showAuth} />
-                    }
-                </View>
-                {!!error && <Text style={styles.errors}>{error}</Text>}
+            <View style={styles.headerText}>
+                <Text style={styles.title}>{t('Settings')}</Text>
             </View>
-        </MenuProvider>
+        </View>
+        <View style={styles.content}>
+            <View style={styles.row}>
+                <Text style={styles.label}>{t('Primary Map')}:</Text>
+                <Picker
+                    selectedValue={primaryMap?.name}
+                    style={styles.picker}
+                    onValueChange={onSetPrimary}
+                    mode="dropdown"
+                >
+                    {primaryList.map(({ name }: MapInfo) => (<Picker.Item key={name} label={name} value={name} />))}
+                </Picker>
+            </View>
+            <View style={styles.row}>
+                <Text style={styles.label}>{t('Secondary Map')}:</Text>
+                <Picker
+                    selectedValue={secondaryMap?.name}
+                    style={styles.picker}
+                    onValueChange={onSetSecondary}
+                    mode="dropdown"
+                >
+                    <Picker.Item label="None" value={''} />
+                    {list.map(({ name }: MapInfo) => (<Picker.Item key={name} label={name} value={name} />))}
+                </Picker>
+            </View>
+            <View style={styles.row}>
+                <Text>{t('Phone')}: {isMemoryAvailable ? `${availableInternalMemory} ${t('free of')} ${totalInternalMemory}`: t('Not Available')}</Text>
+            </View>
+            <View style={styles.row}>
+                <Text>{t('SD card')}: {isSDCardExist && isMemoryAvailable ? `${availableExternalMemory} ${t('free of')} ${totalExternalMemory}`: t('Not Available')}</Text>
+            </View>
+            <View style={styles.buttonsRow}>
+                <Icon.Button backgroundColor={purple} name="file-download" onPress={importMap}>
+                    <Text style={styles.darkButtonText}>{t('Import Map')}</Text>
+                </Icon.Button>
+                <Icon.Button backgroundColor={purple} name="qr-code-scanner" onPress={() => setShowQRReader(true)}>
+                    <Text style={styles.darkButtonText}>{t('Scan QR')}</Text>
+                </Icon.Button>
+            </View>
+            <View style={styles.availableMaps}>
+                <FlatList
+                    data={allMaps}
+                    renderItem={({item}) => renderItem(item, isAuthenticated)}
+                    keyExtractor={(item: MapItem) => item.id}
+                />
+                {!isAuthenticated &&
+                    <Button buttonStyle={styles.btn} title={t('Login to download maps')} onPress={showAuth} />
+                }
+            </View>
+            {!!error && <Text style={styles.errors}>{error}</Text>}
+        </View>
+        {showQRReader && 
+            <Modal>
+                <QR close={() => setShowQRReader(false)} select={(link) => {processCapturedQR(link)}} />
+            </Modal>
+        }
     </Modal>
 }
 
@@ -342,31 +354,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginBottom: 10,
     },
-    menuMainIcon: {
-        textAlign: 'center',
-        alignContent: 'center',
-        padding: 10,
-        margin: 10,
-        fontSize: 22,
-        fontWeight: '700',
-        color: 'white',
-    },
-    menuOptionContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    menuIcon: {
-        padding: 10,
-        margin: 10,
-        fontSize: 22,
-        fontWeight: '700',
-        color: purple,
-    },
-    menuText: {
-        color: 'black',
-        fontSize: 16,
-        fontWeight: '700',
-    },
     listButtonsContainer: {
         flexDirection: "row",
     },
@@ -380,5 +367,15 @@ const styles = StyleSheet.create({
         minHeight: 48,
         minWidth: 48,
         marginLeft: 10,
+    },
+    darkButtonText: {
+        color: "white",
+    },
+    buttonsRow: {
+        padding: 16,
+        flexDirection: "row",
+        alignItems: "center",
+        flexWrap: "wrap",
+        justifyContent: "space-around"
     }
 });
