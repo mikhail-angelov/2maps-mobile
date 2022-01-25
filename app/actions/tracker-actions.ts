@@ -21,13 +21,11 @@ import {makeSvg} from '../utils/svg';
 import * as _ from 'lodash';
 import i18next from 'i18next';
 import distance from '@turf/distance';
+import { requestLocationPermissions } from '../utils/permissions';
 
 const PATH = `${RNFS.CachesDirectoryPath}/tracks`;
 const TRACKS_EXT = '.track';
 const SVG_EXT = '.svg';
-
-const ACCESS_FINE_LOCATION = PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-const ACCESS_COARSE_LOCATION = PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION
 
 export const compassAngle = (magnetometer: any) => {
   let angle = 0.0;
@@ -133,31 +131,9 @@ export const selectTrackAction = (track: Track | undefined): AppThunk => {
   };
 };
 
-const checkLocationPermissions = async() => {
-  try {
-    const isGrantedCoarse = await PermissionsAndroid.check(ACCESS_COARSE_LOCATION);
-    const isGrantedFine = await PermissionsAndroid.check(ACCESS_FINE_LOCATION);  
-    if (!isGrantedCoarse || !isGrantedFine) {
-      Alert.alert(i18next.t("Allow Location Permission otherwise tracking won't work"))
-    }
-  } catch(e) {
-    throw {message: i18next.t("Check location permissions error")}
-  }  
-}
-
-const requestLocationPermissions = async () => {
-  const granted = await PermissionsAndroid.requestMultiple([ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION]);
-  
-  if (granted[ACCESS_FINE_LOCATION] !== PermissionsAndroid.RESULTS.GRANTED || granted[ACCESS_COARSE_LOCATION] !== PermissionsAndroid.RESULTS.GRANTED) {
-    throw {message: i18next.t("Location permission denied")}
-  }
-  console.log("You can use the Location");
-}
-
 export const startTrackingAction = (): AppThunk => {
   return async (dispatch, getState) => {
     try {
-      await checkLocationPermissions()
       await requestLocationPermissions()
       const location = selectLocation(getState());
       const startPoint = [location.coords.longitude, location.coords.latitude];
@@ -171,8 +147,8 @@ export const startTrackingAction = (): AppThunk => {
       dispatch({type: ActionTypeEnum.StartTracking, payload: track});
     } catch (e) {
       console.log(e);
-      const title = i18next.t('Permissions error!')
-      const message = _.get(e, 'message', i18next.t('Something goes wrong :('))
+      const title = _.get(e, 'title', i18next.t('Permissions error!'))
+      const message = _.get(e, 'message', i18next.t("Allow Location Permission otherwise tracking won't work"))
       Alert.alert(title, message)
     }
   };
