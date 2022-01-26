@@ -5,7 +5,7 @@
   "scripts": {
     "android": "react-native run-android && react-native log-android",
     "android-prod": "cd ./android && ./gradlew assembleRelease",
-    "android-gp": "cd ./android && ./gradlew  bundleRelease",
+    "build": "cd ./android && ./gradlew  bundleRelease",
     "r": "react-native run-android --variant=release && react-native log-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
