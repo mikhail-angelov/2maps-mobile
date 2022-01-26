@@ -9,7 +9,7 @@ export const onLineMapList: MapInfo[] = [
   { name: 'MapBox Satellite(online)', url: MapboxGL.StyleURL.Satellite },
   { name: 'MapBox SatelliteStreet(online)', url: MapboxGL.StyleURL.SatelliteStreet },
 ]
-const CENTER_COORD = [44.320691, 56.090846];
+const CENTER_COORD = [44.031732,56.304132];
 
 const initialState: MapState = Object.freeze({
   opacity: 0.5,

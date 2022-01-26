@@ -20,11 +20,7 @@ MapboxGL.setAccessToken(process.env.MAPBOX_PUB_KEY || 'pk.eyJ1IjoibWlraGFpbGFuZ2
 
 const rasterSourceProps: RasterSourceProps = {
     id: 'stamenWatercolorSource',
-    tileUrlTemplates: [
-        // 'https://2map.xyz/map/mende/{z}/{x}/{y}.jpg',
-        'http://localhost:5555/map/mende/{z}/{x}/{y}.png',
-        // 'http://192.168.31.251:3000/map/mende/{z}/{x}/{y}.jpg',
-    ],
+    tileUrlTemplates: ['http://localhost:5555/map/mende/{z}/{x}/{y}.png'],
     minZoomLevel: 1,
     tileSize: 256,
 };
