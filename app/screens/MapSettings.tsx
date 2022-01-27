@@ -185,7 +185,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
     return <Modal style={styles.container} visible onRequestClose={close}>
         {isDownLoading && <View style={styles.loadingOverlay}>
             <Text style={styles.loadingLabel}>{t('loading...')}</Text>
-            <View style={styles.progressBar}><ProgressBar progress={progress} value={progress} /></View>
+            <View style={styles.progressBar}><ProgressBar progress={progress} /></View>
             <Button title="Cancel" onPress={cancelDownloadMap} />
         </View>}
         <Spinner show={isLoading} />
