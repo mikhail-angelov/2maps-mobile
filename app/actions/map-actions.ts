@@ -10,6 +10,7 @@ import DocumentPicker from "react-native-document-picker";
 import RNFS from 'react-native-fs';
 import * as _ from 'lodash';
 import i18next from "i18next";
+import { validateLoadedMapList, validateLocalMapList } from "../utils/validation";
 
 export const setCenterAction = (center: Position) => {
   //todo: validate params
@@ -34,11 +35,18 @@ export const getLocalMapListAction = (): AppThunk => {
     try {
       console.log('get maps');
       dispatch({ type: ActionTypeEnum.GetMapList });
-      const res: AxiosResponse<{[key: string]: MapInfo}> = await getLocal('maps');
-      console.log('get maps', res.data);
-      //todo: validate data before process it
-      const list = Object.values(res.data).map(({name, size, storage}) => ({ name, url: `${HOST_LOCAL}/map/${name}/{z}/{x}/{y}.png`, size: size || 0, storage }));
-      dispatch({ type: ActionTypeEnum.GetMapListSuccess, payload: list });
+      const res: AxiosResponse<any> = await getLocal('maps');
+      console.log('get maps', res.data); 
+      const list = Object.values(res.data).map(({name, size, storage}: any) => ({ name, url: `${HOST_LOCAL}/map/${name}/{z}/{x}/{y}.png`, size, storage }));
+      const validMapList = validateLocalMapList(list)
+      if (_.isEmpty(validMapList)) {
+        dispatch({
+          type: ActionTypeEnum.GetMapListFailure,
+          payload: "map list is not valid",
+        });
+        return
+      }
+      dispatch({ type: ActionTypeEnum.GetMapListSuccess, payload: validMapList });
     } catch (err) {
       console.log("error", err);
       dispatch({
@@ -56,6 +64,14 @@ export const loadMapListAction = (): AppThunk => {
       dispatch({ type: ActionTypeEnum.LoadMapList });
       const res = await get({ url: `${HOST}/maps`, token });
       console.log('load maps', res.data);
+      const validMapList = validateLoadedMapList(res.data)
+      if (_.isEmpty(validMapList)) {
+        dispatch({
+          type: ActionTypeEnum.LoadMapListFailure,
+          payload: "loaded map list is not valid",
+        });
+        return
+      }
       dispatch({ type: ActionTypeEnum.LoadMapListSuccess, payload: res.data });
     } catch (err) {
       console.log("error", err);
