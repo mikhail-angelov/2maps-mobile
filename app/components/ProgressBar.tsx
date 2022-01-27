@@ -123,18 +123,22 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: 'rgb(0, 122, 255)',
         borderRadius: 10,
+        marginHorizontal: 10,
         marginBottom: 5,
         flexDirection: 'row',
-        backgroundColor: '#62ae00',
+        backgroundColor: '#fff',
     },
     progressBar_left: {
         backgroundColor: '#62aeff',
+        borderTopLeftRadius: 8,
+        borderBottomLeftRadius: 8,
         height: 30,
-
     },
     progressBar_right: {
         backgroundColor: '#fff',
         height: 30,
+        borderTopRightRadius: 8,
+        borderBottomRightRadius: 8,
     },
     progressBar_mes: {
         position: 'absolute',
