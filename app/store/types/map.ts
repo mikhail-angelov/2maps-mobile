@@ -9,7 +9,7 @@ export interface MapInfo {
   size: number;
   type?: string;
   style?: string;
-  storage?: Storage;
+  storage: Storage;
 }
 
 export interface MapFile {

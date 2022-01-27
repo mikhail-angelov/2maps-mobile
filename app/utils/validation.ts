@@ -1,36 +1,24 @@
-import {MapFile, MapInfo, Storage} from '../store/types';
+import {MapFile, MapInfo} from '../store/types';
 import * as _ from 'lodash';
+import {LocalMapFile} from '../actions/map-actions';
 
-const validateStorage = (storage: unknown): Storage => {
-  if (String(storage) === 'internal' || String(storage) === 'sd-card') {
-    return String(storage) as Storage;
-  }
-  throw new Error();
-};
+const validateNotEmptyStrings = (stringsList: string[]) => _.every(stringsList, value => typeof value === 'string' && value !== '')
+const validateNotEmptyNumbers = (stringsList: number[]) => _.every(stringsList, value => typeof value === 'number' && value >= 0)
 
-export const validateLocalMapList = (
-  data: {
-    name: any;
-    url: string;
-    size: any;
-    storage: any;
-  }[],
-): MapInfo[] => {
-  let result: MapInfo[] = [];
+export const validateLocalMapList = (data: {[key: string]: LocalMapFile}): {[key: string]: LocalMapFile} => {
+  let result: {[key: string]: LocalMapFile} = {};
   if (!_.isEmpty(data)) {
-    data.forEach(item => {
+    result = Object.entries(data).reduce((acc, [key, item]) => {
       try {
-        const newMap: MapInfo = {
-          name: String(item.name),
-          storage: validateStorage(item.storage),
-          size: item.size || 0,
-          url: item.url,
-        };
-        result = [...result, newMap];
+        const {name, size, storage, path, maxzoom, minzoom} = item
+        if(validateNotEmptyStrings([key, name, storage, path]) && validateNotEmptyNumbers([size, maxzoom, minzoom])) {
+          return {...acc, [key]: item}
+        }
       } catch (e) {
-        console.log('validation local map list error', e);
+        console.log('validate local maps list error', e)
       }
-    });
+      return acc
+    }, {})
   }
   return result;
 };
@@ -38,19 +26,11 @@ export const validateLocalMapList = (
 export const validateLoadedMapList = (data: MapFile[]): MapFile[] => {
   let result: MapFile[] = [];
   if (_.isArray(data) && !_.isEmpty(data)) {
-    data.forEach(item => {
-      try {
-        const newMap = {
-          id: item.id,
-          name: item.name,
-          url: item.url,
-          size: item.size || 0,
-        };
-        result = [...result, newMap];
-      } catch (e) {
-        console.log('loaded map list validation error', e);
-      }
-    });
+    result = data.filter(item => item && validateNotEmptyStrings([item.id, item.name, item.url]) && validateNotEmptyNumbers([item.size]))
   }
   return result;
 };
+
+export const validateMapInfoList = (list: MapInfo[]): MapInfo[] => {
+  return list.filter(item => item && validateNotEmptyStrings([item.name, item.storage, item.url]) && validateNotEmptyNumbers([item.size]))
+}

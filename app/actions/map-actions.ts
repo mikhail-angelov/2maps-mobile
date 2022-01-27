@@ -12,6 +12,15 @@ import * as _ from 'lodash';
 import i18next from "i18next";
 import { validateLoadedMapList, validateLocalMapList } from "../utils/validation";
 
+export interface LocalMapFile {
+  name: string;
+  path: string;
+  size: number;
+  storage: string;
+  minzoom: number;
+  maxzoom: number;
+}
+
 export const setCenterAction = (center: Position) => {
   //todo: validate params
   return { type: ActionTypeEnum.SetCenter, payload: center }
@@ -35,18 +44,11 @@ export const getLocalMapListAction = (): AppThunk => {
     try {
       console.log('get maps');
       dispatch({ type: ActionTypeEnum.GetMapList });
-      const res: AxiosResponse<any> = await getLocal('maps');
+      const res: AxiosResponse<{[key: string]: LocalMapFile}> = await getLocal('maps');
       console.log('get maps', res.data); 
-      const list = Object.values(res.data).map(({name, size, storage}: any) => ({ name, url: `${HOST_LOCAL}/map/${name}/{z}/{x}/{y}.png`, size, storage }));
-      const validMapList = validateLocalMapList(list)
-      if (_.isEmpty(validMapList)) {
-        dispatch({
-          type: ActionTypeEnum.GetMapListFailure,
-          payload: "map list is not valid",
-        });
-        return
-      }
-      dispatch({ type: ActionTypeEnum.GetMapListSuccess, payload: validMapList });
+      const validLocalMaps = validateLocalMapList(res.data)
+      const list = Object.values(validLocalMaps).map(({name, size, storage}: any) => ({ name, url: `${HOST_LOCAL}/map/${name}/{z}/{x}/{y}.png`, size, storage }));
+      dispatch({ type: ActionTypeEnum.GetMapListSuccess, payload: list });
     } catch (err) {
       console.log("error", err);
       dispatch({
@@ -65,14 +67,7 @@ export const loadMapListAction = (): AppThunk => {
       const res = await get({ url: `${HOST}/maps`, token });
       console.log('load maps', res.data);
       const validMapList = validateLoadedMapList(res.data)
-      if (_.isEmpty(validMapList)) {
-        dispatch({
-          type: ActionTypeEnum.LoadMapListFailure,
-          payload: "loaded map list is not valid",
-        });
-        return
-      }
-      dispatch({ type: ActionTypeEnum.LoadMapListSuccess, payload: res.data });
+      dispatch({ type: ActionTypeEnum.LoadMapListSuccess, payload: validMapList });
     } catch (err) {
       console.log("error", err);
       dispatch({
