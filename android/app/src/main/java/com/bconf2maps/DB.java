@@ -7,14 +7,22 @@ import android.database.Cursor;
 import android.content.Context;
 import android.util.Log;
 
+import com.google.gson.annotations.SerializedName;
+
 public class DB extends SQLiteOpenHelper {
     private static final String TAG = "DataBase";
     public static final int DATABASE_VERSION = 1;
+    @SerializedName("name")
     public final String name;
+    @SerializedName("path")
     public final String path;
+    @SerializedName("size")
     public final long size;
+    @SerializedName("storage")
     public final String storage;
+    @SerializedName("minzoom")
     public int minzoom = 0;
+    @SerializedName("maxzoom")
     public int maxzoom = 0;
 
     public DB(Context context, String path, String name, long size, String storage) {
