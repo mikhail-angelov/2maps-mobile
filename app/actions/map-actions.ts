@@ -47,7 +47,7 @@ export const getLocalMapListAction = (): AppThunk => {
       const res: AxiosResponse<{[key: string]: LocalMapFile}> = await getLocal('maps');
       console.log('get maps', res.data); 
       const validLocalMaps = validateLocalMapList(res.data)
-      const list = Object.values(validLocalMaps).map(({name, size, storage}: any) => ({ name, url: `${HOST_LOCAL}/map/${name}/{z}/{x}/{y}.png`, size, storage }));
+      const list = Object.values(validLocalMaps).map(({name, size, storage}) => ({ name, url: `${HOST_LOCAL}/map/${name}/{z}/{x}/{y}.png`, size, storage }));
       dispatch({ type: ActionTypeEnum.GetMapListSuccess, payload: list });
     } catch (err) {
       console.log("error", err);
