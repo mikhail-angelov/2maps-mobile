@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useState } from "react";
+import React, { FC, useEffect, useMemo, useState } from "react";
 import { View, Text, TextInput, StyleSheet, Alert, Modal, TouchableOpacity } from "react-native";
 import { connect, ConnectedProps } from "react-redux";
 import { Button, ListItem } from 'react-native-elements';
@@ -137,6 +137,9 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
     );
     const memoizedValue = useMemo(() => renderItem, [markers]);
     const memoizedHiddenValue = useMemo(() => renderHiddenItem, [markers]);
+    useEffect(() => {
+        setFilterList(list)
+    }, [markers])
     return <Modal style={styles.container} visible onRequestClose={close}>
         <MenuProvider>
             <View style={styles.wrapper}>
