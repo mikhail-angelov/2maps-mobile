@@ -10,6 +10,16 @@ import DocumentPicker from "react-native-document-picker";
 import RNFS from 'react-native-fs';
 import * as _ from 'lodash';
 import i18next from "i18next";
+import { validateLoadedMapList, validateLocalMapList } from "../utils/validation";
+
+export interface LocalMapFile {
+  name: string;
+  path: string;
+  size: number;
+  storage: string;
+  minzoom: number;
+  maxzoom: number;
+}
 
 export const setCenterAction = (center: Position) => {
   //todo: validate params
@@ -34,10 +44,10 @@ export const getLocalMapListAction = (): AppThunk => {
     try {
       console.log('get maps');
       dispatch({ type: ActionTypeEnum.GetMapList });
-      const res: AxiosResponse<{[key: string]: MapInfo}> = await getLocal('maps');
-      console.log('get maps', res.data);
-      //todo: validate data before process it
-      const list = Object.values(res.data).map(({name, size, storage}) => ({ name, url: `${HOST_LOCAL}/map/${name}/{z}/{x}/{y}.png`, size: size || 0, storage }));
+      const res: AxiosResponse<{[key: string]: LocalMapFile}> = await getLocal('maps');
+      console.log('get maps', res.data); 
+      const validLocalMaps = validateLocalMapList(res.data)
+      const list = Object.values(validLocalMaps).map(({name, size, storage}) => ({ name, url: `${HOST_LOCAL}/map/${name}/{z}/{x}/{y}.png`, size, storage }));
       dispatch({ type: ActionTypeEnum.GetMapListSuccess, payload: list });
     } catch (err) {
       console.log("error", err);
@@ -56,7 +66,8 @@ export const loadMapListAction = (): AppThunk => {
       dispatch({ type: ActionTypeEnum.LoadMapList });
       const res = await get({ url: `${HOST}/maps`, token });
       console.log('load maps', res.data);
-      dispatch({ type: ActionTypeEnum.LoadMapListSuccess, payload: res.data });
+      const validMapList = validateLoadedMapList(res.data)
+      dispatch({ type: ActionTypeEnum.LoadMapListSuccess, payload: validMapList });
     } catch (err) {
       console.log("error", err);
       dispatch({

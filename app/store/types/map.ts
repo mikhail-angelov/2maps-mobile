@@ -6,10 +6,10 @@ export type Storage = 'internal' | 'sd-card'
 export interface MapInfo {
   name: string;
   url: string;
-  size?: number;
+  size: number;
   type?: string;
   style?: string;
-  storage?: Storage;
+  storage: Storage;
 }
 
 export interface MapFile {

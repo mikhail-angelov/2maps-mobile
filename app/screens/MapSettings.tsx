@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { purple, red } from "../constants/color";
 import QR from "../components/QR";
 import * as _ from 'lodash';
+import { validateMapInfoList } from "../utils/validation";
 
 const internalStorage: Storage = "internal"
 const sdCardStorage: Storage = "sd-card"
@@ -93,10 +94,10 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
             })
     },[list])
 
-    //todo: validate list data before process it
+    const validList = validateMapInfoList(list)
     const allMaps: MapItem[] = [
-        ...list.map(({ name, url, size = 0, storage }: MapInfo) => ({ id: name, name: `${name.replace(removeStorageFromNamePattern, "")} (${(size / 1000000).toFixed(3)}M)`, file: url, loaded: true, storage })),
-        ...availableMapList.filter(({ name }) => !list.find((item) => item.name.replace(removeStorageFromNamePattern, "") === name)).map(({ id, name, url, size }) => {
+        ...validList.map(({ name, url, size, storage }: MapInfo) => ({ id: name, name: `${name.replace(removeStorageFromNamePattern, "")} (${(size / 1000000).toFixed(3)}M)`, file: url, loaded: true, storage })),
+        ...availableMapList.filter(({ name }) => !validList.find((item) => item.name.replace(removeStorageFromNamePattern, "") === name)).map(({ id, name, url, size }) => {
             return { id, name: `${name} (${(size / 1000000).toFixed(3)}M)`, file: url, loaded: false }
         })]
     const primaryList = [...onLineMapList, ...list]
