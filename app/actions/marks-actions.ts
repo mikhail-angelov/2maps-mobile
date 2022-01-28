@@ -122,7 +122,7 @@ export const syncMarksAction = (): AppThunk => {
     const pois = selectMarks(getState())
     const token = selectToken(getState())
     try{
-      const items = pois.map(({ id, name, description, rate, geometry, timestamp }) => ({ id, name, description, rate, lat: geometry.coordinates[1], lng: geometry.coordinates[0], timestamp }))
+      const items = pois.map(({ id, name, description, rate, geometry, timestamp, deleted }) => ({ id, name, description, rate, lat: geometry.coordinates[1], lng: geometry.coordinates[0], timestamp, removed: deleted }))
       const res = await postLarge({url:`${MARKS_URL}/sync`, data: items, token})
       console.log('sync', res.data)
       

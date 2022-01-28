@@ -43,7 +43,7 @@ export default createReducer<MarksState>(initialState, {
   }),
   [ActionTypeEnum.ImportPois]: (marks:Mark[]) => (state: MarksState) => ({
     ...state,
-    marks: [...state.marks, ...marks],
+    marks,
   }),
 });
 export const selectMarksState = (state: State) => state.marks;

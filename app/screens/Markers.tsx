@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useState } from "react";
+import React, { FC, useState } from "react";
 import { View, Text, TextInput, StyleSheet, Alert, Modal, TouchableOpacity } from "react-native";
 import { connect, ConnectedProps } from "react-redux";
 import { Button, ListItem } from 'react-native-elements';
@@ -13,11 +13,10 @@ import {
 } from 'react-native-popup-menu';
 import { Position } from '@turf/helpers';
 import distance from '@turf/distance';
-import { orderBy } from 'lodash'
 import { State, Mark } from '../store/types'
 import { selectIsAuthenticated } from '../reducers/auth'
 import { selectMarks } from '../reducers/marks'
-import { importPoisAction, exportPoisAction, removeAllPoisAction, syncMarksAction, removeMarkCompletelyAction, editMarkAction } from '../actions/marks-actions'
+import { importPoisAction, exportPoisAction, removeAllPoisAction, syncMarksAction, removeMarkAction, editMarkAction } from '../actions/marks-actions'
 import { useTranslation } from "react-i18next";
 import Advertisement from "../components/AdMob";
 import { renderColor } from "../utils/formats";
@@ -45,7 +44,7 @@ const mapDispatchToProps = {
     exportPois: exportPoisAction,
     removeAllPois: removeAllPoisAction,
     syncMarks: syncMarksAction,
-    removeMark: removeMarkCompletelyAction,
+    removeMark: removeMarkAction,
     editMark: editMarkAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
@@ -53,19 +52,17 @@ type Props = ConnectedProps<typeof connector> & OwnProps
 
 const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, importPois, exportPois, removeAllPois, syncMarks, removeMark, editMark }) => {
     const { t } = useTranslation();
+    const [isFilterMarks, setIsFilterMarks] = useState<boolean>(false);
+    const [filterText, setFilterText] = useState<string>('');
 
-    const list: Item[] = orderBy(markers, mark => distance(mark.geometry.coordinates, center, { units: 'kilometers' }))
+    const list: Item[] = _.chain(markers).filter(({deleted})=>(!deleted)).orderBy(mark => distance(mark.geometry.coordinates, center, { units: 'kilometers' }))
     .map(mark => ({
         rate: mark.rate,
         key: mark.id,
         title: mark.name,
         subtitle: `${distance(mark.geometry.coordinates, center, { units: 'kilometers' }).toFixed(2)} km, ${mark.description || ''}`,
         mark,
-    }));
-
-    const [isFilterMarks, setIsFilterMarks] = useState<boolean>(false);
-    const [filterText, setFilterText] = useState<string>('');
-    const [filterList, setFilterList] = useState<Item[]>(list);
+    })).value();
 
     const onRemoveAll = () => {
         Alert.alert(
@@ -77,6 +74,7 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
             ]
         );
     }
+
     const onRemoveMark = (id?: string) => {
         if (!id) return
         Alert.alert(
@@ -91,16 +89,10 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
 
     const onFilterMarks = (text?: string) => {
         setFilterText(text || '');
-        const newMarkList = text
-            ? list.filter(item => item.title.toLowerCase().includes(text.toLowerCase()) ||
-                item.subtitle.toLowerCase().includes(text.toLowerCase()))
-            : list;
-        setFilterList(newMarkList);
     }
 
     const setFilterReset = () => {
         setFilterText('');
-        setFilterList(list);
         setIsFilterMarks(false);
     }
 
@@ -134,9 +126,13 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
                 onPress={() => onRemoveMark(item.mark.id)}
             />
         </View>
-    );
-    const memoizedValue = useMemo(() => renderItem, [markers]);
-    const memoizedHiddenValue = useMemo(() => renderHiddenItem, [markers]);
+    )
+
+    const filteredList = filterText
+            ? list.filter(item => item.title.toLowerCase().includes(filterText.toLowerCase()) ||
+                item.subtitle.toLowerCase().includes(filterText.toLowerCase()))
+            : list;
+
     return <Modal style={styles.container} visible onRequestClose={close}>
         <MenuProvider>
             <View style={styles.wrapper}>
@@ -201,12 +197,12 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
                 : 
                 <View style={styles.scroll} accessibilityLabel={t('Marks')}>
                     <SwipeListView
-                        data={filterList}
-                        renderItem={memoizedValue}
-                        renderHiddenItem={memoizedHiddenValue}
+                        data={filteredList}
+                        renderItem={renderItem}
+                        renderHiddenItem={renderHiddenItem}
                         leftOpenValue={0}
                         rightOpenValue={-150}
-                        previewRowKey={filterList[0] ? filterList[0].mark.id : undefined}
+                        previewRowKey={filteredList?.[0]?.mark.id}
                         previewOpenValue={-40}
                         previewOpenDelay={1000}
                     />
