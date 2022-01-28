@@ -1,6 +1,6 @@
 import axios from 'axios';
 import FormData from "form-data";
-import { Buffer } from "buffer";
+import RNFS from 'react-native-fs';
 
 export const HOST = 'https://2map.xyz'
 export const HOST_LOCAL = 'http://localhost:5555'
@@ -80,4 +80,26 @@ export const postLocal = ({ url, data }: {
   url: string; data: any
 }) => {
   return axios.post(`${HOST_LOCAL}/${url}`, data);
+}
+
+const getStorageDirectoryPath = async() => {
+  try {
+    const storagePaths = await RNFS.getAllExternalFilesDirs()
+    const primaryStoragePath = storagePaths.find(path => path.includes(RNFS.ExternalStorageDirectoryPath))
+    return primaryStoragePath
+  } catch(e) {
+    console.log('get App Directory Path error', e)    
+  }
+}
+
+export const getMapsDirectoryPath = async() => {
+  const primaryStoragePath = await getStorageDirectoryPath()
+  const destinationPath = primaryStoragePath && `${primaryStoragePath}/map/`
+  return destinationPath
+}
+
+export const getTracksDirectoryPath = async() => {
+  const primaryStoragePath = await getStorageDirectoryPath()
+  const destinationPath = primaryStoragePath && `${primaryStoragePath}/tracks/`
+  return destinationPath
 }
