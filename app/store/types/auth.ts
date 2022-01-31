@@ -20,4 +20,5 @@ export interface AuthState {
   showAdMob: boolean;
   purchases?: InAppPurchase[];
   isPurchaseConnection: boolean;
+  isItTheFirstTimeAppStarted: boolean;
 }

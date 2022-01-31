@@ -1,7 +1,7 @@
 {
     "Login": "Войти",
     "Account": "Аккаунт",
-    "Settings": "Настройки",
+    "Maps": "Карты",
     "Marks": "Метки",
     "Tracks": "Треки",
     "Cancel": "Отмена",
@@ -87,5 +87,6 @@
     "Scan QR": "Сканировать QR",
     "File name is not valid:": "Не правильное имя файла: {{name}}",
     "You have to try with \".sqlitedb\" files": "Попробуйте сканировать файлы \".sqlitedb\"",
-    "Map file:": "Файл карты: {{name}}"
+    "Map file:": "Файл карты: {{name}}",
+    "App support only Locus Map .SQLiteDB offline maps": "Поддерживаются только карты формата Locus .SQLiteDB"
 }

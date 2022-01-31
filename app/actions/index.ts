@@ -34,6 +34,7 @@ export enum ActionTypeEnum {
   AddPurchase = "auth/ADD_PURCHASE",
   SetPurchases = "auth/SET_PURCHASES",
   EstablishedPurchaseConnection = "auth/ESTABLISH_PURCHASE_CONNECTION",
+  TheFirstTimeAppStart = "auth/THE_FIRST_TIME_APP_START",
   // marks
   MarksRequest = "marks/MARKS_REQUEST",
   MarksSuccess = "marks/MARKS_SUCCESS",
