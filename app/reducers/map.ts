@@ -1,10 +1,10 @@
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import { createSelector } from "reselect";
-import { MapState, MapInfo, MapFile, State } from "../store/types";
+import { MapState, MapInfo, MapFile, State, PrimaryMapInfo } from "../store/types";
 import { ActionTypeEnum } from "../actions";
 import { createReducer } from "./reducer-utils";
 
-export const onLineMapList: MapInfo[] = [
+export const onLineMapList: PrimaryMapInfo[] = [
   { name: 'MapBox Vector(online)', url: MapboxGL.StyleURL.Street },
   { name: 'MapBox Satellite(online)', url: MapboxGL.StyleURL.Satellite },
   { name: 'MapBox SatelliteStreet(online)', url: MapboxGL.StyleURL.SatelliteStreet },

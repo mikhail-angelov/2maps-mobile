@@ -166,7 +166,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
     const onHideSelectedTrack = () => {
         selectTrack(undefined)
     }
-
+    
     useEffect(() => {
         if (isItTheFirstTimeAppStarted) {
             setShowSettings(isItTheFirstTimeAppStarted)

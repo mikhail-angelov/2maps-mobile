@@ -5,7 +5,7 @@ import { Picker } from "@react-native-picker/picker";
 import ProgressBar from '../components/ProgressBar';
 import { connect, ConnectedProps } from "react-redux";
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { State, MapInfo, Storage } from '../store/types'
+import { State, MapInfo, Storage, PrimaryMapInfo } from '../store/types'
 import { getLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction, downloadMapByQRAction, removeLocalMapAction, cancelDownloadMapAction, getStorageMemoryInfo, importMapAction, moveMapToSdCardAction, moveMapToPhoneStorageAction, isFileValid } from '../actions/map-actions'
 import { selectPrimaryMap, selectSecondaryMap, selectMapList, selectMapIsLoading, onLineMapList, selectAvailableMapList, selectMapError, selectDownloadProgress, selectMapIsDownLoading } from '../reducers/map'
 import { selectIsAuthenticated } from '../reducers/auth'
@@ -208,7 +208,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                     onValueChange={onSetPrimary}
                     mode="dropdown"
                 >
-                    {primaryList.map(({ name }: MapInfo) => (<Picker.Item key={name} label={name} value={name} />))}
+                    {primaryList.map(({ name }: PrimaryMapInfo) => (<Picker.Item key={name} label={name} value={name} />))}
                 </Picker>
             </View>
             <View style={styles.row}>
@@ -237,7 +237,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                     <Text style={styles.darkButtonText}>{t('Scan QR')}</Text>
                 </Icon.Button>
             </View>
-            <Text style={styles.notificationText}>{t('App support only Locus Map .SQLiteDB offline maps')}</Text>
+            <Text style={styles.notificationText}>{t('Supported map format Locus Map .SQLiteDB')}</Text>
             <View style={styles.availableMaps}>
                 <FlatList
                     data={allMaps}
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         marginBottom: 20,
         marginHorizontal: 5,
-        fontSize: 18,
-        fontWeight: '700',
+        fontSize: 16,
+        fontWeight: '600',
     },
 });
