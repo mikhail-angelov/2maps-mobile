@@ -9,6 +9,8 @@ import android.util.Log;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -198,7 +200,7 @@ public class Downloader {
         return result;
     }
 
-    public static boolean moveFile(File source, String destPath){
+    public boolean moveFile(File source, String destPath){
         if(source.exists()){
             File dest = new File(destPath);
             File parent = new File(dest.getParent());
@@ -210,7 +212,7 @@ public class Downloader {
                 if(!dest.exists()){
                     dest.createNewFile();
                 }
-                writeToOutputStream(fis, fos);
+                writeToOutputStream(fis, fos, source.length());
                 source.delete();
                 return true;
             } catch (IOException ioE){
@@ -220,12 +222,22 @@ public class Downloader {
         return false;
     }
 
-    private static void writeToOutputStream(InputStream is, OutputStream os) throws IOException {
+    private void writeToOutputStream(InputStream is, OutputStream os, long fileLength) throws IOException {
+        Log.e(TAG, String.valueOf(fileLength));
         byte[] buffer = new byte[1024];
         int length;
+        long sum = 0;
         if (is != null) {
+            final DeviceEventManagerModule.RCTDeviceEventEmitter emitter = ((ReactApplicationContext) context).getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
+            
             while ((length = is.read(buffer)) > 0x0) {
                 os.write(buffer, 0x0, length);
+                
+                sum += length;
+                int progress_total = (int)(sum * 100 / fileLength);
+                WritableMap result = new WritableNativeMap();
+                result.putInt("progress", progress_total);
+                emitter.emit("map-transfer", result);
             }
         }
         os.flush();
