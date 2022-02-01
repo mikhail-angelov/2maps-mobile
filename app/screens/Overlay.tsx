@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import { connect, ConnectedProps } from "react-redux";
 import { minBy } from 'lodash'
@@ -18,10 +18,10 @@ import Markers from './Markers'
 import Auth from '../components/Auth'
 import MapSettings from './MapSettings'
 import { addPointAction, addTrackAction, selectTrackAction, startTrackingAction, stopTrackingAction } from "../actions/tracker-actions";
-import { checkAction, storeResetTokenAction } from "../actions/auth-actions";
+import { checkAction, setTheFirstTimeAppStartAction, storeResetTokenAction } from "../actions/auth-actions";
 import { loadWikiAction } from "../actions/wiki-actions";
 import { selectWikiCollection } from "../reducers/wiki";
-import { selectResetToken } from "../reducers/auth";
+import { selectIsItTheFirstTimeAppStarted, selectResetToken } from "../reducers/auth";
 import { setCenterAction, setOpacityAction, setZoomAction } from "../actions/map-actions";
 import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecondaryMap } from '../reducers/map'
 import ResetPassword from "../components/ResetPassword";
@@ -75,6 +75,7 @@ const mapStateToProps = (state: State) => ({
     tracking: selectIsTracking(state),
     editedMark: selectEditedMark(state),
     resetToken: selectResetToken(state),
+    isItTheFirstTimeAppStarted: selectIsItTheFirstTimeAppStarted(state),
 });
 const mapDispatchToProps = {
     removeMark: removeMarkAction,
@@ -91,6 +92,7 @@ const mapDispatchToProps = {
     editMark: editMarkAction,
     saveMark: saveMarkAction,
     storeResetToken: storeResetTokenAction,
+    setTheFirstTimeAppStart: setTheFirstTimeAppStartAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { map?: MapboxGL.Camera }
@@ -102,7 +104,7 @@ const getClosestMark = (location: any, marks: Mark[]) => {
     }
     return `${closest.name} ${distance(closest.geometry.coordinates, location, { units: 'kilometers' }).toFixed(2)} km.`
 }
-const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, center, zoom, location, editMark, saveMark, removeMark, tracking, activeTrack, startTracking, stopTracking, addTrack, resetToken, storeResetToken, selectedTrack, selectTrack }) => {
+const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, center, zoom, location, editMark, saveMark, removeMark, tracking, activeTrack, startTracking, stopTracking, addTrack, resetToken, storeResetToken, selectedTrack, selectTrack, isItTheFirstTimeAppStarted, setTheFirstTimeAppStart }) => {
     const [showMenu, setShowMenu] = useState(false)
     const [showAuth, setShowAuth] = useState(false)
     const [showAccount, setShowAccount] = useState(false)
@@ -114,7 +116,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
 
     const menuItems: MenuItem[] = [
         { title: 'Manage Account', onPress: () => { setShowAccount(true); setShowMenu(false) } },
-        { title: 'Settings', onPress: () => { setShowSettings(true); setShowMenu(false) } },
+        { title: 'Maps', onPress: () => { setShowSettings(true); setShowMenu(false) } },
         { title: 'Marks', onPress: () => { setShowMarkers(true); setShowMenu(false) } },
         { title: 'Tracks', onPress: () => { setShowTracks(true); setShowMenu(false) } },
         { title: 'About app', onPress: () => { setShowAbout(true); setShowMenu(false) } },
@@ -164,6 +166,13 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
     const onHideSelectedTrack = () => {
         selectTrack(undefined)
     }
+
+    useEffect(() => {
+        if (isItTheFirstTimeAppStarted) {
+            setShowSettings(isItTheFirstTimeAppStarted)
+            setTheFirstTimeAppStart(false)
+        }
+    },[])
 
     console.log('render overlay', zoom, opacity)
     return (<>

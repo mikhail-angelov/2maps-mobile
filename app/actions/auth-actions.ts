@@ -164,3 +164,5 @@ export const changePasswordAction = (data: changePassword): AppThunk => {
     }
   };
 };
+
+export const setTheFirstTimeAppStartAction = (value: boolean) => ({type: ActionTypeEnum.TheFirstTimeAppStart, payload: value })
