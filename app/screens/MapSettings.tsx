@@ -171,7 +171,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
     const renderItem = (item: MapItem, isAuthenticated: boolean ) => (
         (isAuthenticated || item.loaded) &&
             <View style={styles.row}>
-                <Text>{item.name}</Text>
+                <Text style={styles.listNameText}>{item.name}</Text>
                 {item.loaded && (
                     <View style={styles.listButtonsContainer}>
                         {item.storage === internalStorage && <Icon.Button style={styles.listButton} iconStyle={styles.listIconStorage} size={22} backgroundColor="transparent" name="phone-android" accessibilityLabel="move to sd card" onPress={() => confirmMovementMapToSdCard(item)}/>}
@@ -196,7 +196,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                 <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="arrow-back-ios" onPress={close} />
             </View>
             <View style={styles.headerText}>
-                <Text style={styles.title}>{t('Settings')}</Text>
+                <Text style={styles.title}>{t('Maps')}</Text>
             </View>
         </View>
         <View style={styles.content}>
@@ -237,6 +237,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                     <Text style={styles.darkButtonText}>{t('Scan QR')}</Text>
                 </Icon.Button>
             </View>
+            <Text style={styles.notificationText}>{t('App support only Locus Map .SQLiteDB offline maps')}</Text>
             <View style={styles.availableMaps}>
                 <FlatList
                     data={allMaps}
@@ -282,6 +283,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: "space-between",
         margin: 5,
+        width: "100%",
     },
     headerButton: {
         width: 60,
@@ -356,8 +358,12 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginBottom: 10,
     },
+    listNameText: {
+        flex: 1,
+    },
     listButtonsContainer: {
         flexDirection: "row",
+
     },
     listIconStorage: {
         color: purple,
@@ -379,5 +385,12 @@ const styles = StyleSheet.create({
         alignItems: "center",
         flexWrap: "wrap",
         justifyContent: "space-around"
-    }
+    },
+    notificationText: {
+        marginTop: 10,
+        marginBottom: 20,
+        marginHorizontal: 5,
+        fontSize: 18,
+        fontWeight: '700',
+    },
 });
