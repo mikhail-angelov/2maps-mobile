@@ -77,7 +77,7 @@ class Map extends Component<Props> {
         this.interval && clearInterval(this.interval)
     }
     shouldComponentUpdate(nextProps: Props) {
-        if (nextProps.center !== this.props.center || nextProps.zoom !== this.props.zoom) {
+        if (nextProps.center !== this.props.center || nextProps.zoom !== this.props.zoom || nextProps.location !== this.props.location) {
             //avoid render on move map
             return false
         }
