@@ -155,7 +155,6 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
             stopTracking()
         } else {
             startTracking()
-            map?.moveTo([location.coords.longitude, location.coords.latitude], 100)
         }
     }
     const selectMark = (mark: Mark) => {
