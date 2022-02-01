@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { State, Mark } from '../store/types'
 import { featureToMark, editMarkAction } from '../actions/marks-actions'
-import { selectIsTracking, selectSelectedTrackBBox } from '../reducers/tracker'
+import { selectIsTracking, selectLocation, selectSelectedTrackBBox } from '../reducers/tracker'
 import styled from 'styled-components/native'
 import MapboxGL, { RasterSourceProps, RegionPayload } from "@react-native-mapbox-gl/maps";
 import { Feature, Point } from '@turf/helpers';
@@ -38,6 +38,7 @@ const mapStateToProps = (state: State) => ({
     secondaryMap: selectSecondaryMap(state),
     tracking: selectIsTracking(state),
     selectedTrackBBox: selectSelectedTrackBBox(state),
+    location: selectLocation(state),
 });
 const mapDispatchToProps = {
     setCenter: setCenterAction,
@@ -54,6 +55,7 @@ type Props = ConnectedProps<typeof connector> & { setMap: (map: MapboxGL.Camera 
 class Map extends Component<Props> {
     private camera: MapboxGL.Camera | undefined
     private map: MapboxGL.MapView | undefined
+    private interval: ReturnType<typeof setInterval> | undefined
 
     state: {
         selected?: Mark;
@@ -63,9 +65,16 @@ class Map extends Component<Props> {
         MapboxGL.setTelemetryEnabled(false);
         this.props.checkAuth()
         MapboxGL.locationManager.start();
+        this.interval = setInterval(() => {
+            const {tracking, location} = this.props
+            if (tracking && location) {
+                this.camera?.moveTo([location.coords.longitude, location.coords.latitude], 100)
+            }
+        }, 20000)
     }
     componentWillUnmount() {
         MapboxGL.locationManager.stop();
+        this.interval && clearInterval(this.interval)
     }
     shouldComponentUpdate(nextProps: Props) {
         if (nextProps.center !== this.props.center || nextProps.zoom !== this.props.zoom) {
