@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useState, useRef } from "react";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import { connect, ConnectedProps } from "react-redux";
 import { minBy } from 'lodash'
@@ -31,8 +31,6 @@ import About from "../components/About";
 import { purple } from "../constants/color";
 import { requestLocationPermissions } from "../utils/permissions";
 import * as _ from 'lodash';
-
-let trackingTimer: ReturnType<typeof setInterval>;
 
 interface MenuItem {
     title: string;
@@ -116,6 +114,9 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
     const [showAbout, setShowAbout] = useState(false)
     const { t } = useTranslation();
 
+    const propsRef = useRef<any>(null);
+    propsRef.current = {tracking, location, map}
+
     const menuItems: MenuItem[] = [
         { title: 'Manage Account', onPress: () => { setShowAccount(true); setShowMenu(false) } },
         { title: 'Maps', onPress: () => { setShowSettings(true); setShowMenu(false) } },
@@ -153,12 +154,10 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         map?.moveTo([location.coords.longitude, location.coords.latitude], 100)      
     }
     const toggleTracking = () => {
-        trackingTimer && clearInterval(trackingTimer)
         if (tracking) {
             stopTracking()
         } else {
             startTracking()
-            trackingTimer = setInterval(toCurrentLocation, 20000)
         }
     }
     const selectMark = (mark: Mark) => {
@@ -170,12 +169,19 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
     const onHideSelectedTrack = () => {
         selectTrack(undefined)
     }
-
+    
     useEffect(() => {
         if (isItTheFirstTimeAppStarted) {
             setShowSettings(isItTheFirstTimeAppStarted)
             setTheFirstTimeAppStart(false)
         }
+        const interval = setInterval(() => {
+            const {tracking, location, map} = propsRef.current
+            if (tracking && location) {
+                map?.moveTo([location.coords.longitude, location.coords.latitude], 100)
+            }
+        }, 20000)
+        return () => clearInterval(interval)
     },[])
 
     console.log('render overlay', zoom, opacity)
