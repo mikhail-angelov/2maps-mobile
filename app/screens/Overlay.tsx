@@ -32,6 +32,8 @@ import { purple } from "../constants/color";
 import { requestLocationPermissions } from "../utils/permissions";
 import * as _ from 'lodash';
 
+let trackingTimer: ReturnType<typeof setInterval>;
+
 interface MenuItem {
     title: string;
     onPress?: () => void;
@@ -151,10 +153,12 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         map?.moveTo([location.coords.longitude, location.coords.latitude], 100)      
     }
     const toggleTracking = () => {
+        trackingTimer && clearInterval(trackingTimer)
         if (tracking) {
             stopTracking()
         } else {
             startTracking()
+            trackingTimer = setInterval(toCurrentLocation, 20000)
         }
     }
     const selectMark = (mark: Mark) => {
