@@ -188,7 +188,6 @@ class Map extends Component<Props> {
             <MapboxGL.Camera
                 ref={this.onSetCamera}
                 defaultSettings={{ centerCoordinate: center, zoomLevel: zoom }}
-                followUserLocation={tracking}
                 followZoomLevel={zoom}
                 followUserMode='normal'
             />
