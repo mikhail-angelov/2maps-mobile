@@ -12,6 +12,11 @@ export interface MapInfo {
   storage: Storage;
 }
 
+export interface PrimaryMapInfo {
+  name: string;
+  url: string;
+}
+
 export interface MapFile {
   id: string;
   name: string;
@@ -24,7 +29,7 @@ export interface MapState {
   zoom: number;
   center: Position;
   styleUrl: MapboxGL.StyleURL;
-  primaryMap: MapInfo;
+  primaryMap: PrimaryMapInfo;
   secondaryMap?: MapInfo;
   list: MapInfo[];
   availableMaps: MapFile[];

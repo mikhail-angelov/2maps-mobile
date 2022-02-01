@@ -27,6 +27,8 @@ const PATH = `${RNFS.CachesDirectoryPath}/tracks`;
 const TRACKS_EXT = '.track';
 const SVG_EXT = '.svg';
 
+const RESTART_TRACKING_DELAY_MS = 20000;
+
 export const compassAngle = (magnetometer: any) => {
   let angle = 0.0;
   if (magnetometer) {
@@ -260,7 +262,7 @@ export const restartTrackingAction = (): AppThunk => {
     const tracking = selectIsTracking(getState());
     if (tracking) {
       dispatch({type: ActionTypeEnum.PauseTracking});
-      setTimeout(() => dispatch({type: ActionTypeEnum.ResumeTracking}), 10000);
+      setTimeout(() => dispatch({type: ActionTypeEnum.ResumeTracking}), RESTART_TRACKING_DELAY_MS);
     }
   };
 };

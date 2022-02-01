@@ -1,7 +1,7 @@
 import { ActionTypeEnum, AppThunk } from ".";
 import { Position } from 'geojson';
 import { NativeModules } from "react-native";
-import { MapInfo, StorageMemory } from "../store/types";
+import { MapInfo, PrimaryMapInfo, StorageMemory } from "../store/types";
 import { getLocal, get, post, HOST, HOST_LOCAL } from './api'
 import { selectToken } from '../reducers/auth'
 import { selectDownloadId } from '../reducers/map'
@@ -33,7 +33,7 @@ export const setZoomAction = (zoom: number) => {
   return { type: ActionTypeEnum.SetZoom, payload: isNaN(+zoom) ? 12 : +zoom }
 };
 
-export const setPrimaryMapAction = (map: MapInfo) => {
+export const setPrimaryMapAction = (map: PrimaryMapInfo) => {
   return { type: ActionTypeEnum.SetPrimary, payload: map }
 };
 export const setSecondaryMapAction = (map?: MapInfo) => {

@@ -119,6 +119,7 @@ class Map extends Component<Props> {
         }
         if (this.props.tracking) {
             this.props.addPoint(location)
+            this.camera?.flyTo([location.coords.longitude, location.coords.latitude], 100)
         }
         this.props.setLocation(location)
     }
@@ -188,7 +189,6 @@ class Map extends Component<Props> {
             <MapboxGL.Camera
                 ref={this.onSetCamera}
                 defaultSettings={{ centerCoordinate: center, zoomLevel: zoom }}
-                followUserLocation={tracking}
                 followZoomLevel={zoom}
                 followUserMode='normal'
             />
