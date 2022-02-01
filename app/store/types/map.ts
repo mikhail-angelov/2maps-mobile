@@ -38,6 +38,8 @@ export interface MapState {
   downloadProgress: number;
   downloadId?: string;
   error?: string;
+  relocating: boolean;
+  relocateProgress: number;
 }
 
 export interface StorageMemory {

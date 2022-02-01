@@ -7,8 +7,9 @@ export const downingMiddleware: Middleware = ({ dispatch }: MiddlewareAPI) => {
         console.log('map-download', event);
         dispatch({ type: ActionTypeEnum.LoadMapProgress, payload: event })
     });
-    DeviceEventEmitter.addListener('map-transfer', (event) => {
-        console.log('++++++++++++++++++++++++++++++++map-transfer', event);
+    DeviceEventEmitter.addListener('map-transfer', (completePersent: number) => {
+        console.log('map-transfer', completePersent);
+        dispatch({ type: ActionTypeEnum.RelocateMapProgress, payload: completePersent })
     });
     return (next: Dispatch) => action => next(action)
 }
