@@ -6,7 +6,7 @@ import ProgressBar from '../components/ProgressBar';
 import { connect, ConnectedProps } from "react-redux";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { State, MapInfo, Storage, PrimaryMapInfo } from '../store/types'
-import { getLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction, downloadMapByQRAction, removeLocalMapAction, cancelDownloadMapAction, getStorageMemoryInfo, importMapAction, moveMapToSdCardAction, moveMapToPhoneStorageAction, isFileValid } from '../actions/map-actions'
+import { getLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction, downloadMapByQRAction, removeLocalMapAction, cancelDownloadMapAction, getStorageMemoryInfo, importMapAction, moveMapToSdCardAction, moveMapToPhoneStorageAction, isFileValid, cancelTransferMapAction } from '../actions/map-actions'
 import { selectPrimaryMap, selectSecondaryMap, selectMapList, selectMapIsLoading, onLineMapList, selectAvailableMapList, selectMapError, selectDownloadProgress, selectMapIsDownLoading, selectMapIsRelocating, selectRelocateProgress } from '../reducers/map'
 import { selectIsAuthenticated } from '../reducers/auth'
 import { ItemValue } from "@react-native-picker/picker/typings/Picker";
@@ -54,6 +54,7 @@ const mapDispatchToProps = {
     moveMapToSdCard: moveMapToSdCardAction,
     moveMapToPhoneStorage: moveMapToPhoneStorageAction,
     downloadMapByQR: downloadMapByQRAction,
+    cancelTransferMap: cancelTransferMapAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & {
@@ -62,7 +63,7 @@ type Props = ConnectedProps<typeof connector> & {
 }
 
 
-const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoading, list, availableMapList, isAuthenticated, error, progress, isRelocating, progressForRelocate, cancelDownloadMap, close, getLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap, showAuth, importMap, moveMapToSdCard, moveMapToPhoneStorage, downloadMapByQR }) => {
+const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoading, list, availableMapList, isAuthenticated, error, progress, isRelocating, progressForRelocate, cancelDownloadMap, close, getLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap, showAuth, importMap, moveMapToSdCard, moveMapToPhoneStorage, downloadMapByQR, cancelTransferMap }) => {
     const { t } = useTranslation()
     const [availableInternalMemory, setAvailableInternalMemory] = useState("")
     const [totalInternalMemory, setTotalInternalMemory] = useState("")
@@ -195,6 +196,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
         {isRelocating && <View style={styles.loadingOverlay}>
             <Text style={styles.loadingLabel}>{t('transferring...')}</Text>
             <View style={styles.progressBar}><ProgressBar progress={progressForRelocate} /></View>
+            <Button title="Cancel" onPress={cancelTransferMap} />
         </View>}
         <Spinner show={isLoading} />
         <View style={styles.header}>

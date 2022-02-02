@@ -40,7 +40,7 @@ public class MapsModule extends ReactContextBaseJavaModule {
     private static final String TAG = "MapsModule";
     private Downloader downloader;
     private LongSparseArray<Callback> appDownloads;
-    private Map<String, Callback> appMapTransfers;
+    private Callback appMapTransferOnDoneCb;
     private final ReactApplicationContext reactContext;
 
     BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
@@ -71,9 +71,15 @@ public class MapsModule extends ReactContextBaseJavaModule {
         public void onReceive(Context context, Intent intent) {
             try {
                 String name = intent.getStringExtra("name");
-                Log.d(TAG, "+++++++++++++++ACTION_TRANSFER_COMPLETE++++++++++++++++++++++++");
-                Log.d(TAG, name);
+                String status = intent.getStringExtra("status");
+                Log.d(TAG, String.format("receive transfer complete: %s, status: %s", name, status));
 
+                if (status.equals("SUCCESSFUL")) {
+                    appMapTransferOnDoneCb.invoke(null, status);
+                } else {
+                    appMapTransferOnDoneCb.invoke(status, null);
+                }
+                appMapTransferOnDoneCb = null;
             } catch (Exception e) {
                 Log.e(TAG, Log.getStackTraceString(e));
             }
@@ -89,8 +95,7 @@ public class MapsModule extends ReactContextBaseJavaModule {
         IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
         reactContext.registerReceiver(downloadReceiver, filter);
 
-        appMapTransfers = new HashMap<>();
-        IntentFilter mapTransferFilter = new IntentFilter("ACTION_TRANSFER_COMPLETE");
+        IntentFilter mapTransferFilter = new IntentFilter("ACTION_MAP_TRANSFER_COMPLETE");
         reactContext.registerReceiver(mapTransferReceiver, mapTransferFilter);
     }
 
@@ -116,7 +121,6 @@ public class MapsModule extends ReactContextBaseJavaModule {
             final DeviceEventManagerModule.RCTDeviceEventEmitter emitter = this.getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
             DownloadManager.Request request = downloader.createRequest(url, config);
             long downloadId = downloader.queueDownload(request);
-            appDownloads.put(downloadId, onDone);
             appDownloads.put(downloadId, onDone);
             new Thread(new Runnable() {
                 @Override
@@ -256,30 +260,31 @@ public class MapsModule extends ReactContextBaseJavaModule {
     public void moveMapToSDCard(String name, Callback onDone) {
         File sdCardPath = LocalHost.getInstance().getSDCardPath();
         if (sdCardPath == null) {
-            //promise.reject("No SD card path", "Can not find sd card");
+            onDone.invoke("No SD card path", null);
             return;
         }
-        appMapTransfers.put(name, onDone);
+        appMapTransferOnDoneCb = onDone;
         String targetPath = sdCardPath.getPath();
         changeMapStorage(name, targetPath);
-        // if (result) {
-        //     promise.resolve(String.valueOf(result));
-        // } else {
-        //     promise.reject("file moving error", String.valueOf(result));
-        // }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @ReactMethod
     public void moveMapToPhoneStorage(String name, Callback onDone) {
         String targetPath = reactContext.getExternalFilesDir("").getPath();
-        appMapTransfers.put(name, onDone);
+        appMapTransferOnDoneCb = onDone;
         changeMapStorage(name, targetPath);
-        // if (result) {
-        //     promise.resolve(String.valueOf(result));
-        // } else {
-        //     promise.reject("file moving error", String.valueOf(result));
-        // }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @ReactMethod
+    public void cancelMapTransfer(Promise promise) {
+        Log.d(TAG, "cancel map transfer");
+        try {
+            downloader.cancelMapTransfer();
+        } catch (Exception e) {
+        }
+        promise.resolve("ok");
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)

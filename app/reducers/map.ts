@@ -142,12 +142,13 @@ export default createReducer<MapState>(initialState, {
   }),
   [ActionTypeEnum.ChangeMapStorage]: () => (state: MapState) => ({
     ...state,
-    relocating: true,
+    loading: true,
     error: undefined,
   }),
   [ActionTypeEnum.ChangeMapStorageSuccess]: () => (state: MapState) => ({
     ...state,
     relocating: false,
+    loading: false,
     relocateProgress: 0,
     error: undefined,
   }),
@@ -158,10 +159,16 @@ export default createReducer<MapState>(initialState, {
     loading: false,
     error,
   }),
-  [ActionTypeEnum.RelocateMapProgress]: (completePersent: number) => (state: MapState) => ({
+  [ActionTypeEnum.RelocateMapProgress]: (completePercentage: number) => (state: MapState) => ({
     ...state,
-    relocateProgress: completePersent,
+    relocateProgress: completePercentage,
+    loading: false,
     relocating: true,
+  }),
+  [ActionTypeEnum.CancelChangeMapStorage]: () => (state: MapState) => ({
+    ...state,
+    loading: true,
+    relocating: false,
   }),
   
 });

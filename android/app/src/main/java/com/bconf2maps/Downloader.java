@@ -28,10 +28,12 @@ public class Downloader {
     private static final String TAG = "Downloader";
     private DownloadManager downloadManager;
     private Context context;
+    private boolean isCanceledMapTransferring;
 
     public Downloader(Context ctx) {
         context = ctx;
         downloadManager = (DownloadManager) ctx.getSystemService(DOWNLOAD_SERVICE);
+        isCanceledMapTransferring = false;
     }
 
     public DownloadManager.Request createRequest(String url, ReadableMap requestConfig) {
@@ -223,16 +225,18 @@ public class Downloader {
                             if (fis != null) {
                                 writeToOutputStream(fis, fos);
                                 source.delete();
-                                sendTransferBroadcastMessage(fileName);
+                                sendTransferBroadcastMessage(fileName, "SUCCESSFUL");
                             }
                         } catch (Exception e) {
                             Log.e(TAG, e.getMessage());
+                            sendTransferBroadcastMessage(fileName, "FAILURE");
                         }
                     }
                 }).start(); 
                 return true;
             } catch (IOException ioE){
                 Log.e(TAG, ioE.getMessage());
+                sendTransferBroadcastMessage(fileName, "FAILURE");
             }
         }
         return false;
@@ -248,6 +252,12 @@ public class Downloader {
         final DeviceEventManagerModule.RCTDeviceEventEmitter emitter = ((ReactApplicationContext) context).getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
 
         while ((length = is.read(buffer)) > 0x0) {
+            if (isCanceledMapTransferring) {
+                isCanceledMapTransferring = false;
+                os.close();
+                sendTransferBroadcastMessage(null, "CANCELED");
+                return;
+            }
             os.write(buffer, 0x0, length);
             
             sumTransferred += length;
@@ -262,10 +272,15 @@ public class Downloader {
         os.flush();
     }
 
-    private void sendTransferBroadcastMessage(String name) {
+    private void sendTransferBroadcastMessage(String name, String status) {
         Intent intent = new Intent();
-        intent.setAction("ACTION_TRANSFER_COMPLETE");
+        intent.setAction("ACTION_MAP_TRANSFER_COMPLETE");
         intent.putExtra("name", name);
+        intent.putExtra("status", status);
         ((ReactApplicationContext) context).sendBroadcast(intent);
+    }
+
+    public void cancelMapTransfer() {
+        isCanceledMapTransferring = true;
     }
 }

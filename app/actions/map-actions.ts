@@ -215,8 +215,6 @@ export const importMapAction = (): AppThunk => {
 export const moveMapToSdCardAction = (path: string): AppThunk => {
   return async dispatch => {    
     dispatch({ type: ActionTypeEnum.ChangeMapStorage });
-    // hack because of NativeModules doesn't allow previous dispatch happen
-     setTimeout(async() => {
       try {
         await new Promise((resolve, reject) => {
           NativeModules.MapsModule.moveMapToSDCard(path, (err: any, data: any) => {
@@ -225,21 +223,19 @@ export const moveMapToSdCardAction = (path: string): AppThunk => {
             }
             return resolve(data);
           });
-        });        
+        });
         dispatch({type: ActionTypeEnum.ChangeMapStorageSuccess})
         dispatch(getLocalMapListAction())
       } catch(e) {
+        console.log("🚀 ~ file: map-actions.ts ~ line 230 ~ moveMapToSdCardAction ~ e", e)
         dispatch({type: ActionTypeEnum.ChangeMapStorageFailure, payload: 'change map storage failure'})
       }
-    }, 0) 
   }
 }
 
 export const moveMapToPhoneStorageAction = (path: string): AppThunk => {
   return async dispatch => {    
     dispatch({ type: ActionTypeEnum.ChangeMapStorage });
-    // hack because of NativeModules doesn't allow previous dispatch happen
-     setTimeout(async() => {
       try {
         await new Promise((resolve, reject) => {
           NativeModules.MapsModule.moveMapToPhoneStorage(path, (err: any, data: any) => {
@@ -248,14 +244,19 @@ export const moveMapToPhoneStorageAction = (path: string): AppThunk => {
             }
             return resolve(data);
           });
-        });   
+        });
         dispatch({type: ActionTypeEnum.ChangeMapStorageSuccess})
         dispatch(getLocalMapListAction())
       } catch(e) {
+        console.log("🚀 ~ file: map-actions.ts ~ line 250 ~ moveMapToPhoneStorageAction ~ e", e)
         dispatch({type: ActionTypeEnum.ChangeMapStorageFailure, payload: 'change map storage failure'})
       }
-    }, 0) 
   }
+}
+
+export const cancelTransferMapAction = (): AppThunk => (dispatch) => {  
+  dispatch({ type: ActionTypeEnum.CancelChangeMapStorage });
+  NativeModules.MapsModule.cancelMapTransfer()
 }
 
 export const downloadMapByQRAction = ({ url, name }: { url: string, name: string }): AppThunk => {
