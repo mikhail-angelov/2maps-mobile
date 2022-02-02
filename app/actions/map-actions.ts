@@ -219,8 +219,8 @@ export const moveMapToSdCardAction = (path: string): AppThunk => {
      setTimeout(async() => {
       try {
         await NativeModules.MapsModule.moveMapToSDCard(path)
-        dispatch({type: ActionTypeEnum.ChangeMapStorageSuccess})
-        dispatch(getLocalMapListAction())
+        //dispatch({type: ActionTypeEnum.ChangeMapStorageSuccess})
+        //dispatch(getLocalMapListAction())
       } catch(e) {
         dispatch({type: ActionTypeEnum.ChangeMapStorageFailure, payload: 'change map storage failure'})
       }
@@ -235,8 +235,8 @@ export const moveMapToPhoneStorageAction = (path: string): AppThunk => {
      setTimeout(async() => {
       try {
         await NativeModules.MapsModule.moveMapToPhoneStorage(path)
-        dispatch({type: ActionTypeEnum.ChangeMapStorageSuccess})
-        dispatch(getLocalMapListAction())
+        //dispatch({type: ActionTypeEnum.ChangeMapStorageSuccess})
+        //dispatch(getLocalMapListAction())
       } catch(e) {
         dispatch({type: ActionTypeEnum.ChangeMapStorageFailure, payload: 'change map storage failure'})
       }

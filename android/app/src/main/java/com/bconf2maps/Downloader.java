@@ -208,13 +208,25 @@ public class Downloader {
             if (!parent.exists()) {
                 parent.mkdirs();
             }
-            try (FileInputStream fis = new FileInputStream(source);
-                 FileOutputStream fos = new FileOutputStream(dest)){
+            try {
                 if(!dest.exists()){
                     dest.createNewFile();
                 }
-                writeToOutputStream(fis, fos, source.length());
-                source.delete();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            FileInputStream fis = new FileInputStream(source);
+                            FileOutputStream fos = new FileOutputStream(dest);
+                            if (fis != null) {
+                                writeToOutputStream(fis, fos);
+                                source.delete();
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, e.getMessage());
+                        }
+                    }
+                }).start(); 
                 return true;
             } catch (IOException ioE){
                 Log.e(TAG, ioE.getMessage());
@@ -223,25 +235,26 @@ public class Downloader {
         return false;
     }
 
-    private void writeToOutputStream(InputStream is, OutputStream os, long fileLength) throws IOException {
+    private void writeToOutputStream(InputStream is, OutputStream os) throws IOException {
         byte[] buffer = new byte[1024];
         int length;
         long sumTransferred = 0;
+        int currentDecade = 0;
+        long fileLength = is.available();
         Map<Integer, Boolean> controlPoints = new HashMap<>();
-        int currentDecada = 0;
-        if (is != null) {
-            DeviceEventManagerModule.RCTDeviceEventEmitter emitter = ((ReactApplicationContext) context).getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
-            while ((length = is.read(buffer)) > 0x0) {
-                os.write(buffer, 0x0, length);
-                
-                sumTransferred += length;
-                int progress_total = (int)(sumTransferred * 100 / fileLength);
-                currentDecada = progress_total / 10;
-                if (!controlPoints.containsKey(currentDecada)) {
-                    controlPoints.put(currentDecada, true);
-                    emitter.emit("map-transfer", progress_total);
-                }
+        final DeviceEventManagerModule.RCTDeviceEventEmitter emitter = ((ReactApplicationContext) context).getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
+
+        while ((length = is.read(buffer)) > 0x0) {
+            os.write(buffer, 0x0, length);
+            
+            sumTransferred += length;
+            int progress_total = (int)(sumTransferred * 100 / fileLength);
+            currentDecade = progress_total / 10;
+            if (!controlPoints.containsKey(currentDecade)) {
+                controlPoints.put(currentDecade, true);
+                emitter.emit("map-transfer", progress_total);
             }
+
         }
         os.flush();
     }
