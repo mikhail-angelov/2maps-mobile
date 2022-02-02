@@ -218,9 +218,16 @@ export const moveMapToSdCardAction = (path: string): AppThunk => {
     // hack because of NativeModules doesn't allow previous dispatch happen
      setTimeout(async() => {
       try {
-        await NativeModules.MapsModule.moveMapToSDCard(path)
-        //dispatch({type: ActionTypeEnum.ChangeMapStorageSuccess})
-        //dispatch(getLocalMapListAction())
+        await new Promise((resolve, reject) => {
+          NativeModules.MapsModule.moveMapToSDCard(path, (err: any, data: any) => {
+            if (err) {
+              return reject(err);
+            }
+            return resolve(data);
+          });
+        });        
+        dispatch({type: ActionTypeEnum.ChangeMapStorageSuccess})
+        dispatch(getLocalMapListAction())
       } catch(e) {
         dispatch({type: ActionTypeEnum.ChangeMapStorageFailure, payload: 'change map storage failure'})
       }
@@ -234,9 +241,16 @@ export const moveMapToPhoneStorageAction = (path: string): AppThunk => {
     // hack because of NativeModules doesn't allow previous dispatch happen
      setTimeout(async() => {
       try {
-        await NativeModules.MapsModule.moveMapToPhoneStorage(path)
-        //dispatch({type: ActionTypeEnum.ChangeMapStorageSuccess})
-        //dispatch(getLocalMapListAction())
+        await new Promise((resolve, reject) => {
+          NativeModules.MapsModule.moveMapToPhoneStorage(path, (err: any, data: any) => {
+            if (err) {
+              return reject(err);
+            }
+            return resolve(data);
+          });
+        });   
+        dispatch({type: ActionTypeEnum.ChangeMapStorageSuccess})
+        dispatch(getLocalMapListAction())
       } catch(e) {
         dispatch({type: ActionTypeEnum.ChangeMapStorageFailure, payload: 'change map storage failure'})
       }

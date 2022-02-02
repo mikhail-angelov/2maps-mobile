@@ -40,6 +40,7 @@ public class MapsModule extends ReactContextBaseJavaModule {
     private static final String TAG = "MapsModule";
     private Downloader downloader;
     private LongSparseArray<Callback> appDownloads;
+    private Map<String, Callback> appMapTransfers;
     private final ReactApplicationContext reactContext;
 
     BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
@@ -65,13 +66,32 @@ public class MapsModule extends ReactContextBaseJavaModule {
         }
     };
 
+    BroadcastReceiver mapTransferReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            try {
+                String name = intent.getStringExtra("name");
+                Log.d(TAG, "+++++++++++++++ACTION_TRANSFER_COMPLETE++++++++++++++++++++++++");
+                Log.d(TAG, name);
+
+            } catch (Exception e) {
+                Log.e(TAG, Log.getStackTraceString(e));
+            }
+        }
+    };
+
     MapsModule(ReactApplicationContext reactContext) {
         super(reactContext);
         this.reactContext = reactContext;
         downloader = new Downloader(reactContext);
+
         appDownloads = new LongSparseArray<>();
         IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
         reactContext.registerReceiver(downloadReceiver, filter);
+
+        appMapTransfers = new HashMap<>();
+        IntentFilter mapTransferFilter = new IntentFilter("ACTION_TRANSFER_COMPLETE");
+        reactContext.registerReceiver(mapTransferReceiver, mapTransferFilter);
     }
 
     @Override
@@ -96,6 +116,7 @@ public class MapsModule extends ReactContextBaseJavaModule {
             final DeviceEventManagerModule.RCTDeviceEventEmitter emitter = this.getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
             DownloadManager.Request request = downloader.createRequest(url, config);
             long downloadId = downloader.queueDownload(request);
+            appDownloads.put(downloadId, onDone);
             appDownloads.put(downloadId, onDone);
             new Thread(new Runnable() {
                 @Override
@@ -218,7 +239,7 @@ public class MapsModule extends ReactContextBaseJavaModule {
         promise.resolve(result);
     }
 
-    private boolean changeMapStorage(String name, String targetPath) {
+    private void changeMapStorage(String name, String targetPath) {
         Map<String, DB> maps = LocalHost.getInstance().getMapsOnly();
         String path = maps.get(name).path;
         File file = new File(path);
@@ -227,36 +248,38 @@ public class MapsModule extends ReactContextBaseJavaModule {
         String destFileName = splittedDestFileName[splittedDestFileName.length - 1];
 
         String destPath = targetPath.concat("/map/" + destFileName);
-        return downloader.moveFile(file, destPath);
+        downloader.moveFile(file, destPath);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @ReactMethod
-    public void moveMapToSDCard(String name, Promise promise) {
+    public void moveMapToSDCard(String name, Callback onDone) {
         File sdCardPath = LocalHost.getInstance().getSDCardPath();
         if (sdCardPath == null) {
-            promise.reject("No SD card path", "Can not find sd card");
+            //promise.reject("No SD card path", "Can not find sd card");
             return;
-        }        
-        String targetPath = sdCardPath.getPath();
-        boolean result = changeMapStorage(name, targetPath);
-        if (result) {
-            promise.resolve(String.valueOf(result));
-        } else {
-            promise.reject("file moving error", String.valueOf(result));
         }
+        appMapTransfers.put(name, onDone);
+        String targetPath = sdCardPath.getPath();
+        changeMapStorage(name, targetPath);
+        // if (result) {
+        //     promise.resolve(String.valueOf(result));
+        // } else {
+        //     promise.reject("file moving error", String.valueOf(result));
+        // }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @ReactMethod
-    public void moveMapToPhoneStorage(String name, Promise promise) {
+    public void moveMapToPhoneStorage(String name, Callback onDone) {
         String targetPath = reactContext.getExternalFilesDir("").getPath();
-        boolean result = changeMapStorage(name, targetPath);
-        if (result) {
-            promise.resolve(String.valueOf(result));
-        } else {
-            promise.reject("file moving error", String.valueOf(result));
-        }
+        appMapTransfers.put(name, onDone);
+        changeMapStorage(name, targetPath);
+        // if (result) {
+        //     promise.resolve(String.valueOf(result));
+        // } else {
+        //     promise.reject("file moving error", String.valueOf(result));
+        // }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)

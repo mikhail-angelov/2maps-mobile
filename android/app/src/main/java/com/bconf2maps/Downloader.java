@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
+import android.content.Intent;
 
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
@@ -205,6 +206,7 @@ public class Downloader {
         if(source.exists()){
             File dest = new File(destPath);
             File parent = new File(dest.getParent());
+            String fileName = source.getName();
             if (!parent.exists()) {
                 parent.mkdirs();
             }
@@ -221,6 +223,7 @@ public class Downloader {
                             if (fis != null) {
                                 writeToOutputStream(fis, fos);
                                 source.delete();
+                                sendTransferBroadcastMessage(fileName);
                             }
                         } catch (Exception e) {
                             Log.e(TAG, e.getMessage());
@@ -257,5 +260,12 @@ public class Downloader {
 
         }
         os.flush();
+    }
+
+    private void sendTransferBroadcastMessage(String name) {
+        Intent intent = new Intent();
+        intent.setAction("ACTION_TRANSFER_COMPLETE");
+        intent.putExtra("name", name);
+        ((ReactApplicationContext) context).sendBroadcast(intent);
     }
 }
