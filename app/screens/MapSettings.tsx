@@ -256,7 +256,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                     <Button buttonStyle={styles.btn} title={t('Login to download maps')} onPress={showAuth} />
                 }
             </View>
-            {!!error && <Text style={styles.errors}>{error}</Text>}
+            {!!error && <Text style={styles.errors}>{t(error)}</Text>}
         </View>
         {showQRReader && 
             <Modal>

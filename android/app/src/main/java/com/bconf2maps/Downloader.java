@@ -217,32 +217,51 @@ public class Downloader {
                     dest.createNewFile();
                 }
                 new Thread(new Runnable() {
+                    FileInputStream fis = new FileInputStream(source);
+                    FileOutputStream fos = new FileOutputStream(dest);
+
                     @Override
                     public void run() {
+                        if (fis == null) {
+                            return;
+                        }
                         try {
-                            FileInputStream fis = new FileInputStream(source);
-                            FileOutputStream fos = new FileOutputStream(dest);
-                            if (fis != null) {
-                                writeToOutputStream(fis, fos);
+                            if (writeToOutputStream(fis, fos)) {
                                 source.delete();
                                 sendTransferBroadcastMessage(fileName, "SUCCESSFUL");
+                            } else {
+                                dest.delete();
+                                sendTransferBroadcastMessage(null, "CANCELED");
                             }
+                            
                         } catch (Exception e) {
-                            Log.e(TAG, e.getMessage());
-                            sendTransferBroadcastMessage(fileName, "FAILURE");
+                            String message = e.getMessage();
+                            Log.e(TAG, message);
+                            if(message.contains("No space left on device")) {
+                                message = "No space left on device";
+                            }
+
+                            try {
+                                dest.delete();
+                            } catch (Exception delEx) {
+                                Log.e(TAG, delEx.getMessage());
+                            }
+
+                            sendTransferBroadcastMessage(message, "FAILURE");
                         }
                     }
                 }).start(); 
                 return true;
             } catch (IOException ioE){
-                Log.e(TAG, ioE.getMessage());
-                sendTransferBroadcastMessage(fileName, "FAILURE");
+                String message = ioE.getMessage();
+                Log.e(TAG, message);
+                sendTransferBroadcastMessage(message, "FAILURE");
             }
         }
         return false;
     }
 
-    private void writeToOutputStream(InputStream is, OutputStream os) throws IOException {
+    private boolean writeToOutputStream(InputStream is, OutputStream os) throws IOException {
         byte[] buffer = new byte[1024];
         int length;
         long sumTransferred = 0;
@@ -254,9 +273,8 @@ public class Downloader {
         while ((length = is.read(buffer)) > 0x0) {
             if (isCanceledMapTransferring) {
                 isCanceledMapTransferring = false;
-                os.close();
-                sendTransferBroadcastMessage(null, "CANCELED");
-                return;
+                os.flush();
+                return false;
             }
             os.write(buffer, 0x0, length);
             
@@ -270,12 +288,13 @@ public class Downloader {
 
         }
         os.flush();
+        return true;
     }
 
-    private void sendTransferBroadcastMessage(String name, String status) {
+    private void sendTransferBroadcastMessage(String message, String status) {
         Intent intent = new Intent();
         intent.setAction("ACTION_MAP_TRANSFER_COMPLETE");
-        intent.putExtra("name", name);
+        intent.putExtra("message", message);
         intent.putExtra("status", status);
         ((ReactApplicationContext) context).sendBroadcast(intent);
     }

@@ -217,7 +217,7 @@ export const moveMapToSdCardAction = (path: string): AppThunk => {
     dispatch({ type: ActionTypeEnum.ChangeMapStorage });
       try {
         await new Promise((resolve, reject) => {
-          NativeModules.MapsModule.moveMapToSDCard(path, (err: any, data: any) => {
+          NativeModules.MapsModule.moveMapToSDCard(path, (err: string, data: any) => {
             if (err) {
               return reject(err);
             }
@@ -227,8 +227,8 @@ export const moveMapToSdCardAction = (path: string): AppThunk => {
         dispatch({type: ActionTypeEnum.ChangeMapStorageSuccess})
         dispatch(getLocalMapListAction())
       } catch(e) {
-        console.log("🚀 ~ file: map-actions.ts ~ line 230 ~ moveMapToSdCardAction ~ e", e)
-        dispatch({type: ActionTypeEnum.ChangeMapStorageFailure, payload: 'change map storage failure'})
+        const message = _.isString(e) ? e : _.get(e, 'message', 'change map storage failure')
+        dispatch({type: ActionTypeEnum.ChangeMapStorageFailure, payload: message})
       }
   }
 }
@@ -238,7 +238,7 @@ export const moveMapToPhoneStorageAction = (path: string): AppThunk => {
     dispatch({ type: ActionTypeEnum.ChangeMapStorage });
       try {
         await new Promise((resolve, reject) => {
-          NativeModules.MapsModule.moveMapToPhoneStorage(path, (err: any, data: any) => {
+          NativeModules.MapsModule.moveMapToPhoneStorage(path, (err: string, data: any) => {
             if (err) {
               return reject(err);
             }
@@ -248,8 +248,8 @@ export const moveMapToPhoneStorageAction = (path: string): AppThunk => {
         dispatch({type: ActionTypeEnum.ChangeMapStorageSuccess})
         dispatch(getLocalMapListAction())
       } catch(e) {
-        console.log("🚀 ~ file: map-actions.ts ~ line 250 ~ moveMapToPhoneStorageAction ~ e", e)
-        dispatch({type: ActionTypeEnum.ChangeMapStorageFailure, payload: 'change map storage failure'})
+        const message = _.isString(e) ? e : _.get(e, 'message', 'change map storage failure')
+        dispatch({type: ActionTypeEnum.ChangeMapStorageFailure, payload: message})
       }
   }
 }

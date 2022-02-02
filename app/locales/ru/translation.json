@@ -89,5 +89,6 @@
     "You have to try with \".sqlitedb\" files": "Попробуйте сканировать файлы \".sqlitedb\"",
     "Map file:": "Файл карты: {{name}}",
     "Supported map format Locus Map .SQLiteDB": "Поддерживаются карты формата Locus .SQLiteDB",
-    "transferring...": "перемещение..."
+    "transferring...": "перемещение...",
+    "No space left on device": "На устройстве не осталось свободного места"
 }

@@ -70,14 +70,14 @@ public class MapsModule extends ReactContextBaseJavaModule {
         @Override
         public void onReceive(Context context, Intent intent) {
             try {
-                String name = intent.getStringExtra("name");
+                String message = intent.getStringExtra("message");
                 String status = intent.getStringExtra("status");
-                Log.d(TAG, String.format("receive transfer complete: %s, status: %s", name, status));
+                Log.d(TAG, String.format("receive transfer complete, message: %s, status: %s", message, status));
 
                 if (status.equals("SUCCESSFUL")) {
                     appMapTransferOnDoneCb.invoke(null, status);
                 } else {
-                    appMapTransferOnDoneCb.invoke(status, null);
+                    appMapTransferOnDoneCb.invoke(message, null);
                 }
                 appMapTransferOnDoneCb = null;
             } catch (Exception e) {
