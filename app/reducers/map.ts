@@ -22,6 +22,8 @@ const initialState: MapState = Object.freeze({
   loading: false,
   downloading: false,
   downloadProgress: 0,
+  relocating: false,
+  relocateProgress: 0,
 });
 
 export default createReducer<MapState>(initialState, {
@@ -140,19 +142,34 @@ export default createReducer<MapState>(initialState, {
   }),
   [ActionTypeEnum.ChangeMapStorage]: () => (state: MapState) => ({
     ...state,
-    loading: true,
     error: undefined,
+    relocating: true,
+    relocateProgress: 0,
   }),
   [ActionTypeEnum.ChangeMapStorageSuccess]: () => (state: MapState) => ({
     ...state,
+    relocating: false,
     loading: false,
+    relocateProgress: 0,
     error: undefined,
   }),
   [ActionTypeEnum.ChangeMapStorageFailure]: (error: string) => (state: MapState) => ({
     ...state,
+    relocating: false,
+    relocateProgress: 0,
     loading: false,
     error,
   }),
+  [ActionTypeEnum.RelocateMapProgress]: (completePercentage: number) => (state: MapState) => ({
+    ...state,
+    relocateProgress: completePercentage,
+    relocating: true,
+  }),
+  [ActionTypeEnum.CancelChangeMapStorage]: () => (state: MapState) => ({
+    ...state,
+    loading: true,
+  }),
+  
 });
 export const selectMapState = (state: State) => state.map;
 export const selectOpacity = createSelector(
@@ -202,4 +219,12 @@ export const selectDownloadProgress = createSelector(
 export const selectDownloadId = createSelector(
   selectMapState,
   (state) => state.downloadId
+);
+export const selectMapIsRelocating = createSelector(
+  selectMapState,
+  (state) => state.relocating
+);
+export const selectRelocateProgress = createSelector(
+  selectMapState,
+  (state) => state.relocateProgress
 );

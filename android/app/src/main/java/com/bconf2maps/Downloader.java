@@ -5,10 +5,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
+import android.content.Intent;
 
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.Map;
 
 import static android.content.Context.DOWNLOAD_SERVICE;
 
@@ -24,10 +28,12 @@ public class Downloader {
     private static final String TAG = "Downloader";
     private DownloadManager downloadManager;
     private Context context;
+    private boolean isCanceledMapTransferring;
 
     public Downloader(Context ctx) {
         context = ctx;
         downloadManager = (DownloadManager) ctx.getSystemService(DOWNLOAD_SERVICE);
+        isCanceledMapTransferring = false;
     }
 
     public DownloadManager.Request createRequest(String url, ReadableMap requestConfig) {
@@ -198,36 +204,102 @@ public class Downloader {
         return result;
     }
 
-    public static boolean moveFile(File source, String destPath){
+    public boolean moveFile(File source, String destPath){
         if(source.exists()){
             File dest = new File(destPath);
             File parent = new File(dest.getParent());
+            String fileName = source.getName();
             if (!parent.exists()) {
                 parent.mkdirs();
             }
-            try (FileInputStream fis = new FileInputStream(source);
-                 FileOutputStream fos = new FileOutputStream(dest)){
+            try {
                 if(!dest.exists()){
                     dest.createNewFile();
                 }
-                writeToOutputStream(fis, fos);
-                source.delete();
+                new Thread(new Runnable() {
+                    FileInputStream fis = new FileInputStream(source);
+                    FileOutputStream fos = new FileOutputStream(dest);
+
+                    @Override
+                    public void run() {
+                        if (fis == null) {
+                            return;
+                        }
+                        try {
+                            if (writeToOutputStream(fis, fos)) {
+                                source.delete();
+                                sendTransferBroadcastMessage(fileName, "SUCCESSFUL");
+                            } else {
+                                dest.delete();
+                                sendTransferBroadcastMessage(null, "CANCELED");
+                            }
+                            
+                        } catch (Exception e) {
+                            String message = e.getMessage();
+                            Log.e(TAG, message);
+                            if(message.contains("No space left on device")) {
+                                message = "No space left on device";
+                            }
+
+                            try {
+                                dest.delete();
+                            } catch (Exception delEx) {
+                                Log.e(TAG, delEx.getMessage());
+                            }
+
+                            sendTransferBroadcastMessage(message, "FAILURE");
+                        }
+                    }
+                }).start(); 
                 return true;
             } catch (IOException ioE){
-                Log.e(TAG, ioE.getMessage());
+                String message = ioE.getMessage();
+                Log.e(TAG, message);
+                sendTransferBroadcastMessage(message, "FAILURE");
             }
         }
         return false;
     }
 
-    private static void writeToOutputStream(InputStream is, OutputStream os) throws IOException {
+    private boolean writeToOutputStream(InputStream is, OutputStream os) throws IOException {
         byte[] buffer = new byte[1024];
         int length;
-        if (is != null) {
-            while ((length = is.read(buffer)) > 0x0) {
-                os.write(buffer, 0x0, length);
+        long sumTransferred = 0;
+        int currentDecade = 0;
+        long fileLength = is.available();
+        Map<Integer, Boolean> controlPoints = new HashMap<>();
+        final DeviceEventManagerModule.RCTDeviceEventEmitter emitter = ((ReactApplicationContext) context).getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class);
+
+        while ((length = is.read(buffer)) > 0x0) {
+            if (isCanceledMapTransferring) {
+                isCanceledMapTransferring = false;
+                os.flush();
+                return false;
             }
+            os.write(buffer, 0x0, length);
+            
+            sumTransferred += length;
+            int progress_total = (int)(sumTransferred * 100 / fileLength);
+            currentDecade = progress_total / 10;
+            if (!controlPoints.containsKey(currentDecade)) {
+                controlPoints.put(currentDecade, true);
+                emitter.emit("map-transfer", progress_total);
+            }
+
         }
         os.flush();
+        return true;
+    }
+
+    private void sendTransferBroadcastMessage(String message, String status) {
+        Intent intent = new Intent();
+        intent.setAction("ACTION_MAP_TRANSFER_COMPLETE");
+        intent.putExtra("message", message);
+        intent.putExtra("status", status);
+        ((ReactApplicationContext) context).sendBroadcast(intent);
+    }
+
+    public void cancelMapTransfer() {
+        isCanceledMapTransferring = true;
     }
 }
