@@ -73,7 +73,7 @@
     "SD card": "SD карта",
     "free of": "свободно из",
     "Not Available": "Недоступно",
-    "Import Map": "Импорт Карты",
+    "Import": "Импорт",
     "Are you sure to remove the map?": "Вы точно хотите удалить карту {{name}}?",
     "Move to SD Card": "Переместить {{name}} на SD карту",
     "Move to Phone": "Переместить {{name}} в память телефона",
@@ -82,7 +82,7 @@
     "Allow Location Permission otherwise tracking won't work": "Трекер не сможет работать без разрешений к местоположению устройства",
     "Check location permissions error": "Ошибка проверки разрешений местоположения",
     "Location permission denied": "Разрешите доступ к местоположению в настройках Android",
-    "Scan map QR code form https://2map.xyz": "Сканируйте QR код карты с https://2map.xyz",
+    "Scan map QR code": "Сканируйте QR код карты в формате .sqlitedb",
     "Flip": "Сменить камеру",
     "Scan QR": "Сканировать QR",
     "File name is not valid:": "Не правильное имя файла: {{name}}",
@@ -90,5 +90,7 @@
     "Map file:": "Файл карты: {{name}}",
     "Supported map format Locus Map .SQLiteDB": "Поддерживаются карты формата Locus .SQLiteDB",
     "transferring...": "перемещение...",
-    "No space left on device": "На устройстве не осталось свободного места"
+    "No space left on device": "На устройстве не осталось свободного места",
+    "EtoMesto.ru": "ЭтоМесто.ru",
+    "For example: ": "Например отсюда: "
 }

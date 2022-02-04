@@ -61,6 +61,7 @@ const styles = StyleSheet.create({
         elevation: 5,
         maxWidth: '80%',
         minWidth: '80%',
+        maxHeight: '80%',
     },
     button: {
         borderRadius: 24,

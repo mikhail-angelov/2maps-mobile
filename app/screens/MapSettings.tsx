@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from "react";
-import { View, Text, Modal, StyleSheet, FlatList, Alert } from "react-native";
+import { View, Text, Modal, StyleSheet, FlatList, Alert, Linking } from "react-native";
 import { Button } from "react-native-elements";
 import { Picker } from "@react-native-picker/picker";
 import ProgressBar from '../components/ProgressBar';
@@ -12,10 +12,13 @@ import { selectIsAuthenticated } from '../reducers/auth'
 import { ItemValue } from "@react-native-picker/picker/typings/Picker";
 import Spinner from "../components/Spinner";
 import { useTranslation } from "react-i18next";
-import { purple, red } from "../constants/color";
+import { green, purple, red } from "../constants/color";
 import QR from "../components/QR";
 import * as _ from 'lodash';
 import { validateMapInfoList } from "../utils/validation";
+import MapModal from "../components/Modal";
+
+const LINKING_URL = 'http://www.etomesto.ru/karta5467/'
 
 const internalStorage: Storage = "internal"
 const sdCardStorage: Storage = "sd-card"
@@ -28,6 +31,25 @@ interface MapItem {
     loaded: boolean;
     storage?: Storage;
 }
+
+const Help: FC = () => {
+    const { t } = useTranslation()
+    return <View style={styles.helpContainer}>
+        <Text style={styles.helpTitle}>Есть 3 способа загрузить карты:</Text>
+        <View style={styles.helpArticle}>
+            <View style={styles.helpArticleBullet}>
+                <Text style={styles.helpText}>1.</Text>
+            </View>
+            <View style={styles.helpArticleTextContainer}>
+                <Text style={styles.helpText}>Найти карты в нужном формате ".sqlitedb" можно на сайте <Text style={styles.link} onPress={() => Linking.openURL(LINKING_URL)}>{t('EtoMesto.ru')}</Text> </Text>
+                <Text style={[styles.helpText, styles.helpTextAddGap]}>Скачать карту на свой телефон в виде файла с расширением ".sqlitedb"</Text>
+                <Text style={[styles.helpText, styles.helpTextAddGap]}>Нажать кнопку "Импорт" и выбрать этот файл. Обычно скачанные файлы находятся в папке "Загрузки"</Text>
+            </View>
+        </View>
+    </View>
+}
+    
+
 
 const mapStateToProps = (state: State) => ({
     primaryMap: selectPrimaryMap(state),
@@ -72,6 +94,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
     const [isSDCardExist, setIsSDCardExist] = useState(true)
     const [isMemoryAvailable, setIsMemoryAvailable] = useState(true)
     const [showQRReader, setShowQRReader] = useState(false)
+    const [showHelp, setShowHelp] = useState(false)
 
     useEffect(() => {
         getLocalMapList()
@@ -239,10 +262,13 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
             </View>
             <View style={styles.buttonsRow}>
                 <Icon.Button backgroundColor={purple} name="file-download" onPress={importMap}>
-                    <Text style={styles.darkButtonText}>{t('Import Map')}</Text>
+                    <Text style={styles.darkButtonText}>{t('Import')}</Text>
                 </Icon.Button>
                 <Icon.Button backgroundColor={purple} name="qr-code-scanner" onPress={() => setShowQRReader(true)}>
                     <Text style={styles.darkButtonText}>{t('Scan QR')}</Text>
+                </Icon.Button>
+                <Icon.Button backgroundColor={green} name="help-outline" onPress={() => setShowHelp(true)}>
+                    <Text style={styles.darkButtonText}>{t('Help')}</Text>
                 </Icon.Button>
             </View>
             <Text style={styles.notificationText}>{t('Supported map format Locus Map .SQLiteDB')}</Text>
@@ -258,11 +284,12 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
             </View>
             {!!error && <Text style={styles.errors}>{t(error)}</Text>}
         </View>
-        {showQRReader && 
+        {showQRReader &&
             <Modal>
                 <QR close={() => setShowQRReader(false)} select={(link) => {processCapturedQR(link)}} />
             </Modal>
         }
+        {showHelp && <MapModal onRequestClose={()=>setShowHelp(false)}><Help /></MapModal>}
     </Modal>
 }
 
@@ -388,7 +415,7 @@ const styles = StyleSheet.create({
         color: "white",
     },
     buttonsRow: {
-        padding: 16,
+        paddingVertical: 16,
         flexDirection: "row",
         alignItems: "center",
         flexWrap: "wrap",
@@ -400,5 +427,35 @@ const styles = StyleSheet.create({
         marginHorizontal: 5,
         fontSize: 16,
         fontWeight: '600',
+    },
+    helpContainer: {
+        marginTop: 20,
+    },
+    helpArticle: {
+        marginTop: 20,
+        flexDirection: "row",
+    },
+    helpArticleBullet: {
+        flexBasis: 20,
+    },
+    helpArticleTextContainer: {
+        flex: 1,
+    },
+    helpTitle: {
+        color: '#212121',
+        fontSize: 20,
+        fontWeight: "300",
+    },
+    helpText: {
+        color: '#212121',
+        fontSize: 18,
+    },
+    helpTextAddGap: {
+        marginTop: 10,
+    },
+    link: {
+        fontSize: 18,
+        color: purple,
+        textDecorationLine: "underline"
     },
 });
