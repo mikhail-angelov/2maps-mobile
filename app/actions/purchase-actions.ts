@@ -1,11 +1,12 @@
-import {Alert, NativeModules, Platform} from 'react-native';
+import {Alert, Platform} from 'react-native';
 import RNIap, {InAppPurchase} from 'react-native-iap';
 import {ActionTypeEnum, AppThunk} from '.';
 import i18next from 'i18next';
 import * as _ from 'lodash';
+import { checkForTestDevice } from './auth-actions';
 
 export const requestPurchase = async () => {
-  const isTestDevice = await NativeModules.MapsModule.isTestDevice()
+  const isTestDevice = await checkForTestDevice()
   if (isTestDevice) {
     return
   }

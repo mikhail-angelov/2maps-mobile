@@ -8,6 +8,7 @@ import RNIap, {
     purchaseErrorListener,
     purchaseUpdatedListener,
 } from 'react-native-iap';
+import { checkForTestDevice } from '../actions/auth-actions';
 
 let purchaseUpdateSubscription: EmitterSubscription | null;
 let purchaseErrorSubscription: EmitterSubscription | null;
@@ -20,8 +21,6 @@ const connector = connect(null, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector>
 
 const InAppPurchaseManager: FC<Props> = ({ addPurchase, setPurchaseConnectionFlag }) => {
-    
-
     useEffect(() => {
         const initGoogleStoreConnection = async () => {
             console.info('initGoogleStoreConnection');
@@ -75,7 +74,10 @@ const InAppPurchaseManager: FC<Props> = ({ addPurchase, setPurchaseConnectionFla
             }
             await RNIap.endConnection();
         };
-        initGoogleStoreConnection()
+        checkForTestDevice().then((isTestDeviceResponse: boolean) => {
+            if (isTestDeviceResponse) return
+            initGoogleStoreConnection()
+        })
         return () => { closeGoogleStoreConnection() }
     }, [])
     return null
