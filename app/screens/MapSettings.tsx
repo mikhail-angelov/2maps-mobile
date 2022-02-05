@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from "react";
-import { View, Text, Modal, StyleSheet, FlatList, Alert, Linking } from "react-native";
+import { View, Text, Modal, StyleSheet, FlatList, Alert, Linking, ScrollView, SafeAreaView } from "react-native";
 import { Button } from "react-native-elements";
 import { Picker } from "@react-native-picker/picker";
 import ProgressBar from '../components/ProgressBar';
@@ -34,19 +34,47 @@ interface MapItem {
 
 const Help: FC = () => {
     const { t } = useTranslation()
-    return <View style={styles.helpContainer}>
-        <Text style={styles.helpTitle}>Есть 3 способа загрузить карты:</Text>
-        <View style={styles.helpArticle}>
-            <View style={styles.helpArticleBullet}>
-                <Text style={styles.helpText}>1.</Text>
-            </View>
-            <View style={styles.helpArticleTextContainer}>
-                <Text style={styles.helpText}>Найти карты в нужном формате ".sqlitedb" можно на сайте <Text style={styles.link} onPress={() => Linking.openURL(LINKING_URL)}>{t('EtoMesto.ru')}</Text> </Text>
-                <Text style={[styles.helpText, styles.helpTextAddGap]}>Скачать карту на свой телефон в виде файла с расширением ".sqlitedb"</Text>
-                <Text style={[styles.helpText, styles.helpTextAddGap]}>Нажать кнопку "Импорт" и выбрать этот файл. Обычно скачанные файлы находятся в папке "Загрузки"</Text>
-            </View>
-        </View>
-    </View>
+    return (
+        <SafeAreaView>
+            <ScrollView style={styles.helpScrollView}>
+                <Text style={styles.helpTitle}>{t('helpTitle')}</Text>
+                <View style={styles.helpArticle}>
+                    <View style={styles.helpArticleBullet}>
+                        <Text style={styles.helpText}>1.</Text>
+                    </View>
+                    <View style={styles.helpArticleTextContainer}>
+                        <Text style={[styles.helpText]}>{t('firstArticleHelp.firstLine')}</Text>
+                        <Text style={[styles.helpText, styles.helpTextAddGap]}>{t('firstArticleHelp.secondLine')}<Text style={styles.link} onPress={() => Linking.openURL(LINKING_URL)}>&nbsp;{t('EtoMesto.ru')}</Text> </Text>
+                        <Text style={[styles.helpText, styles.helpTextAddGap]}>{t('firstArticleHelp.thirdLine')}</Text>
+                        <Text style={[styles.helpText, styles.helpTextAddGap]}>{t('firstArticleHelp.fourthLine')}</Text>
+                    </View>
+                </View>
+                <View style={styles.helpArticle}>
+                    <View style={styles.helpArticleBullet}>
+                        <Text style={styles.helpText}>2.</Text>
+                    </View>
+                    <View style={styles.helpArticleTextContainer}>
+                        <Text style={styles.helpText}>{t('secondArticleHelp.firstLine')}</Text>
+                        <Text style={[styles.helpText, styles.helpTextAddGap]}>{t('secondArticleHelp.secondLine')}<Text style={styles.link} onPress={() => Linking.openURL(LINKING_URL)}>&nbsp;{t('EtoMesto.ru')}</Text> </Text>
+                        <Text style={[styles.helpText, styles.helpTextAddGap]}>{t('secondArticleHelp.thirdLine')}</Text>
+                        <Text style={[styles.helpText, styles.helpTextAddGap]}>{t('secondArticleHelp.fourthLine')}</Text>
+                        <Text style={[styles.helpText, styles.helpTextAddGap]}>{t('secondArticleHelp.firthLine')}</Text>
+                        <Text style={[styles.helpText, styles.helpTextAddGap]}>{t('secondArticleHelp.sixthLine')}</Text>
+                    </View>
+                </View>
+                <View style={styles.helpArticle}>
+                    <View style={styles.helpArticleBullet}>
+                        <Text style={styles.helpText}>3.</Text>
+                    </View>
+                    <View style={styles.helpArticleTextContainer}>
+                        <Text style={styles.helpText}>{t('thirdArticleHelp.firstLine')}</Text>
+                        <Text style={[styles.helpText, styles.helpTextAddGap]}>{t('thirdArticleHelp.secondLine')}</Text>
+                        <Text style={[styles.helpText, styles.helpTextAddGap]}>{t('thirdArticleHelp.thirdLine')}</Text>
+                    </View>
+                </View>
+            </ScrollView>
+        </SafeAreaView>
+    )
 }
     
 
@@ -428,7 +456,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
     },
-    helpContainer: {
+    helpScrollView: {
         marginTop: 20,
     },
     helpArticle: {
@@ -436,7 +464,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
     },
     helpArticleBullet: {
-        flexBasis: 20,
+        flexBasis: 18,
     },
     helpArticleTextContainer: {
         flex: 1,
@@ -444,11 +472,11 @@ const styles = StyleSheet.create({
     helpTitle: {
         color: '#212121',
         fontSize: 20,
-        fontWeight: "300",
+        fontWeight: '300',
     },
     helpText: {
         color: '#212121',
-        fontSize: 18,
+        fontSize: 16,
     },
     helpTextAddGap: {
         marginTop: 10,
