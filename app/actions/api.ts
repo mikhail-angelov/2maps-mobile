@@ -40,36 +40,15 @@ export const postLarge = async ({ url, token, data }: {
   const formData = new FormData()
   const value = JSON.stringify(data) //new Blob([JSON.stringify(data)]);
   formData.append('value', value,)
-
-  const headers = {
-    // 'Content-Length': value.length
-  }
-  try {
-    //   const r = await fetch(url, {
-
-    //     method:'POST',
-
-    //     // accept: 'application/json',
-
-    //     // 'Content-Type': 'multipart/form-data',
-
-    //     body: formData
-
-    // })
-    // console.log('---',r)
-    return await axios({
-      url,
-      method: 'post',
-      data: formData,
-      headers: Object.assign(headers, token ? {
-        authorization: `bearer ${token}`,
-        'Content-Type': 'multipart/form-data',
-      } : {}),
-    });
-  } catch (e) {
-    console.log('--', JSON.stringify(e))
-    throw e
-  }
+  return await axios({
+    url,
+    method: 'post',
+    data: formData,
+    headers: token ? {
+      authorization: `bearer ${token}`,
+      'Content-Type': 'multipart/form-data',
+    } : {},
+  });
 }
 
 export const getLocal = (url: string) => {

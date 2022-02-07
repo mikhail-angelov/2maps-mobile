@@ -1,7 +1,7 @@
 {
     "Login": "Войти",
     "Account": "Аккаунт",
-    "Settings": "Настройки",
+    "Maps": "Карты",
     "Marks": "Метки",
     "Tracks": "Треки",
     "Cancel": "Отмена",
@@ -73,7 +73,7 @@
     "SD card": "SD карта",
     "free of": "свободно из",
     "Not Available": "Недоступно",
-    "Import Map": "Импорт Карты",
+    "Import": "Импорт",
     "Are you sure to remove the map?": "Вы точно хотите удалить карту {{name}}?",
     "Move to SD Card": "Переместить {{name}} на SD карту",
     "Move to Phone": "Переместить {{name}} в память телефона",
@@ -82,10 +82,35 @@
     "Allow Location Permission otherwise tracking won't work": "Трекер не сможет работать без разрешений к местоположению устройства",
     "Check location permissions error": "Ошибка проверки разрешений местоположения",
     "Location permission denied": "Разрешите доступ к местоположению в настройках Android",
-    "Scan map QR code form https://2map.xyz": "Сканируйте QR код карты с https://2map.xyz",
+    "Scan map QR code": "Сканируйте QR код карты в формате .sqlitedb",
     "Flip": "Сменить камеру",
     "Scan QR": "Сканировать QR",
     "File name is not valid:": "Не правильное имя файла: {{name}}",
     "You have to try with \".sqlitedb\" files": "Попробуйте сканировать файлы \".sqlitedb\"",
-    "Map file:": "Файл карты: {{name}}"
+    "Map file:": "Файл карты: {{name}}",
+    "Supported map format Locus Map .SQLiteDB": "Поддерживаются карты формата Locus .SQLiteDB",
+    "transferring...": "перемещение...",
+    "No space left on device": "На устройстве не осталось свободного места",
+    "EtoMesto.ru": "ЭтоМесто.ru",
+    "For example: ": "Например отсюда: ",
+    "helpTitle": "Есть 3 способа загрузить карты:",
+    "firstArticleHelp": {
+        "firstLine": "Использовать кнопку \"Импорт\"",
+        "secondLine": "Найти карты в нужном формате \".sqlitedb\" можно на сайте",
+        "thirdLine": "Скачать карту на свой телефон в виде файла с расширением \".sqlitedb\"",
+        "fourthLine": "Нажать кнопку \"Импорт\" и выбрать этот файл. Обычно скачанные файлы находятся в папке \"Загрузки\""
+    },
+    "secondArticleHelp": {
+        "firstLine": "Сканировать QR код",
+        "secondLine": "Приложение работает с картами формате \".sqlitedb\". Такие карты можно найти на сайте",
+        "thirdLine": "Нажмите кнопку \"Сканировать QR\"",
+        "fourthLine": "Наведите телефон на QR код и подержите некоторое время на одном месте",
+        "firthLine": "Как только телефон распознает QR, сработает вибро, и начнётся скачивание",
+        "sixthLine": "После завершения скачивания вы увидите новую карту в списке карт"
+    },
+    "thirdArticleHelp": {
+        "firstLine": "Скачать карту из списка",
+        "secondLine": "После авторизации вам будет доступен список карт для скачивания.",
+        "thirdLine": "Нажмите на слово \"Скачать\" напротив карты и дождитесь, когда карта появится в списке"
+    }
 }

@@ -1,14 +1,16 @@
-import React, { FC, useState } from "react";
+import React, { FC } from "react";
 import {
     View,
     StyleSheet,
     Text,
     TouchableOpacity,
+    Linking,
 } from 'react-native';
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import { useTranslation } from "react-i18next";
-import { purple } from "../constants/color";
+import { green, purple } from "../constants/color";
 
+const LINKING_URL = 'http://www.etomesto.ru/karta5467/'
 
 interface Props {
     select: (data: string) => void;
@@ -16,7 +18,6 @@ interface Props {
 }
 
 const QR: FC<Props> = ({ select, close }) => {
-    const [front, setFront] = useState(false)
     const { t } = useTranslation()
 
     const onSuccess = (e: any) => {
@@ -27,21 +28,26 @@ const QR: FC<Props> = ({ select, close }) => {
 
     return <QRCodeScanner
         onRead={onSuccess}
-        cameraType={front ? "front" : 'back'}
+        cameraType='back'
+        showMarker
+        markerStyle={styles.markerStyle}
         topContent={
-            <Text style={styles.centerText}>
-                {t('Scan map QR code form https://2map.xyz')}
-            </Text>
+            <View style={styles.titleContainer}>
+                <Text style={styles.titleText}>
+                    {t('Scan map QR code')}
+                </Text>
+                <View style={styles.linkContainer}>
+                    <Text style={styles.titleText}>
+                        {t('For example: ')}
+                    </Text>
+                    <Text style={styles.link} onPress={() => Linking.openURL(LINKING_URL)}>{t('EtoMesto.ru')}</Text>
+                </View>
+            </View>
         }
         bottomContent={
-            <View style={styles.row}>
-                <TouchableOpacity style={styles.buttonTouchable} onPress={close}>
-                    <Text style={styles.buttonText}>{t('Cancel')}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.buttonTouchable} onPress={() => setFront(!front)}>
-                    <Text style={styles.buttonText}>{t('Flip')}</Text>
-                </TouchableOpacity>
-            </View>
+            <TouchableOpacity style={styles.buttonTouchable} onPress={close}>
+                <Text style={styles.buttonText}>{t('Cancel')}</Text>
+            </TouchableOpacity>
         }
     />
 }
@@ -50,24 +56,35 @@ export default QR
 
 
 const styles = StyleSheet.create({
-    centerText: {
-        flex: 1,
-        fontSize: 18,
-        padding: 32,
-        color: '#777'
+    titleContainer: {
+        width: "100%",
+        paddingHorizontal: 32,
+        paddingBottom: 70,
     },
-    textBold: {
-        fontWeight: '500',
-        color: '#000'
+    titleText: {
+        fontSize: 16,
+        color: '#212121'
+    },
+    linkContainer: {
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "baseline"
+    },
+    link: {
+        fontSize: 18,
+        color: purple,
+        textDecorationLine: "underline"
+    },
+    buttonTouchable: {
+        padding: 26,
     },
     buttonText: {
         fontSize: 21,
         color: purple,
     },
-    buttonTouchable: {
-        padding: 16
-    },
-    row:{
-        flexDirection:'row'
-    },
+    markerStyle: {
+        borderRadius: 10,
+        borderStyle: "dashed",
+        borderEndColor: green
+    }
 });

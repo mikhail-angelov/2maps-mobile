@@ -34,6 +34,7 @@ export enum ActionTypeEnum {
   AddPurchase = "auth/ADD_PURCHASE",
   SetPurchases = "auth/SET_PURCHASES",
   EstablishedPurchaseConnection = "auth/ESTABLISH_PURCHASE_CONNECTION",
+  TheFirstTimeAppStart = "auth/THE_FIRST_TIME_APP_START",
   // marks
   MarksRequest = "marks/MARKS_REQUEST",
   MarksSuccess = "marks/MARKS_SUCCESS",
@@ -85,6 +86,8 @@ export enum ActionTypeEnum {
   ChangeMapStorage = 'map/CHANGE_MAP_STORAGE',
   ChangeMapStorageSuccess = 'map/CHANGE_MAP_STORAGE_SUCCESS',
   ChangeMapStorageFailure = 'map/CHANGE_MAP_STORAGE_FAILED',
+  RelocateMapProgress = 'map/RELOCATE_MAP_PROGRESS',
+  CancelChangeMapStorage = 'map/CANCEL_CHANGE_MAP_STORAGE',
   //wiki
   WikiRequest = 'wiki/REQUEST',
   WikiSuccess = 'wiki/REQUEST_SUCCESS',

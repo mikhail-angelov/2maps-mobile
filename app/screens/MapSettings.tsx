@@ -1,21 +1,24 @@
 import React, { FC, useEffect, useState } from "react";
-import { View, Text, Modal, StyleSheet, FlatList, Alert } from "react-native";
+import { View, Text, Modal, StyleSheet, FlatList, Alert, Linking, ScrollView, SafeAreaView } from "react-native";
 import { Button } from "react-native-elements";
 import { Picker } from "@react-native-picker/picker";
 import ProgressBar from '../components/ProgressBar';
 import { connect, ConnectedProps } from "react-redux";
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { State, MapInfo, Storage } from '../store/types'
-import { getLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction, downloadMapByQRAction, removeLocalMapAction, cancelDownloadMapAction, getStorageMemoryInfo, importMapAction, moveMapToSdCardAction, moveMapToPhoneStorageAction, isFileValid } from '../actions/map-actions'
-import { selectPrimaryMap, selectSecondaryMap, selectMapList, selectMapIsLoading, onLineMapList, selectAvailableMapList, selectMapError, selectDownloadProgress, selectMapIsDownLoading } from '../reducers/map'
+import { State, MapInfo, Storage, PrimaryMapInfo } from '../store/types'
+import { getLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction, downloadMapByQRAction, removeLocalMapAction, cancelDownloadMapAction, getStorageMemoryInfo, importMapAction, moveMapToSdCardAction, moveMapToPhoneStorageAction, isFileValid, cancelTransferMapAction } from '../actions/map-actions'
+import { selectPrimaryMap, selectSecondaryMap, selectMapList, selectMapIsLoading, onLineMapList, selectAvailableMapList, selectMapError, selectDownloadProgress, selectMapIsDownLoading, selectMapIsRelocating, selectRelocateProgress } from '../reducers/map'
 import { selectIsAuthenticated } from '../reducers/auth'
 import { ItemValue } from "@react-native-picker/picker/typings/Picker";
 import Spinner from "../components/Spinner";
 import { useTranslation } from "react-i18next";
-import { purple, red } from "../constants/color";
+import { green, purple, red } from "../constants/color";
 import QR from "../components/QR";
 import * as _ from 'lodash';
 import { validateMapInfoList } from "../utils/validation";
+import MapModal from "../components/Modal";
+
+const LINKING_URL = 'http://www.etomesto.ru/karta5467/'
 
 const internalStorage: Storage = "internal"
 const sdCardStorage: Storage = "sd-card"
@@ -29,6 +32,53 @@ interface MapItem {
     storage?: Storage;
 }
 
+const Help: FC = () => {
+    const { t } = useTranslation()
+    return (
+        <SafeAreaView>
+            <ScrollView style={styles.helpScrollView}>
+                <Text style={styles.helpTitle}>{t('helpTitle')}</Text>
+                <View style={styles.helpArticle}>
+                    <View style={styles.helpArticleBullet}>
+                        <Text style={styles.helpText}>1.</Text>
+                    </View>
+                    <View style={styles.helpArticleTextContainer}>
+                        <Text style={[styles.helpText]}>{t('firstArticleHelp.firstLine')}</Text>
+                        <Text style={[styles.helpText, styles.helpTextAddGap]}>{t('firstArticleHelp.secondLine')}<Text style={styles.link} onPress={() => Linking.openURL(LINKING_URL)}>&nbsp;{t('EtoMesto.ru')}</Text> </Text>
+                        <Text style={[styles.helpText, styles.helpTextAddGap]}>{t('firstArticleHelp.thirdLine')}</Text>
+                        <Text style={[styles.helpText, styles.helpTextAddGap]}>{t('firstArticleHelp.fourthLine')}</Text>
+                    </View>
+                </View>
+                <View style={styles.helpArticle}>
+                    <View style={styles.helpArticleBullet}>
+                        <Text style={styles.helpText}>2.</Text>
+                    </View>
+                    <View style={styles.helpArticleTextContainer}>
+                        <Text style={styles.helpText}>{t('secondArticleHelp.firstLine')}</Text>
+                        <Text style={[styles.helpText, styles.helpTextAddGap]}>{t('secondArticleHelp.secondLine')}<Text style={styles.link} onPress={() => Linking.openURL(LINKING_URL)}>&nbsp;{t('EtoMesto.ru')}</Text> </Text>
+                        <Text style={[styles.helpText, styles.helpTextAddGap]}>{t('secondArticleHelp.thirdLine')}</Text>
+                        <Text style={[styles.helpText, styles.helpTextAddGap]}>{t('secondArticleHelp.fourthLine')}</Text>
+                        <Text style={[styles.helpText, styles.helpTextAddGap]}>{t('secondArticleHelp.firthLine')}</Text>
+                        <Text style={[styles.helpText, styles.helpTextAddGap]}>{t('secondArticleHelp.sixthLine')}</Text>
+                    </View>
+                </View>
+                <View style={styles.helpArticle}>
+                    <View style={styles.helpArticleBullet}>
+                        <Text style={styles.helpText}>3.</Text>
+                    </View>
+                    <View style={styles.helpArticleTextContainer}>
+                        <Text style={styles.helpText}>{t('thirdArticleHelp.firstLine')}</Text>
+                        <Text style={[styles.helpText, styles.helpTextAddGap]}>{t('thirdArticleHelp.secondLine')}</Text>
+                        <Text style={[styles.helpText, styles.helpTextAddGap]}>{t('thirdArticleHelp.thirdLine')}</Text>
+                    </View>
+                </View>
+            </ScrollView>
+        </SafeAreaView>
+    )
+}
+    
+
+
 const mapStateToProps = (state: State) => ({
     primaryMap: selectPrimaryMap(state),
     secondaryMap: selectSecondaryMap(state),
@@ -39,6 +89,8 @@ const mapStateToProps = (state: State) => ({
     isAuthenticated: selectIsAuthenticated(state),
     error: selectMapError(state),
     progress: selectDownloadProgress(state),
+    isRelocating: selectMapIsRelocating(state),
+    progressForRelocate: selectRelocateProgress(state),
 });
 const mapDispatchToProps = {
     getLocalMapList: getLocalMapListAction,
@@ -52,6 +104,7 @@ const mapDispatchToProps = {
     moveMapToSdCard: moveMapToSdCardAction,
     moveMapToPhoneStorage: moveMapToPhoneStorageAction,
     downloadMapByQR: downloadMapByQRAction,
+    cancelTransferMap: cancelTransferMapAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & {
@@ -60,7 +113,7 @@ type Props = ConnectedProps<typeof connector> & {
 }
 
 
-const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoading, list, availableMapList, isAuthenticated, error, progress, cancelDownloadMap, close, getLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap, showAuth, importMap, moveMapToSdCard, moveMapToPhoneStorage, downloadMapByQR }) => {
+const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoading, list, availableMapList, isAuthenticated, error, progress, isRelocating, progressForRelocate, cancelDownloadMap, close, getLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap, showAuth, importMap, moveMapToSdCard, moveMapToPhoneStorage, downloadMapByQR, cancelTransferMap }) => {
     const { t } = useTranslation()
     const [availableInternalMemory, setAvailableInternalMemory] = useState("")
     const [totalInternalMemory, setTotalInternalMemory] = useState("")
@@ -69,6 +122,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
     const [isSDCardExist, setIsSDCardExist] = useState(true)
     const [isMemoryAvailable, setIsMemoryAvailable] = useState(true)
     const [showQRReader, setShowQRReader] = useState(false)
+    const [showHelp, setShowHelp] = useState(false)
 
     useEffect(() => {
         getLocalMapList()
@@ -171,7 +225,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
     const renderItem = (item: MapItem, isAuthenticated: boolean ) => (
         (isAuthenticated || item.loaded) &&
             <View style={styles.row}>
-                <Text>{item.name}</Text>
+                <Text style={styles.listNameText}>{item.name}</Text>
                 {item.loaded && (
                     <View style={styles.listButtonsContainer}>
                         {item.storage === internalStorage && <Icon.Button style={styles.listButton} iconStyle={styles.listIconStorage} size={22} backgroundColor="transparent" name="phone-android" accessibilityLabel="move to sd card" onPress={() => confirmMovementMapToSdCard(item)}/>}
@@ -190,13 +244,18 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
             <View style={styles.progressBar}><ProgressBar progress={progress} /></View>
             <Button title="Cancel" onPress={cancelDownloadMap} />
         </View>}
+        {isRelocating && <View style={styles.loadingOverlay}>
+            <Text style={styles.loadingLabel}>{t('transferring...')}</Text>
+            <View style={styles.progressBar}><ProgressBar progress={progressForRelocate} /></View>
+            <Button title="Cancel" onPress={cancelTransferMap} />
+        </View>}
         <Spinner show={isLoading} />
         <View style={styles.header}>
             <View style={styles.headerButton}>
                 <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="arrow-back-ios" onPress={close} />
             </View>
             <View style={styles.headerText}>
-                <Text style={styles.title}>{t('Settings')}</Text>
+                <Text style={styles.title}>{t('Maps')}</Text>
             </View>
         </View>
         <View style={styles.content}>
@@ -208,7 +267,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                     onValueChange={onSetPrimary}
                     mode="dropdown"
                 >
-                    {primaryList.map(({ name }: MapInfo) => (<Picker.Item key={name} label={name} value={name} />))}
+                    {primaryList.map(({ name }: PrimaryMapInfo) => (<Picker.Item key={name} label={name} value={name} />))}
                 </Picker>
             </View>
             <View style={styles.row}>
@@ -231,12 +290,16 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
             </View>
             <View style={styles.buttonsRow}>
                 <Icon.Button backgroundColor={purple} name="file-download" onPress={importMap}>
-                    <Text style={styles.darkButtonText}>{t('Import Map')}</Text>
+                    <Text style={styles.darkButtonText}>{t('Import')}</Text>
                 </Icon.Button>
                 <Icon.Button backgroundColor={purple} name="qr-code-scanner" onPress={() => setShowQRReader(true)}>
                     <Text style={styles.darkButtonText}>{t('Scan QR')}</Text>
                 </Icon.Button>
+                <Icon.Button backgroundColor={green} name="help-outline" onPress={() => setShowHelp(true)}>
+                    <Text style={styles.darkButtonText}>{t('Help')}</Text>
+                </Icon.Button>
             </View>
+            <Text style={styles.notificationText}>{t('Supported map format Locus Map .SQLiteDB')}</Text>
             <View style={styles.availableMaps}>
                 <FlatList
                     data={allMaps}
@@ -247,13 +310,14 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                     <Button buttonStyle={styles.btn} title={t('Login to download maps')} onPress={showAuth} />
                 }
             </View>
-            {!!error && <Text style={styles.errors}>{error}</Text>}
+            {!!error && <Text style={styles.errors}>{t(error)}</Text>}
         </View>
-        {showQRReader && 
+        {showQRReader &&
             <Modal>
                 <QR close={() => setShowQRReader(false)} select={(link) => {processCapturedQR(link)}} />
             </Modal>
         }
+        {showHelp && <MapModal onRequestClose={()=>setShowHelp(false)}><Help /></MapModal>}
     </Modal>
 }
 
@@ -282,6 +346,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: "space-between",
         margin: 5,
+        width: "100%",
     },
     headerButton: {
         width: 60,
@@ -356,8 +421,12 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginBottom: 10,
     },
+    listNameText: {
+        flex: 1,
+    },
     listButtonsContainer: {
         flexDirection: "row",
+
     },
     listIconStorage: {
         color: purple,
@@ -374,10 +443,47 @@ const styles = StyleSheet.create({
         color: "white",
     },
     buttonsRow: {
-        padding: 16,
+        paddingVertical: 16,
         flexDirection: "row",
         alignItems: "center",
         flexWrap: "wrap",
         justifyContent: "space-around"
-    }
+    },
+    notificationText: {
+        marginTop: 10,
+        marginBottom: 20,
+        marginHorizontal: 5,
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    helpScrollView: {
+        marginTop: 20,
+    },
+    helpArticle: {
+        marginTop: 20,
+        flexDirection: "row",
+    },
+    helpArticleBullet: {
+        flexBasis: 18,
+    },
+    helpArticleTextContainer: {
+        flex: 1,
+    },
+    helpTitle: {
+        color: '#212121',
+        fontSize: 20,
+        fontWeight: '300',
+    },
+    helpText: {
+        color: '#212121',
+        fontSize: 16,
+    },
+    helpTextAddGap: {
+        marginTop: 10,
+    },
+    link: {
+        fontSize: 18,
+        color: purple,
+        textDecorationLine: "underline"
+    },
 });

@@ -12,7 +12,7 @@ const initialState: AuthState = Object.freeze({
   resetToken: '',
   showAdMob: true,
   purchases: undefined,
-  isPurchaseConnection: false,
+  isItTheFirstTimeAppStarted: true,
 });
 
 export default createReducer<AuthState>(initialState, {
@@ -145,9 +145,9 @@ export default createReducer<AuthState>(initialState, {
     purchases,
     showAdMob: _.isEmpty(purchases),
   }),
-  [ActionTypeEnum.EstablishedPurchaseConnection]: (value: boolean) => (state: AuthState) => ({
+  [ActionTypeEnum.TheFirstTimeAppStart]: (value: boolean) => (state: AuthState) => ({
     ...state,
-    isPurchaseConnection: !!value,
+    isItTheFirstTimeAppStarted: !!value,
   }),
 });
 export const selectAuthState = (state: State) => state.auth;
@@ -183,7 +183,7 @@ export const selectPurchases = createSelector(
   selectAuthState,
   (state) => state.purchases
 );
-export const selectPurchaseConnectionFlag = createSelector(
+export const selectIsItTheFirstTimeAppStarted = createSelector(
   selectAuthState,
-  (state) => state.isPurchaseConnection
+  (state) => state.isItTheFirstTimeAppStarted
 );

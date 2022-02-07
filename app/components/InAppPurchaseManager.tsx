@@ -1,32 +1,36 @@
 import React, { FC, useEffect } from 'react';
 import { Alert, EmitterSubscription, Platform } from 'react-native';
 import { connect, ConnectedProps } from 'react-redux';
-import { addPurchaseAction, setPurchaseConnectionFlagAction } from '../actions/purchase-actions';
+import { addPurchaseAction } from '../actions/purchase-actions';
 import RNIap, {
     PurchaseError,
     finishTransaction,
     purchaseErrorListener,
     purchaseUpdatedListener,
 } from 'react-native-iap';
+import { checkForTestDevice } from '../actions/auth-actions';
 
 let purchaseUpdateSubscription: EmitterSubscription | null;
 let purchaseErrorSubscription: EmitterSubscription | null;
 
+interface ComponentProps {
+    setIsPurchaseConnected: (isPurchaseConnected: boolean) => void;
+}
+
 const mapDispatchToProps = {
     addPurchase: addPurchaseAction,
-    setPurchaseConnectionFlag: setPurchaseConnectionFlagAction,
 };
 const connector = connect(null, mapDispatchToProps)
-type Props = ConnectedProps<typeof connector>
+type Props = ConnectedProps<typeof connector> & ComponentProps
 
-const InAppPurchaseManager: FC<Props> = ({ addPurchase, setPurchaseConnectionFlag }) => {
-    
-
+const InAppPurchaseManager: FC<Props> = ({ addPurchase, setIsPurchaseConnected }) => {
     useEffect(() => {
+        let isGoogleStoreConnected = false
         const initGoogleStoreConnection = async () => {
             console.info('initGoogleStoreConnection');
             try {
                 await RNIap.initConnection();
+                isGoogleStoreConnected = true
                 if (Platform.OS === 'android') {
                     await RNIap.flushFailedPurchasesCachedAsPendingAndroid();
                 } else {
@@ -57,10 +61,10 @@ const InAppPurchaseManager: FC<Props> = ({ addPurchase, setPurchaseConnectionFla
                         Alert.alert('Purchase error', error?.message || '');
                     },
                 );
-                setPurchaseConnectionFlag(true)
+                setIsPurchaseConnected(true)
             } catch (err: any) {
                 console.info(err.code, err.message);
-                setPurchaseConnectionFlag(false)
+                setIsPurchaseConnected(false)
             }
         };
     
@@ -73,9 +77,17 @@ const InAppPurchaseManager: FC<Props> = ({ addPurchase, setPurchaseConnectionFla
                 purchaseErrorSubscription.remove();
                 purchaseErrorSubscription = null;
             }
-            await RNIap.endConnection();
+            if (isGoogleStoreConnected) {
+                console.info('closeGoogleStoreConnection');
+                await RNIap.endConnection();
+                isGoogleStoreConnected = false
+            }
         };
-        initGoogleStoreConnection()
+        checkForTestDevice().then((isTestDeviceResponse: boolean) => {
+            if (!isTestDeviceResponse) {
+                initGoogleStoreConnection()
+            }
+        })
         return () => { closeGoogleStoreConnection() }
     }, [])
     return null

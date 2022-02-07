@@ -1,8 +1,8 @@
 import { ActionTypeEnum, AppThunk } from ".";
 import { Position } from 'geojson';
 import { NativeModules } from "react-native";
-import { MapInfo, StorageMemory } from "../store/types";
 import { getLocal, get, post, HOST, HOST_LOCAL, getMapsDirectoryPath } from './api'
+import { MapInfo, PrimaryMapInfo, StorageMemory } from "../store/types";
 import { selectToken } from '../reducers/auth'
 import { selectDownloadId } from '../reducers/map'
 import { AxiosResponse } from "axios";
@@ -33,7 +33,7 @@ export const setZoomAction = (zoom: number) => {
   return { type: ActionTypeEnum.SetZoom, payload: isNaN(+zoom) ? 12 : +zoom }
 };
 
-export const setPrimaryMapAction = (map: MapInfo) => {
+export const setPrimaryMapAction = (map: PrimaryMapInfo) => {
   return { type: ActionTypeEnum.SetPrimary, payload: map }
 };
 export const setSecondaryMapAction = (map?: MapInfo) => {
@@ -214,33 +214,48 @@ export const importMapAction = (): AppThunk => {
 export const moveMapToSdCardAction = (path: string): AppThunk => {
   return async dispatch => {    
     dispatch({ type: ActionTypeEnum.ChangeMapStorage });
-    // hack because of NativeModules doesn't allow previous dispatch happen
-     setTimeout(async() => {
       try {
-        await NativeModules.MapsModule.moveMapToSDCard(path)
+        await new Promise((resolve, reject) => {
+          NativeModules.MapsModule.moveMapToSDCard(path, (err: string, data: any) => {
+            if (err) {
+              return reject(err);
+            }
+            return resolve(data);
+          });
+        });
         dispatch({type: ActionTypeEnum.ChangeMapStorageSuccess})
         dispatch(getLocalMapListAction())
       } catch(e) {
-        dispatch({type: ActionTypeEnum.ChangeMapStorageFailure, payload: 'change map storage failure'})
+        const message = _.isString(e) ? e : _.get(e, 'message', 'change map storage failure')
+        dispatch({type: ActionTypeEnum.ChangeMapStorageFailure, payload: message})
       }
-    }, 0) 
   }
 }
 
 export const moveMapToPhoneStorageAction = (path: string): AppThunk => {
   return async dispatch => {    
     dispatch({ type: ActionTypeEnum.ChangeMapStorage });
-    // hack because of NativeModules doesn't allow previous dispatch happen
-     setTimeout(async() => {
       try {
-        await NativeModules.MapsModule.moveMapToPhoneStorage(path)
+        await new Promise((resolve, reject) => {
+          NativeModules.MapsModule.moveMapToPhoneStorage(path, (err: string, data: any) => {
+            if (err) {
+              return reject(err);
+            }
+            return resolve(data);
+          });
+        });
         dispatch({type: ActionTypeEnum.ChangeMapStorageSuccess})
         dispatch(getLocalMapListAction())
       } catch(e) {
-        dispatch({type: ActionTypeEnum.ChangeMapStorageFailure, payload: 'change map storage failure'})
+        const message = _.isString(e) ? e : _.get(e, 'message', 'change map storage failure')
+        dispatch({type: ActionTypeEnum.ChangeMapStorageFailure, payload: message})
       }
-    }, 0) 
   }
+}
+
+export const cancelTransferMapAction = (): AppThunk => (dispatch) => {  
+  dispatch({ type: ActionTypeEnum.CancelChangeMapStorage });
+  NativeModules.MapsModule.cancelMapTransfer()
 }
 
 export const downloadMapByQRAction = ({ url, name }: { url: string, name: string }): AppThunk => {
