@@ -8,7 +8,7 @@ import { selectIsAuthenticated, selectPurchases } from '../reducers/auth'
 import { useTranslation } from "react-i18next";
 import MapModal from "./Modal";
 import { requestPurchase, restorePurchaseAction } from "../actions/purchase-actions";
-import InAppPurchase from "./InAppPurchase";
+import InAppPurchaseManager from "./InAppPurchaseManager";
 
 const mapStateToProps = (state: State) => ({
     isAuthenticated: selectIsAuthenticated(state),
@@ -30,7 +30,7 @@ const Account: FC<Props> = ({ close, showAuth, isAuthenticated, purchases, resto
     const [isPurchaseConnected, setIsPurchaseConnected] = useState(false)
 
     return <>
-        <InAppPurchase setIsPurchaseConnected={setIsPurchaseConnected}/>
+        <InAppPurchaseManager setIsPurchaseConnected={setIsPurchaseConnected}/>
         <MapModal onRequestClose={close} accessibilityLabel={t('Manage Account')}>
             <Text style={styles.title}>{t('Manage Account')}</Text>
             <View style={styles.content}>
