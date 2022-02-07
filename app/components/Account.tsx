@@ -1,18 +1,18 @@
-import React, { FC, useCallback } from "react";
+import React, { FC, useState } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { State } from '../store/types'
 import { View, Text, StyleSheet } from "react-native";
 import { Button } from 'react-native-elements';
 import { purple } from "../constants/color";
-import { selectIsAuthenticated, selectPurchaseConnectionFlag, selectPurchases } from '../reducers/auth'
+import { selectIsAuthenticated, selectPurchases } from '../reducers/auth'
 import { useTranslation } from "react-i18next";
 import MapModal from "./Modal";
 import { requestPurchase, restorePurchaseAction } from "../actions/purchase-actions";
+import InAppPurchase from "./InAppPurchase";
 
 const mapStateToProps = (state: State) => ({
     isAuthenticated: selectIsAuthenticated(state),
     purchases: selectPurchases(state),
-    isPurchaseConnected: selectPurchaseConnectionFlag(state),
 });
 const mapDispatchToProps = {
     restorePurchase: restorePurchaseAction,
@@ -25,26 +25,30 @@ interface AccountProps {
 }
 
 type Props = ConnectedProps<typeof connector> & AccountProps
-const Account: FC<Props> = ({ close, showAuth, isAuthenticated, purchases, restorePurchase, isPurchaseConnected }) => {
+const Account: FC<Props> = ({ close, showAuth, isAuthenticated, purchases, restorePurchase }) => {
     const { t } = useTranslation()
+    const [isPurchaseConnected, setIsPurchaseConnected] = useState(false)
 
-    return <MapModal onRequestClose={close} accessibilityLabel={t('Manage Account')}>
-        <Text style={styles.title}>{t('Manage Account')}</Text>
-        <View style={styles.content}>
-            {purchases && <Text style={styles.subTitle}>{t('Premium version!')}</Text> }
-            <View style={styles.row}>
-                <Button buttonStyle={styles.btn} title={isAuthenticated ? t('Account') : t('Login')} onPress={showAuth} />
-            </View>
-            {!purchases && 
+    return <>
+        <InAppPurchase setIsPurchaseConnected={setIsPurchaseConnected}/>
+        <MapModal onRequestClose={close} accessibilityLabel={t('Manage Account')}>
+            <Text style={styles.title}>{t('Manage Account')}</Text>
+            <View style={styles.content}>
+                {purchases && <Text style={styles.subTitle}>{t('Premium version!')}</Text> }
                 <View style={styles.row}>
-                    <Button buttonStyle={styles.btn} title={t('Purchase')} onPress={requestPurchase} disabled={!isPurchaseConnected} />
+                    <Button buttonStyle={styles.btn} title={isAuthenticated ? t('Account') : t('Login')} onPress={showAuth} />
                 </View>
-            }
-            <View style={styles.lastRow}>
-                <Button buttonStyle={styles.btn} title={t('Restore Purchase')} onPress={restorePurchase} disabled={!isPurchaseConnected} />
+                {!purchases && 
+                    <View style={styles.row}>
+                        <Button buttonStyle={styles.btn} title={t('Purchase')} onPress={requestPurchase} disabled={!isPurchaseConnected} />
+                    </View>
+                }
+                <View style={styles.lastRow}>
+                    <Button buttonStyle={styles.btn} title={t('Restore Purchase')} onPress={restorePurchase} disabled={!isPurchaseConnected} />
+                </View>
             </View>
-        </View>
-    </MapModal>
+        </MapModal>
+    </>
 }
 
 export default connector(Account)
