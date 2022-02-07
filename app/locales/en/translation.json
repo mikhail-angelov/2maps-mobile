@@ -5,5 +5,25 @@
     "Move to SD Card": "Move {{name}} to SD Card",
     "Move to Phone": "Move {{name}} to Phone",
     "File name is not valid:": "File name is not valid: {{name}}",
-    "Map file:": "Map file: {{name}}"
+    "Map file:": "Map file: {{name}}",
+    "helpTitle": "There are 3 ways to load map files:",
+    "firstArticleHelp": {
+        "firstLine": "Use \"Import\" button",
+        "secondLine": "Find map file in \".sqlitedb\" format on site",
+        "thirdLine": "Download this file on your phone",
+        "fourthLine": "Press \"Import\" button on this all and select downloaded file, usually it located in \"Download\" folder"
+    },
+    "secondArticleHelp": {
+        "firstLine": "Scan QR code",
+        "secondLine": "You can find map files in \".sqlitedb\" format on site",
+        "thirdLine": "Press \"Scan QR\" button",
+        "fourthLine": "Use phone camera to scan QR code",
+        "firthLine": "Application will scan QR code and start downloading",
+        "sixthLine": "Once download will be completed, you'll see new map in map list"
+    },
+    "thirdArticleHelp": {
+        "firstLine": "Download map from list",
+        "secondLine": "List of maps to download will be available after authorization",
+        "thirdLine": "Press \"Download\" and wait till new map will be added to map list"
+    }
 }
