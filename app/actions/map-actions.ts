@@ -1,8 +1,8 @@
 import { ActionTypeEnum, AppThunk } from ".";
 import { Position } from 'geojson';
 import { NativeModules } from "react-native";
+import { getLocal, get, post, HOST, HOST_LOCAL, getMapsDirectoryPath } from './api'
 import { MapInfo, PrimaryMapInfo, StorageMemory } from "../store/types";
-import { getLocal, get, post, HOST, HOST_LOCAL } from './api'
 import { selectToken } from '../reducers/auth'
 import { selectDownloadId } from '../reducers/map'
 import { AxiosResponse } from "axios";
@@ -193,12 +193,11 @@ export const importMapAction = (): AppThunk => {
       if(!isFileValid(res.name)){
         throw new Error()
       }
-      const storagePaths = await RNFS.getAllExternalFilesDirs()
-      const primaryStoragePath = storagePaths.find(path => path.includes(RNFS.ExternalStorageDirectoryPath))
-      if(!primaryStoragePath) {
+      const destinationPath = await getMapsDirectoryPath()
+      if(!destinationPath) {
+        dispatch({ type: ActionTypeEnum.ImportMapFailure, payload: 'import map failure, can not find directory path' });
         return
-      }
-      const destinationPath = `${primaryStoragePath}/map/`
+      }      
       const fileName = await findUniqName(destinationPath, res.name)
       await RNFS.copyFile(res.fileCopyUri, destinationPath + fileName)
       dispatch({ type: ActionTypeEnum.ImportMapSuccess });

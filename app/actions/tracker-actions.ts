@@ -1,16 +1,14 @@
 import {ActionTypeEnum, AppThunk} from '.';
 import MapboxGL from '@react-native-mapbox-gl/maps';
-import {State, Track} from '../store/types';
+import {Track} from '../store/types';
 import {
-  selectActiveTrack,
   selectIsTracking,
   selectLocation,
 } from '../reducers/tracker';
-import {selectTracks} from '../reducers/tracker';
 import RNFS from 'react-native-fs';
 import DocumentPicker from 'react-native-document-picker';
 import {createKml, parseKml} from '../utils/kml';
-import {Alert, PermissionsAndroid} from 'react-native';
+import {Alert} from 'react-native';
 import {v4 as uuid} from '@lukeed/uuid';
 import {
   latLngToTileIndex,
@@ -22,8 +20,8 @@ import * as _ from 'lodash';
 import i18next from 'i18next';
 import distance from '@turf/distance';
 import { requestLocationPermissions } from '../utils/permissions';
+import { getTracksDirectoryPath } from './api';
 
-const PATH = `${RNFS.CachesDirectoryPath}/tracks`;
 const TRACKS_EXT = '.track';
 const SVG_EXT = '.svg';
 
@@ -55,23 +53,35 @@ export const addTrackAction = (track: Track) => {
 export const removeTrackAction =
   (trackId: string): AppThunk =>
   async dispatch => {
-    await removeFile(`${PATH}/${trackId}${TRACKS_EXT}`);
-    await removeFile(`${PATH}/${trackId}${SVG_EXT}`);
+    const path = await getTracksDirectoryPath()
+    if (!path) {
+      return
+    }
+    await removeFile(`${path}/${trackId}${TRACKS_EXT}`);
+    await removeFile(`${path}/${trackId}${SVG_EXT}`);
     dispatch({type: ActionTypeEnum.RemoveTrack, payload: trackId});
   };
 const getTrackFromFile = async (trackId: string): Promise<Track> => {
-  const data = await RNFS.readFile(`${PATH}/${trackId}${TRACKS_EXT}`, 'utf8');
+  const path = await getTracksDirectoryPath()
+  if (!path) {
+    throw 'can not find app directory path'
+  }
+  const data = await RNFS.readFile(`${path}/${trackId}${TRACKS_EXT}`, 'utf8');
   return JSON.parse(data);
 };
 const writeTrackToFile = async (activeTrack: Track) => {
+  const path = await getTracksDirectoryPath()
+  if (!path) {
+    return Promise.reject('can not find app directory path')
+  }
   try {
-    await RNFS.readDir(PATH);
+    await RNFS.readDir(path);
   } catch (e) {
     if (_.get(e, 'message') === 'Folder does not exist') {
-      await RNFS.mkdir(PATH);
+      await RNFS.mkdir(path);
     } else {
       const title = i18next.t('Can not save track!');
-      const message = `${i18next.t('Directory unreachable')}: ${PATH}; ${_.get(
+      const message = `${i18next.t('Directory unreachable')}: ${path}; ${_.get(
         e,
         'message',
         '',
@@ -80,7 +90,7 @@ const writeTrackToFile = async (activeTrack: Track) => {
       throw e;
     }
   }
-  const filepath = `${PATH}/${activeTrack.id}`;
+  const filepath = `${path}/${activeTrack.id}`;
   activeTrack.distance = distance(
     activeTrack.track[0],
     activeTrack.track[activeTrack.track.length - 1],
@@ -194,7 +204,11 @@ export const stopTrackingAction = (): AppThunk => {
 
 export const updateTrackListAction = (): AppThunk => async dispatch => {
   try {
-    const rawPathData = await RNFS.readDir(PATH);
+    const path = await getTracksDirectoryPath()
+    if (!path) {
+      return
+    }
+    const rawPathData = await RNFS.readDir(path);
     if (_.isEmpty(rawPathData)) return;
 
     const trackFiles = _.filter(
@@ -212,7 +226,7 @@ export const updateTrackListAction = (): AppThunk => async dispatch => {
         continue;
       }
       track.track = [];
-      const svgPath = `${PATH}/${track.id}${SVG_EXT}`;
+      const svgPath = `${path}/${track.id}${SVG_EXT}`;
       const svgFileStat = await RNFS.stat(svgPath);
       if (svgFileStat.isFile()) {
         track.thumbnail = await RNFS.readFile(svgFileStat.path, 'utf8');
