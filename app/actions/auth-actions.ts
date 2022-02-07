@@ -2,6 +2,7 @@ import { ActionTypeEnum, AppThunk } from ".";
 import { post, HOST } from "./api";
 import { selectToken } from '../reducers/auth'
 import { AuthParams } from '../store/types'
+import { NativeModules } from "react-native";
 
 const AUTH_URL = `${HOST}/auth/m`
 
@@ -166,3 +167,5 @@ export const changePasswordAction = (data: changePassword): AppThunk => {
 };
 
 export const setTheFirstTimeAppStartAction = (value: boolean) => ({type: ActionTypeEnum.TheFirstTimeAppStart, payload: value })
+
+export const checkForTestDevice = async(): Promise<boolean> => NativeModules.MapsModule.isTestDevice()

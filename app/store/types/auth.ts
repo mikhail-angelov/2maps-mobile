@@ -19,6 +19,5 @@ export interface AuthState {
   resetToken: string;
   showAdMob: boolean;
   purchases?: InAppPurchase[];
-  isPurchaseConnection: boolean;
   isItTheFirstTimeAppStarted: boolean;
 }
