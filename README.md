@@ -1,5 +1,6 @@
 # 2Maps mobile maps
-[![Build status](https://build.appcenter.ms/v0.1/apps/e3fb1400-2fe4-45f4-857c-018be8948c92/branches/master/badge)](https://appcenter.ms)
+
+application is deployed to [Google Play](https://play.google.com/store/apps/details?id=com.bconf2maps)
 
 ## Small instruction how to deploy this app to Google Play
 from [https://reactnative.dev/docs/signed-apk-android](https://reactnative.dev/docs/signed-apk-android)
