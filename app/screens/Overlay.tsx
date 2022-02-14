@@ -8,7 +8,7 @@ import { selectMarks, selectEditedMark } from '../reducers/marks'
 import { removeMarkAction, editMarkAction, saveMarkAction, markToFeature } from '../actions/marks-actions'
 import { selectActiveTrack, selectSelectedTrack, selectLocation, selectTracks, selectIsTracking } from '../reducers/tracker'
 import { View, StyleSheet, Text, Alert } from "react-native";
-import {  BottomSheet, ListItem } from 'react-native-elements';
+import { BottomSheet, ListItem } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import styled from 'styled-components/native'
 import EditMark from '../components/EditMark'
@@ -58,7 +58,7 @@ const Buttons = styled(View)`
     bottom:50px;
     left:10px;
 `
-const MenuButton =  ({icon, onPress, color}: {icon: string, onPress:()=>void, color?:string})=>(<Icon.Button name={icon} color={color||"white"} backgroundColor="#00f5"  style={{width:48, height: 48, padding:0, justifyContent:'center'}} iconStyle={{marginLeft:10, width:20}} borderRadius={24} onPress={onPress} />)
+const MenuButton = ({ icon, onPress, color }: { icon: string, onPress: () => void, color?: string }) => (<Icon.Button name={icon} color={color || "white"} backgroundColor="#00f5" style={{ width: 48, height: 48, padding: 0, justifyContent: 'center' }} iconStyle={{ marginLeft: 10, width: 20 }} borderRadius={24} onPress={onPress} />)
 
 const mapStateToProps = (state: State) => ({
     marks: selectMarks(state),
@@ -104,7 +104,7 @@ const getClosestMark = (location: any, marks: Mark[]) => {
     }
     return `${closest.name} ${distance(closest.geometry.coordinates, location, { units: 'kilometers' }).toFixed(2)} km.`
 }
-const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, center, zoom, location, editMark, saveMark, removeMark, tracking, activeTrack, startTracking, stopTracking, addTrack, resetToken, storeResetToken, selectedTrack, selectTrack, isItTheFirstTimeAppStarted, setTheFirstTimeAppStart }) => {
+const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, center, zoom, location, secondaryMap, editMark, saveMark, removeMark, tracking, activeTrack, startTracking, stopTracking, addTrack, resetToken, storeResetToken, selectedTrack, selectTrack, isItTheFirstTimeAppStarted, setTheFirstTimeAppStart }) => {
     const [showMenu, setShowMenu] = useState(false)
     const [showAuth, setShowAuth] = useState(false)
     const [showAccount, setShowAccount] = useState(false)
@@ -137,7 +137,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
     }
     const toCurrentLocation = async () => {
         console.log('-toCurrentLocation-', location)
-        try{
+        try {
             const isGranted = await requestLocationPermissions()
             if (!isGranted) {
                 return Alert.alert(t("Location permission denied"), t("Allow Location Permission otherwise tracking won't work"))
@@ -148,7 +148,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         if (!location) {
             return
         }
-        map?.moveTo([location.coords.longitude, location.coords.latitude], 100)      
+        map?.moveTo([location.coords.longitude, location.coords.latitude], 100)
     }
     const toggleTracking = () => {
         if (tracking) {
@@ -166,20 +166,19 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
     const onHideSelectedTrack = () => {
         selectTrack(undefined)
     }
-    
+
     useEffect(() => {
         if (isItTheFirstTimeAppStarted) {
             setShowSettings(isItTheFirstTimeAppStarted)
             setTheFirstTimeAppStart(false)
         }
-    },[])
+    }, [])
 
     console.log('render overlay', zoom, opacity)
     return (<>
-        <SliderContainer>
+        {!!secondaryMap && <SliderContainer>
             <Slider value={opacity} setValue={onOpacityChange} />
-           
-        </SliderContainer>
+        </SliderContainer>}
         <Buttons>
             {/* <MenuButton name="insights" color="black" backgroundColor="#fff5" onPress={() => this.setState({ showTracks: true })} />
                     <View style={{ height: 40 }} /> */}
@@ -187,7 +186,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
                 <MenuButton icon="visibility-off" onPress={onHideSelectedTrack} />
                 <View style={{ height: 40 }} />
             </>}
-            <MenuButton icon="gps-fixed"  onPress={toCurrentLocation} />
+            <MenuButton icon="gps-fixed" onPress={toCurrentLocation} />
             <View style={{ height: 40 }} />
             <MenuButton icon="track-changes" color={tracking ? "red" : "white"} onPress={toggleTracking} />
             <View style={{ height: 40 }} />
@@ -203,7 +202,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         </BottomSheet>}
         {editedMark && <EditMark
             mark={editedMark}
-            center={[location.coords.longitude,location.coords.latitude]}
+            center={[location.coords.longitude, location.coords.latitude]}
             save={(data) => saveMark({ ...editedMark, ...data })}
             cancel={() => editMark(undefined)}
             remove={() => editedMark.id ? removeMark(editedMark.id) : null}
@@ -211,9 +210,9 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         {showTracks && <Tracks close={() => setShowTracks(false)} />}
         {showMarkers && center && <Markers center={center} select={selectMark} close={() => setShowMarkers(false)} />}
         {showAuth && <Auth close={() => setShowAuth(false)} />}
-        {showSettings && <MapSettings close={() => setShowSettings(false)} showAuth={() => {setShowSettings(false); setShowAuth(true)}} />}
-        {!!resetToken && <ResetPassword close={()=> storeResetToken('')} />}
-        {showAccount && <Account close={() => setShowAccount(false)} showAuth={() => {setShowAccount(false); setShowAuth(true)}} />}
+        {showSettings && <MapSettings close={() => setShowSettings(false)} showAuth={() => { setShowSettings(false); setShowAuth(true) }} />}
+        {!!resetToken && <ResetPassword close={() => storeResetToken('')} />}
+        {showAccount && <Account close={() => setShowAccount(false)} showAuth={() => { setShowAccount(false); setShowAuth(true) }} />}
         {showAbout && <About close={() => setShowAbout(false)} />}
     </>
     );
