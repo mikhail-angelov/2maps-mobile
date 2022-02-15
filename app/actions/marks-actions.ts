@@ -8,6 +8,7 @@ import RNFS from 'react-native-fs'
 import { v4 as uuid } from '@lukeed/uuid';
 import { selectMarks } from '../reducers/marks'
 import { selectToken } from '../reducers/auth'
+import { requestWriteFilePermissions } from '../utils/permissions'
 
 const MARKS_URL = `${HOST}/marks/m`
 
@@ -20,14 +21,14 @@ export const markToFeature = (mark: Mark): Feature<Point> => {
     name: mark.name,
     rate: mark.rate,
     icon: '',
-    timestamp: mark.timestamp|| Date.now()
+    timestamp: mark.timestamp || Date.now()
   };
   return aFeature
 }
 export const featureToMark = (feature: Feature<Point>): Mark => {
   const mark: Mark = {
     geometry: feature.geometry,
-    id: feature.id?String(feature.id): '',
+    id: feature.id ? String(feature.id) : '',
     name: feature.properties?.name || '',
     description: feature.properties?.description_orig || '',
     rate: feature.properties?.rate || 0,
@@ -56,10 +57,10 @@ export const loadMarksAction = (): AppThunk => {
   };
 };
 
-export const editMarkAction = (mark?: Mark) =>({ type: ActionTypeEnum.EditMark, payload: mark });
-export const saveMarkAction = (mark: Mark) =>({ type: ActionTypeEnum.SaveMark, payload: {...mark, timestamp: Date.now(), id: mark.id || `${Date.now()}`} });
-export const removeMarkAction = (id: string)  => ({ type: ActionTypeEnum.RemoveMark, payload: id });
-export const removeMarkCompletelyAction = (id: string)  => ({ type: ActionTypeEnum.RemoveMarkCompletely, payload: id });
+export const editMarkAction = (mark?: Mark) => ({ type: ActionTypeEnum.EditMark, payload: mark });
+export const saveMarkAction = (mark: Mark) => ({ type: ActionTypeEnum.SaveMark, payload: { ...mark, timestamp: Date.now(), id: mark.id || `${Date.now()}` } });
+export const removeMarkAction = (id: string) => ({ type: ActionTypeEnum.RemoveMark, payload: id });
+export const removeMarkCompletelyAction = (id: string) => ({ type: ActionTypeEnum.RemoveMarkCompletely, payload: id });
 
 export const removeAllPoisAction = (): AppThunk => {
   return async (dispatch) => {
@@ -102,6 +103,11 @@ export const exportPoisAction = (): AppThunk => {
     try {
       const data = JSON.stringify(pois)
       url = RNFS.DownloadDirectoryPath + '/poi.json';
+      const granted = await requestWriteFilePermissions()
+      if (!granted) {
+        console.log('no permissions')
+        return
+      }
       console.log('writing to:', url, '\n')
       await RNFS.writeFile(decodeURI(url), data, 'utf8')
       Alert.alert('Markers are saved', `to ${url}`)
@@ -121,11 +127,11 @@ export const syncMarksAction = (): AppThunk => {
   return async (dispatch, getState) => {
     const pois = selectMarks(getState())
     const token = selectToken(getState())
-    try{
+    try {
       const items = pois.map(({ id, name, description, rate, geometry, timestamp, deleted }) => ({ id, name, description, rate, lat: geometry.coordinates[1], lng: geometry.coordinates[0], timestamp, removed: deleted }))
-      const res = await postLarge({url:`${MARKS_URL}/sync`, data: items, token})
+      const res = await postLarge({ url: `${MARKS_URL}/sync`, data: items, token })
       console.log('sync', res.data)
-      
+
       const marks: Mark[] = res.data.map(({ id, name = '', description = '', rate = 0, lat, lng, timestamp }: any) => {
         return { id: id || uuid(), name, description, rate, timestamp, geometry: { type: 'Point', coordinates: [lng, lat] } }
       })

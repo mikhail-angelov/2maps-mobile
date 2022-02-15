@@ -1,26 +1,27 @@
-import {ActionTypeEnum, AppThunk} from '.';
+import { ActionTypeEnum, AppThunk } from '.';
 import MapboxGL from '@react-native-mapbox-gl/maps';
-import {Track} from '../store/types';
+import { Track } from '../store/types';
 import {
   selectIsTracking,
   selectLocation,
 } from '../reducers/tracker';
 import RNFS from 'react-native-fs';
 import DocumentPicker from 'react-native-document-picker';
-import {createKml, parseKml} from '../utils/kml';
-import {Alert} from 'react-native';
-import {v4 as uuid} from '@lukeed/uuid';
+import { createKml, parseKml } from '../utils/kml';
+import { Alert } from 'react-native';
+import { v4 as uuid } from '@lukeed/uuid';
 import {
   latLngToTileIndex,
   convertToBoxSize,
   findMinMaxCoordinates,
 } from '../utils/normalize';
-import {makeSvg} from '../utils/svg';
+import { makeSvg } from '../utils/svg';
 import * as _ from 'lodash';
 import i18next from 'i18next';
 import distance from '@turf/distance';
 import { requestLocationPermissions } from '../utils/permissions';
 import { getTracksDirectoryPath } from './api';
+import { requestWriteFilePermissions } from '../utils/permissions'
 
 const TRACKS_EXT = '.track';
 const SVG_EXT = '.svg';
@@ -28,7 +29,7 @@ const SVG_EXT = '.svg';
 export const compassAngle = (magnetometer: any) => {
   let angle = 0.0;
   if (magnetometer) {
-    const {x, y, z} = magnetometer;
+    const { x, y, z } = magnetometer;
     angle = Math.atan2(x, y);
     angle = angle * (180 / Math.PI);
     // angle = angle + 90
@@ -38,29 +39,29 @@ export const compassAngle = (magnetometer: any) => {
 };
 
 export const setCompassAction = (compass: any) => {
-  return {type: ActionTypeEnum.SetCompass, payload: compass};
+  return { type: ActionTypeEnum.SetCompass, payload: compass };
 };
 export const setLocationAction = (location: MapboxGL.Location) => ({
   type: ActionTypeEnum.SetLocation,
   payload: location,
 });
 export const setTracksAction = (tracks: Track[]) => {
-  return {type: ActionTypeEnum.SetTracks, payload: tracks};
+  return { type: ActionTypeEnum.SetTracks, payload: tracks };
 };
 export const addTrackAction = (track: Track) => {
-  return {type: ActionTypeEnum.AddTrack, payload: track};
+  return { type: ActionTypeEnum.AddTrack, payload: track };
 };
 export const removeTrackAction =
   (trackId: string): AppThunk =>
-  async dispatch => {
-    const path = await getTracksDirectoryPath()
-    if (!path) {
-      return
-    }
-    await removeFile(`${path}/${trackId}${TRACKS_EXT}`);
-    await removeFile(`${path}/${trackId}${SVG_EXT}`);
-    dispatch({type: ActionTypeEnum.RemoveTrack, payload: trackId});
-  };
+    async dispatch => {
+      const path = await getTracksDirectoryPath()
+      if (!path) {
+        return
+      }
+      await removeFile(`${path}/${trackId}${TRACKS_EXT}`);
+      await removeFile(`${path}/${trackId}${SVG_EXT}`);
+      dispatch({ type: ActionTypeEnum.RemoveTrack, payload: trackId });
+    };
 const getTrackFromFile = async (trackId: string): Promise<Track> => {
   const path = await getTracksDirectoryPath()
   if (!path) {
@@ -108,8 +109,8 @@ const writeTrackToFile = async (activeTrack: Track) => {
 export const selectTrackAction = (track: Track | undefined): AppThunk => {
   return async dispatch => {
     if (!track) {
-      dispatch({type: ActionTypeEnum.SetSelectedTrack, payload: track});
-      dispatch({type: ActionTypeEnum.SetSelectedTrackBBox, payload: []});
+      dispatch({ type: ActionTypeEnum.SetSelectedTrack, payload: track });
+      dispatch({ type: ActionTypeEnum.SetSelectedTrackBBox, payload: [] });
       return;
     }
     let trackFromFile;
@@ -120,7 +121,7 @@ export const selectTrackAction = (track: Track | undefined): AppThunk => {
       Alert.alert('Can not read track file');
       return;
     }
-    let {maxX, maxY, minX, minY} = findMinMaxCoordinates(trackFromFile.track);
+    let { maxX, maxY, minX, minY } = findMinMaxCoordinates(trackFromFile.track);
     if (!maxX || !maxY || !minX || !minY) {
       return;
     }
@@ -133,7 +134,7 @@ export const selectTrackAction = (track: Track | undefined): AppThunk => {
     }
     const start = [minX, minY];
     const end = [maxX, maxY];
-    dispatch({type: ActionTypeEnum.SetSelectedTrack, payload: trackFromFile});
+    dispatch({ type: ActionTypeEnum.SetSelectedTrack, payload: trackFromFile });
     dispatch({
       type: ActionTypeEnum.SetSelectedTrackBBox,
       payload: [start, end],
@@ -145,8 +146,8 @@ export const startTrackingAction = (): AppThunk => {
   return async (dispatch, getState) => {
     try {
       const isGranted = await requestLocationPermissions()
-      if (!isGranted) {        
-        return Alert.alert(i18next.t("Location permission denied"), i18next.t("Allow Location Permission otherwise tracking won't work"))        
+      if (!isGranted) {
+        return Alert.alert(i18next.t("Location permission denied"), i18next.t("Allow Location Permission otherwise tracking won't work"))
       }
       const location = selectLocation(getState());
       const startPoint = [location.coords.longitude, location.coords.latitude];
@@ -157,7 +158,7 @@ export const startTrackingAction = (): AppThunk => {
         name: '',
         track: [startPoint, startPoint],
       };
-      dispatch({type: ActionTypeEnum.StartTracking, payload: track});
+      dispatch({ type: ActionTypeEnum.StartTracking, payload: track });
     } catch (e) {
       console.log(e);
       const title = _.get(e, 'title', i18next.t('Permissions error!'))
@@ -165,7 +166,7 @@ export const startTrackingAction = (): AppThunk => {
       Alert.alert(title, message)
     }
   };
-  
+
 };
 
 export const addPointAction = (location: MapboxGL.Location) => ({
@@ -176,7 +177,7 @@ export const addPointAction = (location: MapboxGL.Location) => ({
 const renderTrackIcon = (activeTrack: Track) => {
   if (!activeTrack || _.isEmpty(activeTrack.track)) return;
   const coordinatesXY = activeTrack.track.map(point =>
-    latLngToTileIndex({lng: point[0], lat: point[1], zoom: 100}),
+    latLngToTileIndex({ lng: point[0], lat: point[1], zoom: 100 }),
   );
   const boxX = 50;
   const boxY = 50;
@@ -198,7 +199,7 @@ export const stopTrackingAction = (): AppThunk => {
       }
     }
 
-    dispatch({type: ActionTypeEnum.EndTracking});
+    dispatch({ type: ActionTypeEnum.EndTracking });
   };
 };
 
@@ -233,7 +234,7 @@ export const updateTrackListAction = (): AppThunk => async dispatch => {
       }
       tracks.push(track);
     }
-    dispatch({type: ActionTypeEnum.SetTracks, payload: tracks});
+    dispatch({ type: ActionTypeEnum.SetTracks, payload: tracks });
   } catch (e) {
     console.log('Update tracks error', e);
   }
@@ -250,6 +251,11 @@ export const exportTrack = async (trackId: string) => {
     const exportedTrack = await getTrackFromFile(trackId);
     if (!exportedTrack) {
       throw 'can not find track by id';
+    }
+    const granted = await requestWriteFilePermissions()
+    if (!granted) {
+      console.log('no permissions')
+      return
     }
     const compiledKml = createKml(exportedTrack);
     url = RNFS.DownloadDirectoryPath + `/${compiledKml.name}.kml`;
@@ -273,8 +279,8 @@ export const restartTrackingAction = (): AppThunk => {
   return async (dispatch, getState) => {
     const tracking = selectIsTracking(getState());
     if (tracking) {
-      dispatch({type: ActionTypeEnum.PauseTracking});
-      setTimeout(() => dispatch({type: ActionTypeEnum.ResumeTracking}), 10000);
+      dispatch({ type: ActionTypeEnum.PauseTracking });
+      setTimeout(() => dispatch({ type: ActionTypeEnum.ResumeTracking }), 10000);
     }
   };
 };
