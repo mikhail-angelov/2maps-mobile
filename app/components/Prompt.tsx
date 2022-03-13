@@ -232,6 +232,7 @@ const styles = StyleSheet.create({
         borderColor: 'rgba(26,113,160,1)',
         backgroundColor: 'white',
         padding: 7,
+        color: 'black',
     },
     //Options
     cancelOptionButton: {

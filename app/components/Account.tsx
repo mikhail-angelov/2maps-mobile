@@ -1,23 +1,18 @@
-import React, { FC, useState } from "react";
+import React, { FC } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { State } from '../store/types'
 import { View, Text, StyleSheet } from "react-native";
 import { Button } from 'react-native-elements';
 import { purple } from "../constants/color";
-import { selectIsAuthenticated, selectPurchases } from '../reducers/auth'
+import { selectIsAuthenticated } from '../reducers/auth'
 import { useTranslation } from "react-i18next";
 import MapModal from "./Modal";
-import { requestPurchase, restorePurchaseAction } from "../actions/purchase-actions";
-import InAppPurchaseManager from "./InAppPurchaseManager";
 
 const mapStateToProps = (state: State) => ({
     isAuthenticated: selectIsAuthenticated(state),
-    purchases: selectPurchases(state),
 });
-const mapDispatchToProps = {
-    restorePurchase: restorePurchaseAction,
-};
-const connector = connect(mapStateToProps, mapDispatchToProps)
+
+const connector = connect(mapStateToProps, null)
 
 interface AccountProps {
     close: () => void;
@@ -25,26 +20,15 @@ interface AccountProps {
 }
 
 type Props = ConnectedProps<typeof connector> & AccountProps
-const Account: FC<Props> = ({ close, showAuth, isAuthenticated, purchases, restorePurchase }) => {
+const Account: FC<Props> = ({ close, showAuth, isAuthenticated }) => {
     const { t } = useTranslation()
-    const [isPurchaseConnected, setIsPurchaseConnected] = useState(false)
 
     return <>
-        <InAppPurchaseManager setIsPurchaseConnected={setIsPurchaseConnected}/>
         <MapModal onRequestClose={close} accessibilityLabel={t('Manage Account')}>
             <Text style={styles.title}>{t('Manage Account')}</Text>
             <View style={styles.content}>
-                {purchases && <Text style={styles.subTitle}>{t('Premium version!')}</Text> }
                 <View style={styles.row}>
                     <Button buttonStyle={styles.btn} title={isAuthenticated ? t('Account') : t('Login')} onPress={showAuth} />
-                </View>
-                {!purchases && 
-                    <View style={styles.row}>
-                        <Button buttonStyle={styles.btn} title={t('Purchase')} onPress={requestPurchase} disabled={!isPurchaseConnected} />
-                    </View>
-                }
-                <View style={styles.lastRow}>
-                    <Button buttonStyle={styles.btn} title={t('Restore Purchase')} onPress={restorePurchase} disabled={!isPurchaseConnected} />
                 </View>
             </View>
         </MapModal>

@@ -7,6 +7,7 @@ import tracker from "./tracker";
 import map from "./map";
 import wiki from "./wiki";
 import auth from "./auth";
+import ui from "./ui";
 
 const marksPersistConfig = {
   key: 'marks',
@@ -38,7 +39,8 @@ const rootReducer = combineReducers({
   map: persistReducer(mapPersistConfig, map),
   wiki: persistReducer(wikiPersistConfig, wiki),
   auth: persistReducer(authPersistConfig, auth),
-  network
+  network,
+  ui,
 } as any);
 
 export default rootReducer;

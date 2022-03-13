@@ -1,4 +1,3 @@
-import {InAppPurchase, SubscriptionPurchase} from 'react-native-iap';
 export interface User {
   id: string;
   name: string;
@@ -18,6 +17,5 @@ export interface AuthState {
   user?: any;
   resetToken: string;
   showAdMob: boolean;
-  purchases?: InAppPurchase[];
   isItTheFirstTimeAppStarted: boolean;
 }

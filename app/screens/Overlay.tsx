@@ -3,11 +3,11 @@ import MapboxGL from "@react-native-mapbox-gl/maps";
 import { connect, ConnectedProps } from "react-redux";
 import { minBy } from 'lodash'
 import distance from '@turf/distance';
-import { State, Mark } from '../store/types'
+import { State, Mark, ModalActionType } from '../store/types'
 import { selectMarks, selectEditedMark } from '../reducers/marks'
 import { removeMarkAction, editMarkAction, saveMarkAction, markToFeature } from '../actions/marks-actions'
 import { selectActiveTrack, selectSelectedTrack, selectLocation, selectTracks, selectIsTracking } from '../reducers/tracker'
-import { View, StyleSheet, Text, Alert } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 import { BottomSheet, ListItem } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import styled from 'styled-components/native'
@@ -24,6 +24,7 @@ import { selectWikiCollection } from "../reducers/wiki";
 import { selectIsItTheFirstTimeAppStarted, selectResetToken } from "../reducers/auth";
 import { setCenterAction, setOpacityAction, setZoomAction } from "../actions/map-actions";
 import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecondaryMap } from '../reducers/map'
+import { showModalAction} from '../actions/ui-actions'
 import ResetPassword from "../components/ResetPassword";
 import { useTranslation } from "react-i18next";
 import Account from "../components/Account";
@@ -93,6 +94,7 @@ const mapDispatchToProps = {
     saveMark: saveMarkAction,
     storeResetToken: storeResetTokenAction,
     setTheFirstTimeAppStart: setTheFirstTimeAppStartAction,
+    showModal: showModalAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { map?: MapboxGL.Camera }
@@ -104,7 +106,9 @@ const getClosestMark = (location: any, marks: Mark[]) => {
     }
     return `${closest.name} ${distance(closest.geometry.coordinates, location, { units: 'kilometers' }).toFixed(2)} km.`
 }
-const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, center, zoom, location, secondaryMap, editMark, saveMark, removeMark, tracking, activeTrack, startTracking, stopTracking, addTrack, resetToken, storeResetToken, selectedTrack, selectTrack, isItTheFirstTimeAppStarted, setTheFirstTimeAppStart }) => {
+const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, center, zoom, location, secondaryMap, 
+    editMark, saveMark, removeMark, tracking, activeTrack, startTracking, stopTracking, showModal, resetToken,
+    storeResetToken, selectedTrack, selectTrack, isItTheFirstTimeAppStarted, setTheFirstTimeAppStart }) => {
     const [showMenu, setShowMenu] = useState(false)
     const [showAuth, setShowAuth] = useState(false)
     const [showAccount, setShowAccount] = useState(false)
@@ -140,10 +144,14 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         try {
             const isGranted = await requestLocationPermissions()
             if (!isGranted) {
-                return Alert.alert(t("Location permission denied"), t("Allow Location Permission otherwise tracking won't work"))
+                return showModal({title:t("Location permission denied"), text:t("Allow Location Permission otherwise tracking won't work"), actions:[
+                    {text: t('Ok'), type: ModalActionType.cancel},
+                ]})
             }
         } catch (e) {
-            return Alert.alert(t('Permissions error!'), t('Check location permissions error'))
+            return showModal({title:t('Permissions error!'), text:t('Check location permissions error'), actions:[
+                {text: t('Ok'), type: ModalActionType.cancel},
+            ]})
         }
         if (!location) {
             return
@@ -206,6 +214,7 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
             save={(data) => saveMark({ ...editedMark, ...data })}
             cancel={() => editMark(undefined)}
             remove={() => editedMark.id ? removeMark(editedMark.id) : null}
+            showModal={showModal}
         />}
         {showTracks && <Tracks close={() => setShowTracks(false)} />}
         {showMarkers && center && <Markers center={center} select={selectMark} close={() => setShowMarkers(false)} />}

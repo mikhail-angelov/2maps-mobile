@@ -92,4 +92,7 @@ export enum ActionTypeEnum {
   WikiRequest = 'wiki/REQUEST',
   WikiSuccess = 'wiki/REQUEST_SUCCESS',
   WikiFailure = 'wiki/REQUEST_FAILURE',
+  //ui
+  UIAddModal = 'ui/ADD_MODAL',
+  UIRemoveModal = 'ui/REMOVE_MODAL',
 }

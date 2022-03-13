@@ -2,7 +2,7 @@ import React, { FC, useState, useCallback } from "react";
 import { View, Linking, TextInput, Text, Alert, StyleSheet, Pressable } from "react-native";
 import { Button } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { Mark } from '../store/types'
+import { Mark, ModalActionType, ModalParams } from '../store/types'
 import MapModal from './Modal'
 import { AirbnbRating } from 'react-native-elements';
 import { purple } from "../constants/color";
@@ -16,16 +16,16 @@ interface Props {
     save: (data: { name: string, description: string, rate: number }) => void;
     remove?: (id: string) => void;
     cancel: () => void;
+    showModal: (params: ModalParams)=>void;
 }
 
-const EditMark: FC<Props> = ({ mark,center, save, cancel, remove }) => {
+const EditMark: FC<Props> = ({ mark,center, save, cancel, remove, showModal }) => {
     const [name, setName] = useState<string>(mark?.name || '')
     const [description, setDescription] = useState<string>(mark?.description || '')
     const [rate, setRate] = useState<number>(mark?.rate || 0)
     const [isEdit, setIsEdit] = useState(!mark.id)
     const { t } = useTranslation();
 
-    console.log('ed', description)
     const openLink = useCallback(async () => {
         const { coordinates } = mark.geometry
         const url = `http://osmand.net/go?lat=${coordinates[1]}&lon=${coordinates[0]}&z=16&name=${mark?.name || ''}`
@@ -34,7 +34,9 @@ const EditMark: FC<Props> = ({ mark,center, save, cancel, remove }) => {
         if (supported) {
             await Linking.openURL(url);
         } else {
-            Alert.alert(`${t('Don\'t know how to open this URL')}: ${url}`);
+            showModal({title:'', text:`${t('Don\'t know how to open this URL')}: ${url}`, actions:[
+                {text: t('Ok'), type: ModalActionType.cancel},
+            ]})
         }
     }, [mark]);
 
@@ -42,14 +44,10 @@ const EditMark: FC<Props> = ({ mark,center, save, cancel, remove }) => {
         if (!remove) {
             return
         }
-        Alert.alert(
-            t('Warning!'),
-            t('Are you sure to remove marker?', {name: name || ''}),
-            [
-                { text: t('No'), style: "cancel" },
-                { text: t('Yes'), onPress: () => remove(mark.id?.toString() || '') }
-            ]
-        );
+        showModal({title:t('Warning!'), text:t('Are you sure to remove marker?', {name: name || ''}), actions:[
+            {text: t('No'), type: ModalActionType.cancel},
+            {text: t('Yes'), type: ModalActionType.default, handler: () => remove(mark.id?.toString() || '')},
+        ]})
     }
     const onCloseEdit = () => {
         setName(mark?.name || '');
@@ -184,6 +182,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         minWidth: '100%',
         maxHeight: 90,
+        color: 'black',
     },
 });
 

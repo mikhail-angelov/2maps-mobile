@@ -84,7 +84,7 @@
     "Location permission denied": "Разрешите доступ к местоположению в настройках Android",
     "Scan map QR code": "Сканируйте QR код карты в формате .sqlitedb",
     "Flip": "Сменить камеру",
-    "Scan QR": "Сканировать QR",
+    "Scan QR": "Скан QR",
     "File name is not valid:": "Не правильное имя файла: {{name}}",
     "You have to try with \".sqlitedb\" files": "Попробуйте сканировать файлы \".sqlitedb\"",
     "Map file:": "Файл карты: {{name}}",

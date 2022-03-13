@@ -249,6 +249,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'grey',
         marginBottom: 10,
+        color: 'black',
         width: '100%',
     },
     passwordWrapper: {

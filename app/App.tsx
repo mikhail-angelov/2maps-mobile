@@ -3,9 +3,10 @@ import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 import { StatusBar, Platform } from 'react-native';
 import { ReduxNetworkProvider } from 'react-native-offline'
-import SplashScreen from  "react-native-splash-screen";
+import SplashScreen from "react-native-splash-screen";
 import createStore from './store'
 import Tracker from './Tracker'
+import ModalManager from './ModalManager'
 import Main from './screens/Main'
 
 const { store, persistor } = createStore()
@@ -23,8 +24,9 @@ const App = () => {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <ReduxNetworkProvider>
-          <Tracker/>
+          <Tracker />
           <Main />
+          <ModalManager />
         </ReduxNetworkProvider>
       </PersistGate>
     </Provider>

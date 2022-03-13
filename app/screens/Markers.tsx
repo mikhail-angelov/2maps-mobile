@@ -1,5 +1,5 @@
 import React, { FC, useState } from "react";
-import { View, Text, TextInput, StyleSheet, Alert, Modal, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, StyleSheet, Modal, TouchableOpacity } from "react-native";
 import { connect, ConnectedProps } from "react-redux";
 import { Button, ListItem } from 'react-native-elements';
 import { SwipeListView } from 'react-native-swipe-list-view';
@@ -13,12 +13,12 @@ import {
 } from 'react-native-popup-menu';
 import { Position } from '@turf/helpers';
 import distance from '@turf/distance';
-import { State, Mark } from '../store/types'
+import { State, Mark, ModalActionType } from '../store/types'
 import { selectIsAuthenticated } from '../reducers/auth'
 import { selectMarks } from '../reducers/marks'
 import { importPoisAction, exportPoisAction, removeAllPoisAction, syncMarksAction, removeMarkAction, editMarkAction } from '../actions/marks-actions'
+import { showModalAction } from '../actions/ui-actions'
 import { useTranslation } from "react-i18next";
-import Advertisement from "../components/AdMob";
 import { renderColor } from "../utils/formats";
 import { emptyListText, purple, red } from "../constants/color";
 import * as _ from 'lodash';
@@ -46,11 +46,12 @@ const mapDispatchToProps = {
     syncMarks: syncMarksAction,
     removeMark: removeMarkAction,
     editMark: editMarkAction,
+    showModal: showModalAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & OwnProps
 
-const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, importPois, exportPois, removeAllPois, syncMarks, removeMark, editMark }) => {
+const Markers: FC<Props> = ({ markers, center, isAuthenticated, showModal, close, select, importPois, exportPois, removeAllPois, syncMarks, removeMark, editMark }) => {
     const { t } = useTranslation();
     const [isFilterMarks, setIsFilterMarks] = useState<boolean>(false);
     const [filterText, setFilterText] = useState<string>('');
@@ -65,26 +66,18 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
     })).value();
 
     const onRemoveAll = () => {
-        Alert.alert(
-            t('Warning!'),
-            t('Are you sure to remove all your markers?'),
-            [
-                { text: t('No'), style: "cancel" },
-                { text: t('Yes'), onPress: removeAllPois }
-            ]
-        );
+        showModal({title:t('Warning!'), text:t('Are you sure to remove all your markers?'), actions:[
+            {text: t('No'), type: ModalActionType.cancel},
+            {text: t('Yes'), type: ModalActionType.default, handler: removeAllPois},
+        ]})
     }
 
     const onRemoveMark = (id?: string) => {
         if (!id) return
-        Alert.alert(
-            t('Warning!'),
-            t('Are you sure to remove the marker?'),
-            [
-                { text: t('No'), style: "cancel" },
-                { text: t('Yes'), onPress: () => removeMark(id) }
-            ]
-        );
+        showModal({title:t('Warning!'), text:t('Are you sure to remove the marker?'), actions:[
+            {text: t('No'), type: ModalActionType.cancel},
+            {text: t('Yes'), type: ModalActionType.default, handler: () => removeMark(id)},
+        ]})
     }
 
     const onFilterMarks = (text?: string) => {
@@ -209,7 +202,6 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, close, select, i
                 </View>
                 }
             </View>
-            <Advertisement />
         </MenuProvider>
     </Modal>
 }

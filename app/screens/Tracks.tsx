@@ -13,12 +13,12 @@ import {
     MenuOption,
     MenuTrigger,
 } from 'react-native-popup-menu';
-import { State } from '../store/types'
+import { State, ModalActionType } from '../store/types'
 import { selectSelectedTrack, selectTracks } from '../reducers/tracker'
-import { selectTrackAction, exportTrack, removeTrackAction, importTrackAction, updateTrackListAction, clearTrackListAction } from "../actions/tracker-actions";
+import { selectTrackAction, exportTrackAction, removeTrackAction, importTrackAction, updateTrackListAction, clearTrackListAction } from "../actions/tracker-actions";
+import { showModalAction} from "../actions/ui-actions";
 import { SvgXml } from "react-native-svg";
 import { useTranslation } from "react-i18next";
-import Advertisement from "../components/AdMob";
 import { emptyListText, green, purple, red } from "../constants/color";
 import * as _ from 'lodash';
 
@@ -47,11 +47,13 @@ const mapDispatchToProps = {
     importTrack: importTrackAction,
     updateTrackList: updateTrackListAction,
     clearTrackList: clearTrackListAction,
+    exportTrack: exportTrackAction,
+    showModal: showModalAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
 
-const Tracks: FC<Props> = ({ tracks, selectedTrack, selectTrack, close, removeTrack, importTrack, updateTrackList, clearTrackList }) => {
+const Tracks: FC<Props> = ({ tracks, selectedTrack, selectTrack, close, removeTrack, importTrack, updateTrackList, clearTrackList, exportTrack, showModal }) => {
     const { t } = useTranslation();
 
     const onSelectTrack = (id: string) => {
@@ -66,14 +68,10 @@ const Tracks: FC<Props> = ({ tracks, selectedTrack, selectTrack, close, removeTr
     }
 
     const onRemoveTrack = (itemId: string) => {
-        Alert.alert(
-            t('Warning!'),
-            t('Are you sure to remove the track?'),
-            [
-                { text: t('No'), style: "cancel" },
-                { text: t('Yes'), onPress: () => { removeTrack(itemId); selectTrack(undefined) } }
-            ]
-        );
+        showModal({title:t('Warning!'), text:t('Are you sure to remove the track?'), actions:[
+            {text: t('No'), type: ModalActionType.cancel},
+            {text: t('Yes'), type: ModalActionType.default, handler: () => { removeTrack(itemId); selectTrack(undefined) } },
+        ]})
     }
 
     const list: Item[] = orderBy(tracks, 'start', 'desc').map(({ id, name, start, end, distance, thumbnail }) => {
@@ -168,7 +166,6 @@ const Tracks: FC<Props> = ({ tracks, selectedTrack, selectTrack, close, removeTr
                 }
                 
             </View>
-            <Advertisement />
         </MenuProvider>
     </Modal>
 }

@@ -1,7 +1,6 @@
 import { ActionTypeEnum, AppThunk } from ".";
-import { Alert } from "react-native";
 import { postLarge, HOST } from "./api";
-import { Mark, POI } from "../store/types";
+import { Mark, POI, ModalActionType } from "../store/types";
 import { feature, Feature, Point } from '@turf/helpers';
 import DocumentPicker from 'react-native-document-picker';
 import RNFS from 'react-native-fs'
@@ -9,6 +8,7 @@ import { v4 as uuid } from '@lukeed/uuid';
 import { selectMarks } from '../reducers/marks'
 import { selectToken } from '../reducers/auth'
 import { requestWriteFilePermissions } from '../utils/permissions'
+import { showModalAction } from './ui-actions'
 
 const MARKS_URL = `${HOST}/marks/m`
 
@@ -110,10 +110,23 @@ export const exportPoisAction = (): AppThunk => {
       }
       console.log('writing to:', url, '\n')
       await RNFS.writeFile(decodeURI(url), data, 'utf8')
-      Alert.alert('Markers are saved', `to ${url}`)
+      dispatch(showModalAction({
+        title: 'Markers are saved',
+        text: `to ${url}`,
+        actions: [
+          { text: 'Ok', type: ModalActionType.cancel },
+        ]
+      }))
+
     } catch (err: any) {
       console.log('Error write to:', url, '\n', err)
-      Alert.alert('Oops', `do not manage to save it ${url}`)
+      dispatch(showModalAction({
+        title: 'Oops',
+        text: `do not manage to save it ${url}`,
+        actions: [
+          { text: 'Ok', type: ModalActionType.cancel },
+        ]
+      }))
       if (DocumentPicker.isCancel(err)) {
         // User cancelled the picker, exit any dialogs or menus and move on
       } else {
@@ -137,11 +150,22 @@ export const syncMarksAction = (): AppThunk => {
       })
       dispatch({ type: ActionTypeEnum.ImportPois, payload: marks });
 
-
-      Alert.alert('Markers are synced', `Yo!`)
+      dispatch(showModalAction({
+        title: 'Info',
+        text: 'Markers are synced',
+        actions: [
+          { text: 'Ok', type: ModalActionType.cancel },
+        ]
+      }))
     } catch (err) {
       console.log('Error write to:', err)
-      Alert.alert('Oops', `do not manage to sync`)
+      dispatch(showModalAction({
+        title: 'Oops',
+        text: 'do not manage to sync',
+        actions: [
+          { text: 'Ok', type: ModalActionType.cancel },
+        ]
+      }))
     }
   };
 };

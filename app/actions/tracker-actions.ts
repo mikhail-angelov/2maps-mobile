@@ -1,6 +1,6 @@
 import { ActionTypeEnum, AppThunk } from '.';
 import MapboxGL from '@react-native-mapbox-gl/maps';
-import { Track } from '../store/types';
+import { Track, ModalActionType, State } from '../store/types';
 import {
   selectIsTracking,
   selectLocation,
@@ -22,6 +22,8 @@ import distance from '@turf/distance';
 import { requestLocationPermissions } from '../utils/permissions';
 import { getTracksDirectoryPath } from './api';
 import { requestWriteFilePermissions } from '../utils/permissions'
+import { showModalAction } from './ui-actions'
+import { ThunkDispatch } from 'redux-thunk';
 
 const TRACKS_EXT = '.track';
 const SVG_EXT = '.svg';
@@ -70,7 +72,7 @@ const getTrackFromFile = async (trackId: string): Promise<Track> => {
   const data = await RNFS.readFile(`${path}/${trackId}${TRACKS_EXT}`, 'utf8');
   return JSON.parse(data);
 };
-const writeTrackToFile = async (activeTrack: Track) => {
+const writeTrackToFile = async (activeTrack: Track, dispatch: ThunkDispatch<State, unknown, any>) => {
   const path = await getTracksDirectoryPath()
   if (!path) {
     return Promise.reject('can not find app directory path')
@@ -82,12 +84,17 @@ const writeTrackToFile = async (activeTrack: Track) => {
       await RNFS.mkdir(path);
     } else {
       const title = i18next.t('Can not save track!');
-      const message = `${i18next.t('Directory unreachable')}: ${path}; ${_.get(
+      const text = `${i18next.t('Directory unreachable')}: ${path}; ${_.get(
         e,
         'message',
         '',
       )}`;
-      Alert.alert(title, message);
+      dispatch(showModalAction({
+        title,text,
+        actions: [
+          { text: 'Ok', type: ModalActionType.cancel },
+        ]
+      }));
       throw e;
     }
   }
@@ -118,7 +125,13 @@ export const selectTrackAction = (track: Track | undefined): AppThunk => {
       trackFromFile = await getTrackFromFile(track.id);
     } catch (e) {
       console.log(e);
-      Alert.alert('Can not read track file');
+      dispatch(showModalAction({
+        title: 'Oops',
+        text: 'Can not read track file',
+        actions: [
+          { text: 'Ok', type: ModalActionType.cancel },
+        ]
+      }))
       return;
     }
     let { maxX, maxY, minX, minY } = findMinMaxCoordinates(trackFromFile.track);
@@ -147,7 +160,13 @@ export const startTrackingAction = (): AppThunk => {
     try {
       const isGranted = await requestLocationPermissions()
       if (!isGranted) {
-        return Alert.alert(i18next.t("Location permission denied"), i18next.t("Allow Location Permission otherwise tracking won't work"))
+        return dispatch(showModalAction({
+          title: i18next.t("Location permission denied"),
+          text: i18next.t("Allow Location Permission otherwise tracking won't work"),
+          actions: [
+            { text: 'Ok', type: ModalActionType.cancel },
+          ]
+        }))
       }
       const location = selectLocation(getState());
       const startPoint = [location.coords.longitude, location.coords.latitude];
@@ -162,8 +181,13 @@ export const startTrackingAction = (): AppThunk => {
     } catch (e) {
       console.log(e);
       const title = _.get(e, 'title', i18next.t('Permissions error!'))
-      const message = _.get(e, 'message', i18next.t("Allow Location Permission otherwise tracking won't work"))
-      Alert.alert(title, message)
+      const text = _.get(e, 'message', i18next.t("Allow Location Permission otherwise tracking won't work"))
+      dispatch(showModalAction({
+        title, text,
+        actions: [
+          { text: 'Ok', type: ModalActionType.cancel },
+        ]
+      }))
     }
   };
 
@@ -193,7 +217,7 @@ export const stopTrackingAction = (): AppThunk => {
     if (activeTrack) {
       try {
         activeTrack.end = Date.now();
-        await writeTrackToFile(activeTrack);
+        await writeTrackToFile(activeTrack, dispatch);
       } catch (e) {
         console.log(e);
       }
@@ -245,7 +269,7 @@ export const clearTrackListAction = () => ({
   payload: [],
 });
 
-export const exportTrack = async (trackId: string) => {
+export const exportTrackAction = (trackId: string): AppThunk => async dispatch => {
   let url = '';
   try {
     const exportedTrack = await getTrackFromFile(trackId);
@@ -261,13 +285,22 @@ export const exportTrack = async (trackId: string) => {
     url = RNFS.DownloadDirectoryPath + `/${compiledKml.name}.kml`;
     console.log('writing kml to:', url, '\n');
     await RNFS.writeFile(decodeURI(url), compiledKml.data, 'utf8');
-    Alert.alert(i18next.t('Track is saved'), `${i18next.t('to')} ${url}`);
+    dispatch(showModalAction({
+      title: i18next.t('Track is saved'),
+      text: `${i18next.t('to')} ${url}`,
+      actions: [
+        { text: 'Ok', type: ModalActionType.cancel },
+      ]
+    }));
   } catch (err: any) {
     console.log('Error write to:', url, '\n', err);
-    Alert.alert(
-      i18next.t('Oops'),
-      `${i18next.t('do not manage to save it')} ${url}`,
-    );
+    dispatch(showModalAction({
+      title: i18next.t('Oops'),
+      text: `${i18next.t('do not manage to save it')} ${url}`,
+      actions: [
+        { text: 'Ok', type: ModalActionType.cancel },
+      ]
+    }));
     if (DocumentPicker.isCancel(err)) {
       // User cancelled the picker, exit any dialogs or menus and move on
     } else {
@@ -300,13 +333,13 @@ export const importTrackAction = (): AppThunk => {
         name: trackFromKml.name,
         track: trackFromKml.coordinates,
       };
-      await writeTrackToFile(newTrack);
+      await writeTrackToFile(newTrack, dispatch);
       dispatch(updateTrackListAction());
     } catch (err: any) {
       if (DocumentPicker.isCancel(err)) {
         // User cancelled the picker, exit any dialogs or menus and move on
       } else {
-        throw err;
+        //ignore
       }
     }
   };

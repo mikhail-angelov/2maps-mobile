@@ -1,14 +1,15 @@
 import React, { FC, useEffect, useState } from "react";
-import { View, Text, Modal, StyleSheet, FlatList, Alert, Linking, ScrollView, SafeAreaView } from "react-native";
+import { View, Text, Modal, StyleSheet, FlatList, Linking, ScrollView, SafeAreaView } from "react-native";
 import { Button } from "react-native-elements";
 import { Picker } from "@react-native-picker/picker";
 import ProgressBar from '../components/ProgressBar';
 import { connect, ConnectedProps } from "react-redux";
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { State, MapInfo, Storage, PrimaryMapInfo } from '../store/types'
+import { State, MapInfo, Storage, PrimaryMapInfo, ModalActionType } from '../store/types'
 import { getLocalMapListAction, setPrimaryMapAction, setSecondaryMapAction, loadMapListAction, downloadMapAction, downloadMapByQRAction, removeLocalMapAction, cancelDownloadMapAction, getStorageMemoryInfo, importMapAction, moveMapToSdCardAction, moveMapToPhoneStorageAction, isFileValid, cancelTransferMapAction } from '../actions/map-actions'
 import { selectPrimaryMap, selectSecondaryMap, selectMapList, selectMapIsLoading, onLineMapList, selectAvailableMapList, selectMapError, selectDownloadProgress, selectMapIsDownLoading, selectMapIsRelocating, selectRelocateProgress } from '../reducers/map'
 import { selectIsAuthenticated } from '../reducers/auth'
+import { showModalAction } from '../actions/ui-actions'
 import { ItemValue } from "@react-native-picker/picker/typings/Picker";
 import Spinner from "../components/Spinner";
 import { useTranslation } from "react-i18next";
@@ -76,8 +77,6 @@ const Help: FC = () => {
         </SafeAreaView>
     )
 }
-    
-
 
 const mapStateToProps = (state: State) => ({
     primaryMap: selectPrimaryMap(state),
@@ -105,6 +104,7 @@ const mapDispatchToProps = {
     moveMapToPhoneStorage: moveMapToPhoneStorageAction,
     downloadMapByQR: downloadMapByQRAction,
     cancelTransferMap: cancelTransferMapAction,
+    showModal: showModalAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & {
@@ -113,7 +113,8 @@ type Props = ConnectedProps<typeof connector> & {
 }
 
 
-const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoading, list, availableMapList, isAuthenticated, error, progress, isRelocating, progressForRelocate, cancelDownloadMap, close, getLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap, showAuth, importMap, moveMapToSdCard, moveMapToPhoneStorage, downloadMapByQR, cancelTransferMap }) => {
+const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoading, list, availableMapList, isAuthenticated, error, progress, isRelocating, progressForRelocate,
+    cancelDownloadMap, close, getLocalMapList, setPrimaryMap, setSecondaryMap, loadMapList, downloadMap, removeLocalMap, showAuth, importMap, moveMapToSdCard, moveMapToPhoneStorage, downloadMapByQR, cancelTransferMap, showModal }) => {
     const { t } = useTranslation()
     const [availableInternalMemory, setAvailableInternalMemory] = useState("")
     const [totalInternalMemory, setTotalInternalMemory] = useState("")
@@ -126,7 +127,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
 
     useEffect(() => {
         getLocalMapList()
-        if(isAuthenticated) {
+        if (isAuthenticated) {
             loadMapList()
         }
     }, [])
@@ -136,7 +137,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
             .then((response) => {
                 setAvailableInternalMemory(response.internalFree)
                 setTotalInternalMemory(response.internalTotal)
-                if(response.sdFree && response.sdTotal) {
+                if (response.sdFree && response.sdTotal) {
                     setAvailableExternalMemory(response.sdFree)
                     setTotalExternalMemory(response.sdTotal)
                 } else {
@@ -146,7 +147,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
             .catch(() => {
                 setIsMemoryAvailable(false)
             })
-    },[list])
+    }, [list])
 
     const validList = validateMapInfoList(list)
     const allMaps: MapItem[] = [
@@ -165,76 +166,56 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
     }
 
     const confirmMovementMapToSdCard = (item: MapItem) => {
-        if(isSDCardExist){
-            Alert.alert(
-                "",
-                t('Move to SD Card', {name: item.name}),
-                [
-                    { text: t('No'), style: "cancel" },
-                    { text: t('Yes'), onPress: () => {moveMapToSdCard(item.id)} }
-                ]
-            );
+        if (isSDCardExist) {
+            showModal({title:'', text:t('Move to SD Card', { name: item.name }), actions:[
+                {text: t('No'), type: ModalActionType.cancel},
+                {text: t('Yes'), type: ModalActionType.default, handler: () => {moveMapToSdCard(item.id) }},
+            ]})
         } else {
-            Alert.alert(
-                "",
-                t('No SD Card'),
-                [
-                    { text: t('Ok'), style: "default" },
-                ]
-            );
+            showModal({title:'', text:t('No SD Card', { name: item.name }), actions:[
+                {text: t('Ok'), type: ModalActionType.cancel},
+            ]})
         }
     }
 
     const confirmMovementMapToPhoneStorage = (item: MapItem) => {
-        Alert.alert(
-            "",
-            t('Move to Phone', {name: item.name}),
-            [
-                { text: t('No'), style: "cancel" },
-                { text: t('Yes'), onPress: () => {moveMapToPhoneStorage(item.id) } }
-            ]
-        );
+        showModal({title:'', text:t('Move to Phone', { name: item.name }), actions:[
+            {text: t('No'), type: ModalActionType.cancel},
+            {text: t('Yes'), type: ModalActionType.default, handler: () => {moveMapToPhoneStorage(item.id) }},
+        ]})
     }
 
     const confirmRemoving = (item: MapItem) => {
-        Alert.alert(
-            t('Warning!'),
-            t('Are you sure to remove the map?', {name: item.name}),
-            [
-                { text: t('No'), style: "cancel" },
-                { text: t('Yes'), onPress: () => {removeLocalMap(item.id)} }
-            ]
-        );
+        showModal({title:t('Warning!'), text:t('Are you sure to remove the map?', { name: item.name }), actions:[
+            {text: t('No'), type: ModalActionType.cancel},
+            {text: t('Yes'), type: ModalActionType.default, handler: () => {removeLocalMap(item.id) }},
+        ]})
     }
 
     const processCapturedQR = (link: string) => {
         const fileName = _.last(link.split("/")) || ''
         if (isFileValid(fileName)) {
-            downloadMapByQR({url: link, name: fileName})         
+            downloadMapByQR({ url: link, name: fileName })
         } else {
-            Alert.alert(
-                t('File name is not valid:', {name: fileName}),
-                t('You have to try with ".sqlitedb" files'),
-                [
-                    { text: t('Ok') }
-                ]
-            );
+            showModal({title:t('File name is not valid:', { name: fileName }), text:t('You have to try with ".sqlitedb" files'), actions:[
+                {text: t('Ok'), type: ModalActionType.cancel},
+            ]})
         }
     }
 
-    const renderItem = (item: MapItem, isAuthenticated: boolean ) => (
+    const renderItem = (item: MapItem, isAuthenticated: boolean) => (
         (isAuthenticated || item.loaded) &&
-            <View style={styles.row}>
-                <Text style={styles.listNameText}>{item.name}</Text>
-                {item.loaded && (
-                    <View style={styles.listButtonsContainer}>
-                        {item.storage === internalStorage && <Icon.Button style={styles.listButton} iconStyle={styles.listIconStorage} size={22} backgroundColor="transparent" name="phone-android" accessibilityLabel="move to sd card" onPress={() => confirmMovementMapToSdCard(item)}/>}
-                        {item.storage === sdCardStorage && <Icon.Button style={styles.listButton} iconStyle={styles.listIconStorage} size={22} backgroundColor="transparent" name="sd-card" accessibilityLabel="move to mobile" onPress={() => confirmMovementMapToPhoneStorage(item)}/>}
-                        <Icon.Button style={styles.listButton} iconStyle={styles.listIconRemove} size={22} backgroundColor="transparent" name="delete-outline" accessibilityLabel="remove" onPress={() => confirmRemoving(item)}/>
-                    </View>
-                )}
-                {!item.loaded && isAuthenticated && <Button titleStyle={{color: purple}} type='clear' onPress={() => downloadMap({ id: item.id, name: item.file })} title="download" />}
-            </View>
+        <View style={styles.row}>
+            <Text style={styles.listNameText}>{item.name}</Text>
+            {item.loaded && (
+                <View style={styles.listButtonsContainer}>
+                    {item.storage === internalStorage && <Icon.Button style={styles.listButton} iconStyle={styles.listIconStorage} size={22} backgroundColor="transparent" name="phone-android" accessibilityLabel="move to sd card" onPress={() => confirmMovementMapToSdCard(item)} />}
+                    {item.storage === sdCardStorage && <Icon.Button style={styles.listButton} iconStyle={styles.listIconStorage} size={22} backgroundColor="transparent" name="sd-card" accessibilityLabel="move to mobile" onPress={() => confirmMovementMapToPhoneStorage(item)} />}
+                    <Icon.Button style={styles.listButton} iconStyle={styles.listIconRemove} size={22} backgroundColor="transparent" name="delete-outline" accessibilityLabel="remove" onPress={() => confirmRemoving(item)} />
+                </View>
+            )}
+            {!item.loaded && isAuthenticated && <Button titleStyle={{ color: purple }} type='clear' onPress={() => downloadMap({ id: item.id, name: item.file })} title="download" />}
+        </View>
         || null
     );
 
@@ -267,7 +248,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                     onValueChange={onSetPrimary}
                     mode="dropdown"
                 >
-                    {primaryList.map(({ name }: PrimaryMapInfo) => (<Picker.Item key={name} label={name} value={name} />))}
+                    {primaryList.map(({ name }: PrimaryMapInfo) => (<Picker.Item key={name} label={name} value={name} style={styles.pickerItem} />))}
                 </Picker>
             </View>
             <View style={styles.row}>
@@ -278,15 +259,15 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                     onValueChange={onSetSecondary}
                     mode="dropdown"
                 >
-                    <Picker.Item label="None" value={''} />
-                    {list.map(({ name }: MapInfo) => (<Picker.Item key={name} label={name} value={name} />))}
+                    <Picker.Item label="None" value={''} style={styles.pickerItem} />
+                    {list.map(({ name }: MapInfo) => (<Picker.Item key={name} label={name} value={name} style={styles.pickerItem} />))}
                 </Picker>
             </View>
             <View style={styles.row}>
-                <Text>{t('Phone')}: {isMemoryAvailable ? `${availableInternalMemory} ${t('free of')} ${totalInternalMemory}`: t('Not Available')}</Text>
+                <Text>{t('Phone')}: {isMemoryAvailable ? `${availableInternalMemory} ${t('free of')} ${totalInternalMemory}` : t('Not Available')}</Text>
             </View>
             <View style={styles.row}>
-                <Text>{t('SD card')}: {isSDCardExist && isMemoryAvailable ? `${availableExternalMemory} ${t('free of')} ${totalExternalMemory}`: t('Not Available')}</Text>
+                <Text>{t('SD card')}: {isSDCardExist && isMemoryAvailable ? `${availableExternalMemory} ${t('free of')} ${totalExternalMemory}` : t('Not Available')}</Text>
             </View>
             <View style={styles.buttonsRow}>
                 <Icon.Button backgroundColor={purple} name="file-download" onPress={importMap}>
@@ -303,7 +284,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
             <View style={styles.availableMaps}>
                 <FlatList
                     data={allMaps}
-                    renderItem={({item}) => renderItem(item, isAuthenticated)}
+                    renderItem={({ item }) => renderItem(item, isAuthenticated)}
                     keyExtractor={(item: MapItem) => item.id}
                 />
                 {!isAuthenticated &&
@@ -314,10 +295,10 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
         </View>
         {showQRReader &&
             <Modal>
-                <QR close={() => setShowQRReader(false)} select={(link) => {processCapturedQR(link)}} />
+                <QR close={() => setShowQRReader(false)} select={(link) => { processCapturedQR(link) }} />
             </Modal>
         }
-        {showHelp && <MapModal onRequestClose={()=>setShowHelp(false)}><Help /></MapModal>}
+        {showHelp && <MapModal onRequestClose={() => setShowHelp(false)}><Help /></MapModal>}
     </Modal>
 }
 
@@ -378,11 +359,22 @@ const styles = StyleSheet.create({
         marginVertical: 8,
     },
     picker: {
-        width: 150,
-        justifyContent: 'flex-end',
+        minWidth: 150,
+        flex: 1,
+        color: 'black',
+        backgroundColor: "#ddd",
+    },
+    pickerItem: {
+        // minWidth: 150,
+        // flex: 1,
+        backgroundColor: "white",
+        color: 'black',
+        justifyContent: 'center',
+        alignItems: 'flex-end',
     },
     label: {
         fontSize: 18,
+        flex: 1,
     },
     availableMaps: {
         borderWidth: 1,

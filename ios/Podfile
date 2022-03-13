@@ -14,8 +14,6 @@ target 'bconf2maps' do
 
   pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
 
-  pod 'RNIap', :path => '../node_modules/react-native-iap'
-
   target 'bconf2mapsTests' do
     inherit! :complete
     # Pods for testing

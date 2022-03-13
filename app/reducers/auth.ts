@@ -2,7 +2,6 @@ import { createSelector } from "reselect";
 import { AuthState, State, AuthParams } from "../store/types";
 import { ActionTypeEnum } from "../actions";
 import { createReducer } from "./reducer-utils";
-import { InAppPurchase } from "react-native-iap";
 import _ from "lodash";
 
 const initialState: AuthState = Object.freeze({
@@ -11,7 +10,6 @@ const initialState: AuthState = Object.freeze({
   token: '',
   resetToken: '',
   showAdMob: true,
-  purchases: undefined,
   isItTheFirstTimeAppStarted: true,
 });
 
@@ -135,16 +133,6 @@ export default createReducer<AuthState>(initialState, {
     error,
     isRequestInProgress: false,
   }),
-  [ActionTypeEnum.AddPurchase]: (purchase: InAppPurchase) => (state: AuthState) => ({
-    ...state,
-    purchases: state.purchases ? [...state.purchases, purchase] : [purchase],
-    showAdMob: false,
-  }),
-  [ActionTypeEnum.SetPurchases]: (purchases?: InAppPurchase[]) => (state: AuthState) => ({
-    ...state,
-    purchases,
-    showAdMob: _.isEmpty(purchases),
-  }),
   [ActionTypeEnum.TheFirstTimeAppStart]: (value: boolean) => (state: AuthState) => ({
     ...state,
     isItTheFirstTimeAppStarted: !!value,
@@ -178,10 +166,6 @@ export const selectResetToken = createSelector(
 export const selectShowAdMob = createSelector(
   selectAuthState,
   (state) => state.showAdMob
-);
-export const selectPurchases = createSelector(
-  selectAuthState,
-  (state) => state.purchases
 );
 export const selectIsItTheFirstTimeAppStarted = createSelector(
   selectAuthState,
