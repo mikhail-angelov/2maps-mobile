@@ -20,6 +20,7 @@ import { validateMapInfoList } from "../utils/validation";
 import MapModal from "../components/Modal";
 
 const LINKING_URL = 'http://www.etomesto.ru/karta5467/'
+const ETO_MESTO_URL = 'http://www.etomesto.ru/'
 
 const internalStorage: Storage = "internal"
 const sdCardStorage: Storage = "sd-card"
@@ -167,29 +168,37 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
 
     const confirmMovementMapToSdCard = (item: MapItem) => {
         if (isSDCardExist) {
-            showModal({title:'', text:t('Move to SD Card', { name: item.name }), actions:[
-                {text: t('No'), type: ModalActionType.cancel},
-                {text: t('Yes'), type: ModalActionType.default, handler: () => {moveMapToSdCard(item.id) }},
-            ]})
+            showModal({
+                title: '', text: t('Move to SD Card', { name: item.name }), actions: [
+                    { text: t('No'), type: ModalActionType.cancel },
+                    { text: t('Yes'), type: ModalActionType.default, handler: () => { moveMapToSdCard(item.id) } },
+                ]
+            })
         } else {
-            showModal({title:'', text:t('No SD Card', { name: item.name }), actions:[
-                {text: t('Ok'), type: ModalActionType.cancel},
-            ]})
+            showModal({
+                title: '', text: t('No SD Card', { name: item.name }), actions: [
+                    { text: t('Ok'), type: ModalActionType.cancel },
+                ]
+            })
         }
     }
 
     const confirmMovementMapToPhoneStorage = (item: MapItem) => {
-        showModal({title:'', text:t('Move to Phone', { name: item.name }), actions:[
-            {text: t('No'), type: ModalActionType.cancel},
-            {text: t('Yes'), type: ModalActionType.default, handler: () => {moveMapToPhoneStorage(item.id) }},
-        ]})
+        showModal({
+            title: '', text: t('Move to Phone', { name: item.name }), actions: [
+                { text: t('No'), type: ModalActionType.cancel },
+                { text: t('Yes'), type: ModalActionType.default, handler: () => { moveMapToPhoneStorage(item.id) } },
+            ]
+        })
     }
 
     const confirmRemoving = (item: MapItem) => {
-        showModal({title:t('Warning!'), text:t('Are you sure to remove the map?', { name: item.name }), actions:[
-            {text: t('No'), type: ModalActionType.cancel},
-            {text: t('Yes'), type: ModalActionType.default, handler: () => {removeLocalMap(item.id) }},
-        ]})
+        showModal({
+            title: t('Warning!'), text: t('Are you sure to remove the map?', { name: item.name }), actions: [
+                { text: t('No'), type: ModalActionType.cancel },
+                { text: t('Yes'), type: ModalActionType.default, handler: () => { removeLocalMap(item.id) } },
+            ]
+        })
     }
 
     const processCapturedQR = (link: string) => {
@@ -197,9 +206,11 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
         if (isFileValid(fileName)) {
             downloadMapByQR({ url: link, name: fileName })
         } else {
-            showModal({title:t('File name is not valid:', { name: fileName }), text:t('You have to try with ".sqlitedb" files'), actions:[
-                {text: t('Ok'), type: ModalActionType.cancel},
-            ]})
+            showModal({
+                title: t('File name is not valid:', { name: fileName }), text: t('You have to try with ".sqlitedb" files'), actions: [
+                    { text: t('Ok'), type: ModalActionType.cancel },
+                ]
+            })
         }
     }
 
@@ -263,12 +274,12 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                     {list.map(({ name }: MapInfo) => (<Picker.Item key={name} label={name} value={name} style={styles.pickerItem} />))}
                 </Picker>
             </View>
-            <View style={styles.row}>
-                <Text>{t('Phone')}: {isMemoryAvailable ? `${availableInternalMemory} ${t('free of')} ${totalInternalMemory}` : t('Not Available')}</Text>
-            </View>
-            <View style={styles.row}>
-                <Text>{t('SD card')}: {isSDCardExist && isMemoryAvailable ? `${availableExternalMemory} ${t('free of')} ${totalExternalMemory}` : t('Not Available')}</Text>
-            </View>
+            {isMemoryAvailable ?
+                <View style={styles.row}>
+                    <Text>{`${t('Memory on phone')} ${totalInternalMemory}/${availableInternalMemory} ${t('free')}, ${isSDCardExist ? `${t('SD card')} ${totalExternalMemory}/${availableExternalMemory} ${t('free')}` : 'no SD card'}`}</Text>
+                </View> : <View style={styles.row}>
+                    <Text>{t('Phone memory is not writable')}</Text>
+                </View>}
             <View style={styles.buttonsRow}>
                 <Icon.Button backgroundColor={purple} name="file-download" onPress={importMap}>
                     <Text style={styles.darkButtonText}>{t('Import')}</Text>
@@ -280,7 +291,10 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                     <Text style={styles.darkButtonText}>{t('Help')}</Text>
                 </Icon.Button>
             </View>
-            <Text style={styles.notificationText}>{t('Supported map format Locus Map .SQLiteDB')}</Text>
+            <View style={styles.row}>
+                <Text style={styles.notificationText}>{t('Supported map format Locus Map .SQLiteDB')}</Text>
+                <Text style={styles.link} onPress={() => Linking.openURL(ETO_MESTO_URL)}>EtoMesto.ru</Text>
+            </View>
             <View style={styles.availableMaps}>
                 <FlatList
                     data={allMaps}
@@ -442,8 +456,8 @@ const styles = StyleSheet.create({
         justifyContent: "space-around"
     },
     notificationText: {
-        marginTop: 10,
-        marginBottom: 20,
+        // marginTop: 10,
+        // marginBottom: 20,
         marginHorizontal: 5,
         fontSize: 16,
         fontWeight: '600',
@@ -476,6 +490,6 @@ const styles = StyleSheet.create({
     link: {
         fontSize: 18,
         color: purple,
-        textDecorationLine: "underline"
+        textDecorationLine: "underline",
     },
 });

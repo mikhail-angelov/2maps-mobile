@@ -157,6 +157,7 @@ class Map extends Component<Props> {
         const { selected } = this.state
 
         let styleURL = primaryMap.url
+        let mapKey = `${primaryMap.url}-${secondaryMap?.url}`
         console.log('render map', zoom, opacity)
         if (!styleURL) {
             //todo:  render invalid map setting view
@@ -192,7 +193,7 @@ class Map extends Component<Props> {
             onRegionDidChange={this.updateCenter}
             onTouchEnd={this.onTouchEnd}
             ref={this.onSetMap}
-            key={styleURL}
+            key={mapKey}
         >
             <MapboxGL.Camera
                 ref={this.onSetCamera}
