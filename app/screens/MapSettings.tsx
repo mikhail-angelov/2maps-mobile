@@ -292,7 +292,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                 </Icon.Button>
             </View>
             <View style={styles.row}>
-                <Text style={styles.notificationText}>{t('Supported map format Locus Map .SQLiteDB')}</Text>
+                <Text style={styles.notificationText}>{t('Supported map format .SQLiteDB')}</Text>
                 <Text style={styles.link} onPress={() => Linking.openURL(ETO_MESTO_URL)}>EtoMesto.ru</Text>
             </View>
             <View style={styles.availableMaps}>

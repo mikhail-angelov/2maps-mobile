@@ -1,5 +1,5 @@
 import React, { FC, useState, useCallback } from "react";
-import { View, Linking, TextInput, Text, Alert, StyleSheet, Pressable } from "react-native";
+import { View, Linking, TextInput, Text, Alert, StyleSheet, Pressable, Share } from "react-native";
 import { Button } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Mark, ModalActionType, ModalParams } from '../store/types'
@@ -16,10 +16,10 @@ interface Props {
     save: (data: { name: string, description: string, rate: number }) => void;
     remove?: (id: string) => void;
     cancel: () => void;
-    showModal: (params: ModalParams)=>void;
+    showModal: (params: ModalParams) => void;
 }
 
-const EditMark: FC<Props> = ({ mark,center, save, cancel, remove, showModal }) => {
+const EditMark: FC<Props> = ({ mark, center, save, cancel, remove, showModal }) => {
     const [name, setName] = useState<string>(mark?.name || '')
     const [description, setDescription] = useState<string>(mark?.description || '')
     const [rate, setRate] = useState<number>(mark?.rate || 0)
@@ -34,9 +34,11 @@ const EditMark: FC<Props> = ({ mark,center, save, cancel, remove, showModal }) =
         if (supported) {
             await Linking.openURL(url);
         } else {
-            showModal({title:'', text:`${t('Don\'t know how to open this URL')}: ${url}`, actions:[
-                {text: t('Ok'), type: ModalActionType.cancel},
-            ]})
+            showModal({
+                title: '', text: `${t('Don\'t know how to open this URL')}: ${url}`, actions: [
+                    { text: t('Ok'), type: ModalActionType.cancel },
+                ]
+            })
         }
     }, [mark]);
 
@@ -44,10 +46,12 @@ const EditMark: FC<Props> = ({ mark,center, save, cancel, remove, showModal }) =
         if (!remove) {
             return
         }
-        showModal({title:t('Warning!'), text:t('Are you sure to remove marker?', {name: name || ''}), actions:[
-            {text: t('No'), type: ModalActionType.cancel},
-            {text: t('Yes'), type: ModalActionType.default, handler: () => remove(mark.id?.toString() || '')},
-        ]})
+        showModal({
+            title: t('Warning!'), text: t('Are you sure to remove marker?', { name: name || '' }), actions: [
+                { text: t('No'), type: ModalActionType.cancel },
+                { text: t('Yes'), type: ModalActionType.default, handler: () => remove(mark.id?.toString() || '') },
+            ]
+        })
     }
     const onCloseEdit = () => {
         setName(mark?.name || '');
@@ -56,9 +60,19 @@ const EditMark: FC<Props> = ({ mark,center, save, cancel, remove, showModal }) =
         setIsEdit(false);
     }
 
+    const shareMark = async () => {
+        try {
+            const result = await Share.share({
+                message: `${mark.name}: geo:${mark.geometry.coordinates[1]},${mark.geometry.coordinates[0]}`,
+            });
+        } catch (error: any) {
+            // Alert.alert(error.message);
+        }
+    }
+
     const distance = markToDistance(center)(mark)
 
-    return <MapModal onRequestClose={cancel} accessibilityLabel={isEdit ? t('Edit Mark'): t('Mark info')}>
+    return <MapModal onRequestClose={cancel} accessibilityLabel={isEdit ? t('Edit Mark') : t('Mark info')}>
         {!isEdit && <View style={styles.header}>
             <Text style={styles.title}>{name}</Text>
             <View style={styles.ratingAndDistance}>
@@ -110,6 +124,7 @@ const EditMark: FC<Props> = ({ mark,center, save, cancel, remove, showModal }) =
                 <Button buttonStyle={styles.btn} type="clear" onPress={() => save({ name, description, rate })} icon={<Icon name="save" size={26} color={purple} />} />
             </> : <Button buttonStyle={styles.btn} type="clear" onPress={() => setIsEdit(true)} icon={<Icon name="edit" size={26} color={purple} />} />}
             <Button buttonStyle={styles.btn} type="clear" onPress={openLink} icon={<Icon name="location-arrow" size={26} color={purple} />} />
+            {!isEdit && <Button buttonStyle={styles.btn} type="clear" onPress={shareMark} icon={<Icon name="share" size={26} color={purple} />} />}
             {/* {navigate && <Button buttonStyle={styles.btn} type='clear' onPress={navigate} icon={<Icon name="compass" size={26} color={purple} />} />} */}
             {remove && <Button buttonStyle={styles.btn} type='clear' onPress={onRemove} icon={<Icon name="trash" size={26} color={purple} />} />}
         </View>
