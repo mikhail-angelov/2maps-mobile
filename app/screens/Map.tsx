@@ -7,9 +7,9 @@ import styled from 'styled-components/native'
 import MapboxGL, { RasterSourceProps, RegionPayload } from "@react-native-mapbox-gl/maps";
 import { Feature, Point } from '@turf/helpers';
 import { checkAction } from "../actions/auth-actions";
-import { setCenterAction, setZoomAction } from "../actions/map-actions";
+import { setCenterAction, setIsNeedToTakeSnapshotAction, setZoomAction } from "../actions/map-actions";
 import { addPointAction, setLocationAction, restartTrackingAction } from "../actions/tracker-actions";
-import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecondaryMap } from '../reducers/map'
+import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecondaryMap, selectIsNeedToTakeSnapshot } from '../reducers/map'
 import ActiveTrack from '../components/ActiveTrack'
 import MarksLocation from "../components/MarksLocation";
 import Wikimapia from "../components/Wikimapia";
@@ -39,6 +39,7 @@ const mapStateToProps = (state: State) => ({
     tracking: selectIsTracking(state),
     selectedTrackBBox: selectSelectedTrackBBox(state),
     location: selectLocation(state),
+    isNeedToTakeSnapshot: selectIsNeedToTakeSnapshot(state),
 });
 const mapDispatchToProps = {
     setCenter: setCenterAction,
@@ -48,6 +49,7 @@ const mapDispatchToProps = {
     addPoint: addPointAction,
     setLocation: setLocationAction,
     restartTracking: restartTrackingAction,
+    selectIsNeedToTakeSnapshot: setIsNeedToTakeSnapshotAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { setMap: (map: MapboxGL.Camera | undefined) => void }
@@ -90,6 +92,14 @@ class Map extends Component<Props> {
             const end = this.props.selectedTrackBBox?.[1]
             this.camera?.fitBounds(start, end, 70, 100)
         }
+        if (this.props.isNeedToTakeSnapshot && !prevProps.isNeedToTakeSnapshot) {
+            this.props.selectIsNeedToTakeSnapshot(false)
+            this.map?.takeSnap().then((snap) => {
+                console.log('Snapshot: ', snap.length);                    
+            }).catch((e)=> {
+                console.log('ERROR snapshot', e);
+            });
+        }
     }
 
     onAddMark = async (feature: GeoJSON.Feature) => {
@@ -109,7 +119,7 @@ class Map extends Component<Props> {
         const selected = featureToMark(feature)
         if (feature.id === this.state.selected?.id) {
             this.setState({ selected: undefined })
-            this.props.editMark(selected)
+            this.props.editMark(selected)         
         } else {
             this.setState({ selected })
         }
@@ -183,7 +193,7 @@ class Map extends Component<Props> {
                 ]
             })
         }
-
+        
         return (<StyledMap
             zoomEnabled
             compassEnabled

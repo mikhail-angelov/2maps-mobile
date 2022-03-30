@@ -17,9 +17,10 @@ interface Props {
     remove?: (id: string) => void;
     cancel: () => void;
     showModal: (params: ModalParams) => void;
+    setIsNeedToTakeSnapshot: (value: boolean) => void
 }
 
-const EditMark: FC<Props> = ({ mark, center, save, cancel, remove, showModal }) => {
+const EditMark: FC<Props> = ({ mark, center, save, cancel, remove, showModal, setIsNeedToTakeSnapshot }) => {
     const [name, setName] = useState<string>(mark?.name || '')
     const [description, setDescription] = useState<string>(mark?.description || '')
     const [rate, setRate] = useState<number>(mark?.rate || 0)
@@ -68,6 +69,10 @@ const EditMark: FC<Props> = ({ mark, center, save, cancel, remove, showModal }) 
         } catch (error: any) {
             // Alert.alert(error.message);
         }
+    }
+
+    const shareImage = async () => {
+        setIsNeedToTakeSnapshot(true)
     }
 
     const distance = markToDistance(center)(mark)
@@ -124,7 +129,12 @@ const EditMark: FC<Props> = ({ mark, center, save, cancel, remove, showModal }) 
                 <Button buttonStyle={styles.btn} type="clear" onPress={() => save({ name, description, rate })} icon={<Icon name="save" size={26} color={purple} />} />
             </> : <Button buttonStyle={styles.btn} type="clear" onPress={() => setIsEdit(true)} icon={<Icon name="edit" size={26} color={purple} />} />}
             <Button buttonStyle={styles.btn} type="clear" onPress={openLink} icon={<Icon name="location-arrow" size={26} color={purple} />} />
-            {!isEdit && <Button buttonStyle={styles.btn} type="clear" onPress={shareMark} icon={<Icon name="share" size={26} color={purple} />} />}
+            {!isEdit && (
+                <>
+                    <Button buttonStyle={styles.btn} type="clear" onPress={shareMark} icon={<Icon name="share" size={26} color={purple} />} />
+                    <Button buttonStyle={styles.btn} type="clear" onPress={shareImage} icon={<Icon name="image" size={26} color={purple} />} />
+                </>
+            )}
             {/* {navigate && <Button buttonStyle={styles.btn} type='clear' onPress={navigate} icon={<Icon name="compass" size={26} color={purple} />} />} */}
             {remove && <Button buttonStyle={styles.btn} type='clear' onPress={onRemove} icon={<Icon name="trash" size={26} color={purple} />} />}
         </View>

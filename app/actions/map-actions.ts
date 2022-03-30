@@ -289,3 +289,5 @@ export const downloadMapByQRAction = ({ url, name }: { url: string, name: string
     }
   };
 };
+
+export const setIsNeedToTakeSnapshotAction = (value: boolean) => ({type: ActionTypeEnum.setIsNeedToTakeSnapshot, payload: value})
