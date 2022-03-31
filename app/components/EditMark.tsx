@@ -1,5 +1,5 @@
-import React, { FC, useState, useCallback } from "react";
-import { View, Linking, TextInput, Text, Alert, StyleSheet, Pressable, Share } from "react-native";
+import React, { FC, useState, useCallback, useRef } from "react";
+import { View, Linking, TextInput, Text, Alert, StyleSheet, Pressable} from "react-native";
 import { Button } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Mark, ModalActionType, ModalParams } from '../store/types'
@@ -9,6 +9,9 @@ import { purple } from "../constants/color";
 import { markToDistance } from '../utils/normalize'
 import { Position } from 'geojson';
 import { useTranslation } from "react-i18next";
+import MapboxGL from "@react-native-mapbox-gl/maps";
+import SnapshotMark from "./SnapshotMark";
+import Share from 'react-native-share';
 
 interface Props {
     mark: Mark;
@@ -25,6 +28,8 @@ const EditMark: FC<Props> = ({ mark, center, save, cancel, remove, showModal }) 
     const [rate, setRate] = useState<number>(mark?.rate || 0)
     const [isEdit, setIsEdit] = useState(!mark.id)
     const { t } = useTranslation();
+
+    const snapshotMapRef = useRef<MapboxGL.MapView>()
 
     const openLink = useCallback(async () => {
         const { coordinates } = mark.geometry
@@ -62,7 +67,7 @@ const EditMark: FC<Props> = ({ mark, center, save, cancel, remove, showModal }) 
 
     const shareMark = async () => {
         try {
-            const result = await Share.share({
+            const result = await Share.open({
                 message: `${mark.name}: geo:${mark.geometry.coordinates[1]},${mark.geometry.coordinates[0]}`,
             });
         } catch (error: any) {
@@ -70,7 +75,25 @@ const EditMark: FC<Props> = ({ mark, center, save, cancel, remove, showModal }) 
         }
     }
 
+    const shareImage = async () => {
+        if (!snapshotMapRef.current) {
+            return
+        }
+        try{
+            const imgPngBase64 = await snapshotMapRef.current.takeSnap()
+            await Share.open({
+                message: mark.name,
+                url: imgPngBase64,
+            });
+        } catch (error: any) {            
+        }
+    }
+
     const distance = markToDistance(center)(mark)
+
+    const onSetMap = (map: MapboxGL.MapView) => {
+        snapshotMapRef.current = map
+    }
 
     return <MapModal onRequestClose={cancel} accessibilityLabel={isEdit ? t('Edit Mark') : t('Mark info')}>
         {!isEdit && <View style={styles.header}>
@@ -124,10 +147,16 @@ const EditMark: FC<Props> = ({ mark, center, save, cancel, remove, showModal }) 
                 <Button buttonStyle={styles.btn} type="clear" onPress={() => save({ name, description, rate })} icon={<Icon name="save" size={26} color={purple} />} />
             </> : <Button buttonStyle={styles.btn} type="clear" onPress={() => setIsEdit(true)} icon={<Icon name="edit" size={26} color={purple} />} />}
             <Button buttonStyle={styles.btn} type="clear" onPress={openLink} icon={<Icon name="location-arrow" size={26} color={purple} />} />
-            {!isEdit && <Button buttonStyle={styles.btn} type="clear" onPress={shareMark} icon={<Icon name="share" size={26} color={purple} />} />}
+            {!isEdit && (
+                <>
+                    <Button buttonStyle={styles.btn} type="clear" onPress={shareMark} icon={<Icon name="share" size={26} color={purple} />} />
+                    <Button buttonStyle={styles.btn} type="clear" onPress={shareImage} icon={<Icon name="image" size={26} color={purple} />} />
+                </>
+            )}
             {/* {navigate && <Button buttonStyle={styles.btn} type='clear' onPress={navigate} icon={<Icon name="compass" size={26} color={purple} />} />} */}
             {remove && <Button buttonStyle={styles.btn} type='clear' onPress={onRemove} icon={<Icon name="trash" size={26} color={purple} />} />}
         </View>
+        <SnapshotMark onSetMap={onSetMap} mark={mark} />
     </MapModal>
 }
 

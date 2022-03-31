@@ -18,7 +18,7 @@ import * as _ from 'lodash'
 
 MapboxGL.setAccessToken(process.env.MAPBOX_PUB_KEY || 'pk.eyJ1IjoibWlraGFpbGFuZ2Vsb3YiLCJhIjoiY2tpa2FnbnM5MDg5ejJ3bDQybWN3eWRsdSJ9.vK_kqebrJaO7MdIg4ilaFQ');
 
-const rasterSourceProps: RasterSourceProps = {
+export const rasterSourceProps: RasterSourceProps = {
     id: 'stamenWatercolorSource',
     tileUrlTemplates: ['http://localhost:5555/map/mende/{z}/{x}/{y}.png'],
     minZoomLevel: 1,
@@ -109,7 +109,7 @@ class Map extends Component<Props> {
         const selected = featureToMark(feature)
         if (feature.id === this.state.selected?.id) {
             this.setState({ selected: undefined })
-            this.props.editMark(selected)
+            this.props.editMark(selected)         
         } else {
             this.setState({ selected })
         }
@@ -183,7 +183,7 @@ class Map extends Component<Props> {
                 ]
             })
         }
-
+        
         return (<StyledMap
             zoomEnabled
             compassEnabled
