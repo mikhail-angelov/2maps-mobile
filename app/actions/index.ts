@@ -88,7 +88,6 @@ export enum ActionTypeEnum {
   ChangeMapStorageFailure = 'map/CHANGE_MAP_STORAGE_FAILED',
   RelocateMapProgress = 'map/RELOCATE_MAP_PROGRESS',
   CancelChangeMapStorage = 'map/CANCEL_CHANGE_MAP_STORAGE',
-  setIsNeedToTakeSnapshot = 'map/SET_IS_NEED_TO_TAKE_SNAPSHOT',
   //wiki
   WikiRequest = 'wiki/REQUEST',
   WikiSuccess = 'wiki/REQUEST_SUCCESS',

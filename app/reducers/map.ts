@@ -24,7 +24,6 @@ const initialState: MapState = Object.freeze({
   downloadProgress: 0,
   relocating: false,
   relocateProgress: 0,
-  isNeedToTakeSnapshot: false,
 });
 
 export default createReducer<MapState>(initialState, {
@@ -169,12 +168,7 @@ export default createReducer<MapState>(initialState, {
   [ActionTypeEnum.CancelChangeMapStorage]: () => (state: MapState) => ({
     ...state,
     loading: true,
-  }),
-  [ActionTypeEnum.setIsNeedToTakeSnapshot]: (value: boolean) => (state: MapState) => ({
-    ...state,
-    isNeedToTakeSnapshot: value,
-  }),
-  
+  }),  
 });
 export const selectMapState = (state: State) => state.map;
 export const selectOpacity = createSelector(
@@ -232,8 +226,4 @@ export const selectMapIsRelocating = createSelector(
 export const selectRelocateProgress = createSelector(
   selectMapState,
   (state) => state.relocateProgress
-);
-export const selectIsNeedToTakeSnapshot = createSelector(
-  selectMapState,
-  (state) => state.isNeedToTakeSnapshot
 );

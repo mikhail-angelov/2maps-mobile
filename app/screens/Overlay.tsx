@@ -22,7 +22,7 @@ import { checkAction, setTheFirstTimeAppStartAction, storeResetTokenAction } fro
 import { loadWikiAction } from "../actions/wiki-actions";
 import { selectWikiCollection } from "../reducers/wiki";
 import { selectIsItTheFirstTimeAppStarted, selectResetToken } from "../reducers/auth";
-import { setCenterAction, setOpacityAction, setZoomAction, setIsNeedToTakeSnapshotAction } from "../actions/map-actions";
+import { setCenterAction, setOpacityAction, setZoomAction } from "../actions/map-actions";
 import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecondaryMap } from '../reducers/map'
 import { showModalAction} from '../actions/ui-actions'
 import ResetPassword from "../components/ResetPassword";
@@ -95,7 +95,6 @@ const mapDispatchToProps = {
     storeResetToken: storeResetTokenAction,
     setTheFirstTimeAppStart: setTheFirstTimeAppStartAction,
     showModal: showModalAction,
-    setIsNeedToTakeSnapshot: setIsNeedToTakeSnapshotAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { map?: MapboxGL.Camera }
@@ -109,7 +108,7 @@ const getClosestMark = (location: any, marks: Mark[]) => {
 }
 const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, center, zoom, location, secondaryMap, 
     editMark, saveMark, removeMark, tracking, activeTrack, startTracking, stopTracking, showModal, resetToken,
-    storeResetToken, selectedTrack, selectTrack, isItTheFirstTimeAppStarted, setTheFirstTimeAppStart, setIsNeedToTakeSnapshot }) => {
+    storeResetToken, selectedTrack, selectTrack, isItTheFirstTimeAppStarted, setTheFirstTimeAppStart }) => {
     const [showMenu, setShowMenu] = useState(false)
     const [showAuth, setShowAuth] = useState(false)
     const [showAccount, setShowAccount] = useState(false)
@@ -216,7 +215,6 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
             cancel={() => editMark(undefined)}
             remove={() => editedMark.id ? removeMark(editedMark.id) : null}
             showModal={showModal}
-            map={map}
         />}
         {showTracks && <Tracks close={() => setShowTracks(false)} />}
         {showMarkers && center && <Markers center={center} select={selectMark} close={() => setShowMarkers(false)} />}

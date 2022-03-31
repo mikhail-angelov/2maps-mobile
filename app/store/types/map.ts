@@ -40,7 +40,6 @@ export interface MapState {
   error?: string;
   relocating: boolean;
   relocateProgress: number;
-  isNeedToTakeSnapshot: boolean;
 }
 
 export interface StorageMemory {

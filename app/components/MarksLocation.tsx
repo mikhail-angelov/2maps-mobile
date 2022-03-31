@@ -7,7 +7,7 @@ import { selectMarks } from "../reducers/marks";
 import { markToFeature } from "../actions/marks-actions";
 import { colorPalette } from "../constants/color";
 
-const MarkStyle: CircleLayerStyle = {
+export const MarkStyle: CircleLayerStyle = {
     circleRadius: 8,
     circleColor: ['step', ['number', ['get', 'rate'], 0], colorPalette[0], 1, colorPalette[1], 2, colorPalette[2], 3, colorPalette[3], 4, colorPalette[4], 5, colorPalette[5]],
     circleOpacity: 0.7,
