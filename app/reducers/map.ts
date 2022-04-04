@@ -24,6 +24,7 @@ const initialState: MapState = Object.freeze({
   downloadProgress: 0,
   relocating: false,
   relocateProgress: 0,
+  showWikimapia: false,
 });
 
 export default createReducer<MapState>(initialState, {
@@ -169,6 +170,10 @@ export default createReducer<MapState>(initialState, {
     ...state,
     loading: true,
   }),  
+  [ActionTypeEnum.SetWikimapia]: (value: boolean) => (state: MapState) => ({
+    ...state,
+    showWikimapia: value,
+  }),  
 });
 export const selectMapState = (state: State) => state.map;
 export const selectOpacity = createSelector(
@@ -226,4 +231,8 @@ export const selectMapIsRelocating = createSelector(
 export const selectRelocateProgress = createSelector(
   selectMapState,
   (state) => state.relocateProgress
+);
+export const selectShowWikimapia = createSelector(
+  selectMapState,
+  (state) => state.showWikimapia
 );

@@ -289,3 +289,5 @@ export const downloadMapByQRAction = ({ url, name }: { url: string, name: string
     }
   };
 };
+
+export const setShowWikimapiaAction = (value: boolean) => ({type: ActionTypeEnum.SetWikimapia, payload: value})

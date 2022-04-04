@@ -40,6 +40,7 @@ export interface MapState {
   error?: string;
   relocating: boolean;
   relocateProgress: number;
+  showWikimapia: boolean;
 }
 
 export interface StorageMemory {

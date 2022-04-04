@@ -9,7 +9,7 @@ import { Feature, Point } from '@turf/helpers';
 import { checkAction } from "../actions/auth-actions";
 import { setCenterAction, setZoomAction } from "../actions/map-actions";
 import { addPointAction, setLocationAction, restartTrackingAction } from "../actions/tracker-actions";
-import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecondaryMap } from '../reducers/map'
+import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecondaryMap, selectShowWikimapia } from '../reducers/map'
 import ActiveTrack from '../components/ActiveTrack'
 import MarksLocation from "../components/MarksLocation";
 import Wikimapia from "../components/Wikimapia";
@@ -39,6 +39,7 @@ const mapStateToProps = (state: State) => ({
     tracking: selectIsTracking(state),
     selectedTrackBBox: selectSelectedTrackBBox(state),
     location: selectLocation(state),
+    showWikimapia: selectShowWikimapia(state),
 });
 const mapDispatchToProps = {
     setCenter: setCenterAction,
@@ -153,7 +154,7 @@ class Map extends Component<Props> {
     }
 
     render() {
-        const { tracking, primaryMap, secondaryMap, opacity, center, zoom } = this.props
+        const { tracking, primaryMap, secondaryMap, opacity, center, zoom, showWikimapia } = this.props
         const { selected } = this.state
 
         let styleURL = primaryMap.url
@@ -209,7 +210,7 @@ class Map extends Component<Props> {
                     style={{ rasterOpacity: opacity }}
                 />
             </MapboxGL.RasterSource>}
-            <Wikimapia />
+            {showWikimapia && <Wikimapia />}
             <MarksLocation onMarkPress={this.onMarkPress} />
             <ActiveTrack />
             <SelectedMark mark={selected} unselect={this.onBalloonClick} openEdit={this.onBalloonLongClick} />

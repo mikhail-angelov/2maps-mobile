@@ -10,6 +10,7 @@ import { selectActiveTrack, selectSelectedTrack, selectLocation, selectTracks, s
 import { View, StyleSheet, Text } from "react-native";
 import { BottomSheet, ListItem } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import IconCommunity from 'react-native-vector-icons/MaterialCommunityIcons';
 import styled from 'styled-components/native'
 import EditMark from '../components/EditMark'
 import Slider from '../components/Slider'
@@ -19,11 +20,9 @@ import Auth from '../components/Auth'
 import MapSettings from './MapSettings'
 import { addPointAction, addTrackAction, selectTrackAction, startTrackingAction, stopTrackingAction } from "../actions/tracker-actions";
 import { checkAction, setTheFirstTimeAppStartAction, storeResetTokenAction } from "../actions/auth-actions";
-import { loadWikiAction } from "../actions/wiki-actions";
-import { selectWikiCollection } from "../reducers/wiki";
 import { selectIsItTheFirstTimeAppStarted, selectResetToken } from "../reducers/auth";
-import { setCenterAction, setOpacityAction, setZoomAction } from "../actions/map-actions";
-import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecondaryMap } from '../reducers/map'
+import { setCenterAction, setOpacityAction, setZoomAction, setShowWikimapiaAction } from "../actions/map-actions";
+import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecondaryMap, selectShowWikimapia } from '../reducers/map'
 import { showModalAction} from '../actions/ui-actions'
 import ResetPassword from "../components/ResetPassword";
 import { useTranslation } from "react-i18next";
@@ -70,13 +69,13 @@ const mapStateToProps = (state: State) => ({
     center: selectCenter(state),
     opacity: selectOpacity(state),
     zoom: selectZoom(state),
-    wikiCollection: selectWikiCollection(state),
     primaryMap: selectPrimaryMap(state),
     secondaryMap: selectSecondaryMap(state),
     tracking: selectIsTracking(state),
     editedMark: selectEditedMark(state),
     resetToken: selectResetToken(state),
     isItTheFirstTimeAppStarted: selectIsItTheFirstTimeAppStarted(state),
+    showWikimapia: selectShowWikimapia(state),
 });
 const mapDispatchToProps = {
     removeMark: removeMarkAction,
@@ -88,13 +87,13 @@ const mapDispatchToProps = {
     setCenter: setCenterAction,
     setOpacity: setOpacityAction,
     setZoom: setZoomAction,
-    loadWiki: loadWikiAction,
     checkAuth: checkAction,
     editMark: editMarkAction,
     saveMark: saveMarkAction,
     storeResetToken: storeResetTokenAction,
     setTheFirstTimeAppStart: setTheFirstTimeAppStartAction,
     showModal: showModalAction,
+    setShowWikimapia: setShowWikimapiaAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { map?: MapboxGL.Camera }
@@ -108,7 +107,7 @@ const getClosestMark = (location: any, marks: Mark[]) => {
 }
 const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, center, zoom, location, secondaryMap, 
     editMark, saveMark, removeMark, tracking, activeTrack, startTracking, stopTracking, showModal, resetToken,
-    storeResetToken, selectedTrack, selectTrack, isItTheFirstTimeAppStarted, setTheFirstTimeAppStart }) => {
+    storeResetToken, selectedTrack, selectTrack, isItTheFirstTimeAppStarted, setTheFirstTimeAppStart, showWikimapia, setShowWikimapia }) => {
     const [showMenu, setShowMenu] = useState(false)
     const [showAuth, setShowAuth] = useState(false)
     const [showAccount, setShowAccount] = useState(false)
@@ -175,6 +174,10 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         selectTrack(undefined)
     }
 
+    const toggleWikimapia = () => {
+        setShowWikimapia(!showWikimapia)
+    }
+
     useEffect(() => {
         if (isItTheFirstTimeAppStarted) {
             setShowSettings(isItTheFirstTimeAppStarted)
@@ -190,6 +193,9 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
         <Buttons>
             {/* <MenuButton name="insights" color="black" backgroundColor="#fff5" onPress={() => this.setState({ showTracks: true })} />
                     <View style={{ height: 40 }} /> */}
+            <View style={{position: 'absolute', bottom: 380}}>
+                <IconCommunity.Button name={showWikimapia ? "window-close": "wikipedia"} color="white" backgroundColor="#00f5" style={{ width: 48, height: 48, padding: 0, justifyContent: 'center' }} iconStyle={{ marginLeft: 10, width: 20 }} borderRadius={24}  onPress={toggleWikimapia} />
+            </View>
             {selectedTrack && <>
                 <MenuButton icon="visibility-off" onPress={onHideSelectedTrack} />
                 <View style={{ height: 40 }} />
