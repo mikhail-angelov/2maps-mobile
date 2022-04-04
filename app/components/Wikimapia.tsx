@@ -1,38 +1,54 @@
 import React, { FC } from "react";
-import { connect, ConnectedProps } from "react-redux";
-import { State } from '../store/types'
-import MapboxGL, { LineLayerStyle, SymbolLayerStyle } from "@react-native-mapbox-gl/maps";
-import { selectWikiCollection } from '../reducers/wiki'
+import MapboxGL, { FillLayerStyle, LineLayerStyle, SymbolLayerStyle } from "@react-native-mapbox-gl/maps";
+
+const tileUrl = 'https://2maps.xyz/wikimapia/{z}/{x}/{y}.mvt'
 
 const WikiStyle: LineLayerStyle = {
     lineWidth: 2,
-    lineColor: 'red',
     lineOpacity: 0.6,
+    lineJoin: 'round',
+    lineCap: 'round',
+    lineColor: '#ff0000'
+}
+const WikiStyleFill: FillLayerStyle = {
+    fillColor: 'rgba(200, 100, 240, 0.2)',
+    fillOutlineColor: 'rgba(200, 100, 240, 1)'
 }
 const WikiStyleLabel: SymbolLayerStyle = {
     textColor: 'red',
     textSize: 18,
-    textField: ['get', 'title'],
+    textField: ['format',
+        ['get', 'name'],
+        { 'font-scale': 0.5 }],
     textAnchor: 'bottom',
 }
 
-const mapStateToProps = (state: State) => ({
-    wikiCollection: selectWikiCollection(state),
-});
-const connector = connect(mapStateToProps)
-type Props = ConnectedProps<typeof connector> 
-
-const Wikimapia: FC<Props> = ({ wikiCollection }) => {
-    if (!wikiCollection) {
-        return null
-    }
-
-    return (<MapboxGL.ShapeSource
-        id="wikiSource"
-        shape={wikiCollection}>
-        <MapboxGL.LineLayer id='w' style={WikiStyle} minZoomLevel={1} />
-        <MapboxGL.SymbolLayer id='wl' style={WikiStyleLabel} minZoomLevel={1} />
-    </MapboxGL.ShapeSource>);
+const Wikimapia: FC = () => {
+    return (<MapboxGL.VectorSource
+        id="wiki"
+        tileUrlTemplates={[tileUrl]}
+        minZoomLevel={11}
+        maxZoomLevel={14}
+    >
+        <MapboxGL.LineLayer
+            id="wiki2"
+            sourceID="wiki"
+            sourceLayerID="wikiLayer"
+            style={WikiStyle}
+        />
+        <MapboxGL.FillLayer
+            id="wiki3"
+            sourceID="wiki"
+            sourceLayerID="wikiLayer"
+            style={WikiStyleFill}
+        />
+        <MapboxGL.SymbolLayer
+            id="wiki-label"
+            sourceID="wiki"
+            sourceLayerID="wikiLayer"
+            style={WikiStyleLabel}
+        />
+    </MapboxGL.VectorSource>);
 }
 
-export default connector(Wikimapia)
+export default Wikimapia

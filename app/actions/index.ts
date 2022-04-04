@@ -88,10 +88,7 @@ export enum ActionTypeEnum {
   ChangeMapStorageFailure = 'map/CHANGE_MAP_STORAGE_FAILED',
   RelocateMapProgress = 'map/RELOCATE_MAP_PROGRESS',
   CancelChangeMapStorage = 'map/CANCEL_CHANGE_MAP_STORAGE',
-  //wiki
-  WikiRequest = 'wiki/REQUEST',
-  WikiSuccess = 'wiki/REQUEST_SUCCESS',
-  WikiFailure = 'wiki/REQUEST_FAILURE',
+  SetWikimapia = 'map/SET_WIKIMAPIA',
   //ui
   UIAddModal = 'ui/ADD_MODAL',
   UIRemoveModal = 'ui/REMOVE_MODAL',
