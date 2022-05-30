@@ -1,5 +1,8 @@
 package com.bconf2maps;
 
+import static com.facebook.react.bridge.UiThreadUtil.runOnUiThread;
+
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -13,6 +16,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 
 import android.provider.Settings;
+import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -178,6 +182,35 @@ public class MapsModule extends ReactContextBaseJavaModule {
         } catch (NameNotFoundException e) {          
         }
         promise.resolve(versionName + " (" + versionCode + ")");
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @ReactMethod
+    public void setAwake(boolean value, Promise promise) {
+        Log.d(TAG, String.format("set awake flag %b", value));
+        final Activity activity = getCurrentActivity();
+        if(activity == null){
+            promise.reject("err","awake");
+            return;
+        }
+        try {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if(value){
+                        activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    }else{
+                        activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    }
+                }
+            });
+            promise.resolve("ok");
+        } catch (Exception e) {
+            Log.d(TAG, String.format("error set awake flag %s", e.getMessage()));
+            promise.reject("err","awake");
+        }
+
+
     }
 
     //use it to notify

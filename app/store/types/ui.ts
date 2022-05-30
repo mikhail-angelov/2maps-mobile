@@ -15,5 +15,6 @@ export interface ModalParams {
 }
 
 export interface UIState {
+  awake: boolean;
   modal?: ModalParams;
 }

@@ -140,7 +140,7 @@ android {
         applicationId "com.bconf2maps"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 20
+        versionCode 23
         versionName "1.0"
         // resValue "string", "ADMOB_APP_ID", "${System.env.ADMOB_APP_ID}"
         // react-native-iap: we only use the Google Play flavor

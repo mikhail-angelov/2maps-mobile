@@ -33,18 +33,22 @@ const EditMark: FC<Props> = ({ mark, center, save, cancel, remove, showModal }) 
 
     const openLink = useCallback(async () => {
         const { coordinates } = mark.geometry
-        const url = `http://osmand.net/go?lat=${coordinates[1]}&lon=${coordinates[0]}&z=16&name=${mark?.name || ''}`
-        const supported = await Linking.canOpenURL(url);
+        const url = `https://osmand.net/go?lat=${coordinates[1]}&lon=${coordinates[0]}&z=16&name=${mark?.name || ''}`
+        // looks like Linking.canOpenURL require more permission on android 11 https://medium.com/androiddevelopers/package-visibility-in-android-11-cc857f221cd9
+        // so call api without verification
 
-        if (supported) {
-            await Linking.openURL(url);
-        } else {
-            showModal({
-                title: '', text: `${t('Don\'t know how to open this URL')}: ${url}`, actions: [
-                    { text: t('Ok'), type: ModalActionType.cancel },
-                ]
-            })
-        }
+        // const supported = await Linking.canOpenURL(url);
+
+        // if (supported) {
+        //     await Linking.openURL(url);
+        // } else {
+        //     showModal({
+        //         title: '', text: `${t('Don\'t know how to open this URL')}: ${url}`, actions: [
+        //             { text: t('Ok'), type: ModalActionType.cancel },
+        //         ]
+        //     })
+        // }
+        await Linking.openURL(url);
     }, [mark]);
 
     const onRemove = () => {

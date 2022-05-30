@@ -23,6 +23,8 @@ import { checkAction, setTheFirstTimeAppStartAction, storeResetTokenAction } fro
 import { selectIsItTheFirstTimeAppStarted, selectResetToken } from "../reducers/auth";
 import { setCenterAction, setOpacityAction, setZoomAction, setShowWikimapiaAction } from "../actions/map-actions";
 import { selectCenter, selectOpacity, selectZoom, selectPrimaryMap, selectSecondaryMap, selectShowWikimapia } from '../reducers/map'
+import { toggleAwakeAction } from "../actions/ui-actions";
+import { selectAwake} from '../reducers/ui'
 import { showModalAction} from '../actions/ui-actions'
 import ResetPassword from "../components/ResetPassword";
 import { useTranslation } from "react-i18next";
@@ -58,7 +60,7 @@ const Buttons = styled(View)`
     bottom:50px;
     left:10px;
 `
-const MenuButton = ({ icon, onPress, color }: { icon: string, onPress: () => void, color?: string }) => (<Icon.Button name={icon} color={color || "white"} backgroundColor="#00f5" style={{ width: 48, height: 48, padding: 0, justifyContent: 'center' }} iconStyle={{ marginLeft: 10, width: 20 }} borderRadius={24} onPress={onPress} />)
+const MenuButton = ({ icon, onPress, color, bgColor }: { icon: string, onPress: () => void, color?: string, bgColor?: string }) => (<Icon.Button name={icon} color={color || "white"} backgroundColor={bgColor||"#00f5"} style={{ width: 48, height: 48, padding: 0, justifyContent: 'center' }} iconStyle={{ marginLeft: 10, width: 20 }} borderRadius={24} onPress={onPress} />)
 
 const mapStateToProps = (state: State) => ({
     marks: selectMarks(state),
@@ -76,6 +78,7 @@ const mapStateToProps = (state: State) => ({
     resetToken: selectResetToken(state),
     isItTheFirstTimeAppStarted: selectIsItTheFirstTimeAppStarted(state),
     showWikimapia: selectShowWikimapia(state),
+    awake: selectAwake(state),
 });
 const mapDispatchToProps = {
     removeMark: removeMarkAction,
@@ -94,6 +97,7 @@ const mapDispatchToProps = {
     setTheFirstTimeAppStart: setTheFirstTimeAppStartAction,
     showModal: showModalAction,
     setShowWikimapia: setShowWikimapiaAction,
+    toggleAwake: toggleAwakeAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { map?: MapboxGL.Camera }
@@ -107,7 +111,8 @@ const getClosestMark = (location: any, marks: Mark[]) => {
 }
 const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, center, zoom, location, secondaryMap, 
     editMark, saveMark, removeMark, tracking, activeTrack, startTracking, stopTracking, showModal, resetToken,
-    storeResetToken, selectedTrack, selectTrack, isItTheFirstTimeAppStarted, setTheFirstTimeAppStart, showWikimapia, setShowWikimapia }) => {
+    storeResetToken, selectedTrack, selectTrack, isItTheFirstTimeAppStarted, setTheFirstTimeAppStart, showWikimapia, 
+    setShowWikimapia, awake, toggleAwake }) => {
     const [showMenu, setShowMenu] = useState(false)
     const [showAuth, setShowAuth] = useState(false)
     const [showAccount, setShowAccount] = useState(false)
@@ -200,6 +205,8 @@ const Overlay: FC<Props> = ({ map, marks, setOpacity, editedMark, opacity, cente
                 <MenuButton icon="visibility-off" onPress={onHideSelectedTrack} />
                 <View style={{ height: 40 }} />
             </>}
+            <MenuButton icon={awake?"brightness-high":"brightness-low"} bgColor={awake?"#0f0a":"#00f5"} onPress={toggleAwake} />
+            <View style={{ height: 40 }} />
             <MenuButton icon="gps-fixed" onPress={toCurrentLocation} />
             <View style={{ height: 40 }} />
             <MenuButton icon="track-changes" color={tracking ? "red" : "white"} onPress={toggleTracking} />

@@ -13,7 +13,6 @@
     <uses-feature android:name="android.hardware.location.gps" />
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="com.android.vending.BILLING" />
 
     <application
       android:usesCleartextTraffic="true"
@@ -39,7 +38,7 @@
             <category android:name="android.intent.category.DEFAULT" />
             <category android:name="android.intent.category.BROWSABLE" />
             <data android:scheme="https"
-                  android:host="2map.xyz" />
+                  android:host="2maps.xyz" />
         </intent-filter>
       </activity>
     </application>
