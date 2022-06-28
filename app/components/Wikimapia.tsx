@@ -16,7 +16,7 @@ const WikiStyleFill: FillLayerStyle = {
 }
 const WikiStyleLabel: SymbolLayerStyle = {
     textColor: 'red',
-    textSize: 18,
+    textSize: 28,
     textField: ['format',
         ['get', 'name'],
         { 'font-scale': 0.5 }],

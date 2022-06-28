@@ -33,7 +33,10 @@ const EditMark: FC<Props> = ({ mark, center, save, cancel, remove, showModal }) 
 
     const openLink = useCallback(async () => {
         const { coordinates } = mark.geometry
-        const url = `https://osmand.net/go?lat=${coordinates[1]}&lon=${coordinates[0]}&z=16&name=${mark?.name || ''}`
+        // const url = `https://osmand.net/go?lat=${coordinates[1]}&lon=${coordinates[0]}&z=16&name=${mark?.name || ''}`
+        const url = `yandexnavi://build_route_on_map?lat_to=${coordinates[1]}&lon_to=${coordinates[0]}`
+        // const url = `yandexnavi://show_point_on_map?lat_to=${coordinates[1]}&lon_to=${coordinates[0]}&desc=${mark?.name || ''}`
+        console.log('-----', url)
         // looks like Linking.canOpenURL require more permission on android 11 https://medium.com/androiddevelopers/package-visibility-in-android-11-cc857f221cd9
         // so call api without verification
 

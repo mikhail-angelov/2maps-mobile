@@ -57,6 +57,7 @@ export const loadMarksAction = (): AppThunk => {
   };
 };
 
+export const selectMarkAction = (mark?: Mark) => ({ type: ActionTypeEnum.SelectMark, payload: mark });
 export const editMarkAction = (mark?: Mark) => ({ type: ActionTypeEnum.EditMark, payload: mark });
 export const saveMarkAction = (mark: Mark) => ({ type: ActionTypeEnum.SaveMark, payload: { ...mark, timestamp: Date.now(), id: mark.id || `${Date.now()}` } });
 export const removeMarkAction = (id: string) => ({ type: ActionTypeEnum.RemoveMark, payload: id });

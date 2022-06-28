@@ -25,6 +25,7 @@ export interface POI {
 export interface MarksState {
   isRequestInProgress: boolean;
   marks: Mark[];
+  selectedMark?: Mark;
   editMark?: Mark;
   error?: string;
 }

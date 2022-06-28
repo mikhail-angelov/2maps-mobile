@@ -10,6 +10,10 @@ const initialState: MarksState = Object.freeze({
 });
 
 export default createReducer<MarksState>(initialState, {
+  [ActionTypeEnum.SelectMark]: (selectedMark?: Mark) => (state: MarksState) => ({
+    ...state,
+    selectedMark,
+  }),
   [ActionTypeEnum.EditMark]: (editMark?: Mark) => (state: MarksState) => ({
     ...state,
     editMark,
@@ -50,6 +54,10 @@ export const selectMarksState = (state: State) => state.marks;
 export const selectMarks = createSelector(
   selectMarksState,
   (state) => state.marks
+);
+export const selectSelectedMark = createSelector(
+  selectMarksState,
+  (state) => state.selectedMark
 );
 export const selectEditedMark = createSelector(
   selectMarksState,

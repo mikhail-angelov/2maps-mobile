@@ -18,14 +18,17 @@ const marksPersistConfig = {
 const trackerPersistConfig = {
   key: 'tracker',
   storage: AsyncStorage,
+  blacklist: ['tracking', 'error'],
 }
 const mapPersistConfig = {
   key: 'map',
   storage: AsyncStorage,
+  blacklist: ['relocating', 'loading', 'relocateProgress', 'error']
 }
 const authPersistConfig = {
   key: 'auth',
   storage: AsyncStorage,
+  blacklist: ['isRequestInProgress', 'error'],
 }
 
 const rootReducer = combineReducers({

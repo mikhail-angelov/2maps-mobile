@@ -9,7 +9,6 @@ const initialState: AuthState = Object.freeze({
   isRequestInProgress: false,
   token: '',
   resetToken: '',
-  showAdMob: true,
   isItTheFirstTimeAppStarted: true,
 });
 
@@ -162,10 +161,6 @@ export const selectError = createSelector(
 export const selectResetToken = createSelector(
   selectAuthState,
   (state) => state.resetToken
-);
-export const selectShowAdMob = createSelector(
-  selectAuthState,
-  (state) => state.showAdMob
 );
 export const selectIsItTheFirstTimeAppStarted = createSelector(
   selectAuthState,

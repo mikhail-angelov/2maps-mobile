@@ -14,7 +14,8 @@ import android.content.BroadcastReceiver;
 import android.util.LongSparseArray;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-
+import android.util.Base64;
+import android.net.Uri;
 import android.provider.Settings;
 import android.view.WindowManager;
 
@@ -35,6 +36,11 @@ import java.io.File;
 import java.util.Set;
 import java.util.HashMap;
 import java.util.Map;
+import java.math.BigInteger;
+import java.security.KeyFactory;
+import java.security.Signature;
+import java.security.spec.EncodedKeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
 
 import androidx.core.content.ContextCompat;
 
@@ -325,5 +331,56 @@ public class MapsModule extends ReactContextBaseJavaModule {
     public void isTestDevice(Promise promise) {
         String testLabSetting = Settings.System.getString(reactContext.getContentResolver(), "firebase.test.lab");
         promise.resolve("true".equals(testLabSetting));
+    }
+
+    public String sha256rsa(String key, String data) throws SecurityException {
+        String trimmedKey = key.replaceAll("-----\\w+ PRIVATE KEY-----", "")
+                                .replaceAll("\\s", "");
+
+        try {
+            byte[]         result    = Base64.decode(trimmedKey, Base64.DEFAULT);
+            KeyFactory     factory   = KeyFactory.getInstance("RSA");
+            EncodedKeySpec keySpec   = new PKCS8EncodedKeySpec(result);
+            Signature      signature = Signature.getInstance("SHA256withRSA");
+            signature.initSign(factory.generatePrivate(keySpec));
+            signature.update(data.getBytes());
+
+            byte[] encrypted = signature.sign();
+            return Base64.encodeToString(encrypted, Base64.NO_WRAP);
+        } catch (Exception e) {
+            throw new SecurityException("Error sign: "+e.getMessage());
+        }
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @ReactMethod
+    public void openYandexNavigator(String lng,String lat,String clientId,String key, Promise promise) throws SecurityException {
+        Log.d(TAG, "openYandexNavigator: "+clientId);
+        try{
+            Uri uri = Uri.parse("yandexnavi://build_route_on_map").buildUpon()
+                .appendQueryParameter("lat_to", lat)
+                .appendQueryParameter("lon_to",lng)
+                .appendQueryParameter("client", clientId).build();
+
+            uri = uri.buildUpon()
+                .appendQueryParameter("signature", sha256rsa(key, uri.toString()))
+                .build();
+
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            intent.setPackage("ru.yandex.yandexnavi");
+            final Activity activity = getCurrentActivity();
+            if(activity == null){
+                promise.reject("err","nav");
+                return;
+            }
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    activity.startActivity(intent);
+                }
+            });
+            promise.resolve("ok");
+        } catch (Exception e) {
+            promise.reject("err","nav");
+        }
     }
 }

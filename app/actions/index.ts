@@ -40,6 +40,7 @@ export enum ActionTypeEnum {
   MarksSuccess = "marks/MARKS_SUCCESS",
   MarksFailure = "marks/MARKS_FAILURE",
   AddMark = "marks/ADD_MARK",
+  SelectMark = "marks/SELECT_MARK",
   EditMark = "marks/EDIT_MARK",
   SaveMark = "marks/SAVE_MARK",
   UpdateMark = "marks/UPDATE_MARK",
