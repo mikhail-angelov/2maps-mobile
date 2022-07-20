@@ -1,10 +1,9 @@
-import React, {FC, useEffect, useState, useCallback} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import MapboxGL from '@react-native-mapbox-gl/maps';
 import {connect, ConnectedProps} from 'react-redux';
-import { NativeModules } from "react-native";
 import {minBy} from 'lodash';
 import distance from '@turf/distance';
-import {State, Mark, ModalActionType} from '../store/types';
+import {State, Mark, ModalActionType, Tracking} from '../store/types';
 import {
   selectMarks,
   selectEditedMark,
@@ -17,13 +16,12 @@ import {
   markToFeature,
 } from '../actions/marks-actions';
 import {
-  selectActiveTrack,
   selectSelectedTrack,
   selectLocation,
   selectTracks,
   selectIsTracking,
 } from '../reducers/tracker';
-import {View, StyleSheet, Text, Linking} from 'react-native';
+import {View, StyleSheet, Text} from 'react-native';
 import {BottomSheet, ListItem} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import IconCommunity from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -38,6 +36,7 @@ import {
   addTrackAction,
   selectTrackAction,
   startTrackingAction,
+  startTrackingAdnRecordingAction,
   stopTrackingAction,
 } from '../actions/tracker-actions';
 import {
@@ -64,6 +63,11 @@ import {
   selectShowWikimapia,
 } from '../reducers/map';
 import {toggleAwakeAction} from '../actions/ui-actions';
+import {
+  navigateYandex,
+  navigateGoogle,
+  navigateOsm,
+} from '../actions/navigation';
 import {selectAwake} from '../reducers/ui';
 import {showModalAction} from '../actions/ui-actions';
 import ResetPassword from '../components/ResetPassword';
@@ -77,7 +81,6 @@ import {createIconSetFromIcoMoon} from 'react-native-vector-icons';
 import iconMoonConfig from '../fontConfig.json';
 const IconMoon = createIconSetFromIcoMoon(iconMoonConfig);
 
-
 interface MenuItem {
   title: string;
   onPress?: () => void;
@@ -88,11 +91,13 @@ interface MenuItem {
 const MenuButton = ({
   icon,
   onPress,
+  onLongPress,
   color,
   bgColor,
 }: {
   icon: string;
   onPress: () => void;
+  onLongPress?: () => void;
   color?: string;
   bgColor?: string;
 }) => (
@@ -104,13 +109,13 @@ const MenuButton = ({
     iconStyle={{marginLeft: 10, width: 20}}
     borderRadius={24}
     onPress={onPress}
+    onLongPress={onLongPress}
   />
 );
 
 const mapStateToProps = (state: State) => ({
   marks: selectMarks(state),
   tracks: selectTracks(state),
-  activeTrack: selectActiveTrack(state),
   selectedTrack: selectSelectedTrack(state),
   location: selectLocation(state),
   center: selectCenter(state),
@@ -130,6 +135,7 @@ const mapDispatchToProps = {
   removeMark: removeMarkAction,
   selectTrack: selectTrackAction,
   startTracking: startTrackingAction,
+  startTrackingAdnRecording: startTrackingAdnRecordingAction,
   stopTracking: stopTrackingAction,
   addPoint: addPointAction,
   addTrack: addTrackAction,
@@ -173,8 +179,8 @@ const Overlay: FC<Props> = ({
   saveMark,
   removeMark,
   tracking,
-  activeTrack,
   startTracking,
+  startTrackingAdnRecording,
   stopTracking,
   showModal,
   resetToken,
@@ -247,8 +253,6 @@ const Overlay: FC<Props> = ({
     return null;
   }
   const currentLocation = [location.coords.longitude, location.coords.latitude];
-  // const currentLocationFeature = point(currentLocation)
-  // currentLocationFeature.id = 'currentLocationFeature'
   const closest = getClosestMark(currentLocation, marks);
   const onOpacityChange = (value: number) => {
     console.log('setOpacityAction c', value);
@@ -277,11 +281,24 @@ const Overlay: FC<Props> = ({
     }
     map?.moveTo([location.coords.longitude, location.coords.latitude], 100);
   };
+  let trackingColor='white';
+  if(tracking === Tracking.track){
+    trackingColor='green';
+  }else if(tracking === Tracking.trackAndRecord){
+    trackingColor='red';
+  }
   const toggleTracking = () => {
-    if (tracking) {
-      stopTracking();
-    } else {
+    if (tracking === Tracking.none) {
       startTracking();
+    } else {
+      stopTracking();
+    }
+  };
+  const toggleTrackingAndRecord = () => {
+    if (tracking === Tracking.none) {
+      startTrackingAdnRecording();
+    } else {
+      stopTracking();
     }
   };
   const selectMark = (mark: Mark) => {
@@ -304,66 +321,6 @@ const Overlay: FC<Props> = ({
       setTheFirstTimeAppStart(false);
     }
   }, []);
-
-  const navigateYandex = useCallback(async () => {
-    if (!selectedMark) {
-      return;
-    }
-    const {coordinates} = selectedMark.geometry;
-    const clientId = process.env.YANDEX_NAV_CLIENT || '';
-    //this line break is required for encryption
-    let key = `
-    ${process.env.YANDEX_NAV_KEY || ''}`;
-
-    try {
-        await  NativeModules.MapsModule.openYandexNavigator(coordinates[0]+'',coordinates[1]+'', clientId, key)
-    } catch (e) {
-      console.log('error', e);
-      showModal({
-        title: 'Oops',
-        text: `${t("Can't start navigation with yandex navigator")}`,
-        actions: [{text: t('Ok'), type: ModalActionType.cancel}],
-      });
-    }
-  }, [selectedMark]);
-
-  const navigateOsm = useCallback(async () => {
-    if (!selectedMark) {
-      return;
-    }
-    const {coordinates} = selectedMark.geometry;
-    const url = `https://osmand.net/go?lat=${coordinates[1]}&lon=${
-      coordinates[0]
-    }&z=16&name=${selectedMark?.name || ''}`;
-    try {
-      await Linking.openURL(url);
-    } catch (e) {
-      console.log('error', e);
-      showModal({
-        title: 'Oops',
-        text: `${t("Can't start navigation with OSMAnd\n link:")}: ${url}`,
-        actions: [{text: t('Ok'), type: ModalActionType.cancel}],
-      });
-    }
-  }, [selectedMark]);
-  const navigateGoogle = useCallback(async () => {
-    if (!selectedMark) {
-      return;
-    }
-    const {coordinates} = selectedMark.geometry;
-    // const url = `geo:${coordinates[1]},${coordinates[0]}`
-    const url = `https://maps.google.com/maps?daddr=${coordinates[1]},${coordinates[0]}`;
-    try {
-      await Linking.openURL(url);
-    } catch (e) {
-      console.log('error', e);
-      showModal({
-        title: 'Oops',
-        text: `${t("Can't start navigation with Google map\n link:")}: ${url}`,
-        actions: [{text: t('Ok'), type: ModalActionType.cancel}],
-      });
-    }
-  }, [selectedMark]);
 
   console.log('render overlay', zoom, opacity, editedMark);
   return (
@@ -407,8 +364,9 @@ const Overlay: FC<Props> = ({
           <View style={{height: 40}} />
           <MenuButton
             icon="track-changes"
-            color={tracking ? 'red' : 'white'}
+            color={trackingColor}
             onPress={toggleTracking}
+            onLongPress={toggleTrackingAndRecord}
           />
         </View>
         <View style={styles.buttonSubPanelBottom}>
@@ -428,7 +386,9 @@ const Overlay: FC<Props> = ({
                     }}
                     iconStyle={{marginLeft: 10, width: 20}}
                     borderRadius={24}
-                    onPress={navigateYandex}
+                    onPress={() =>
+                      navigateYandex(selectedMark.geometry.coordinates)
+                    }
                   />
                 </View>
                 <View style={styles.navPanelItem}>
@@ -444,14 +404,18 @@ const Overlay: FC<Props> = ({
                     }}
                     iconStyle={{marginLeft: 10, width: 20}}
                     borderRadius={24}
-                    onPress={navigateOsm}
+                    onPress={() =>
+                      navigateOsm(selectedMark.geometry.coordinates)
+                    }
                   />
                 </View>
                 <View style={styles.navPanelItem}>
                   <MenuButton
                     icon="navigation"
                     bgColor="#0f05"
-                    onPress={navigateGoogle}
+                    onPress={() =>
+                      navigateGoogle(selectedMark.geometry.coordinates)
+                    }
                   />
                 </View>
               </View>

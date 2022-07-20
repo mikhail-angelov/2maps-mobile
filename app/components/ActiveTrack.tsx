@@ -1,9 +1,9 @@
 import React, { FC } from "react";
 import { connect, ConnectedProps } from "react-redux";
-import { State } from '../store/types'
+import { State, Tracking } from '../store/types'
 import MapboxGL, { LineLayerStyle } from "@react-native-mapbox-gl/maps";
 import { lineString } from '@turf/helpers';
-import { selectActiveTrack, selectSelectedTrack } from '../reducers/tracker'
+import { selectActiveTrack, selectSelectedTrack, selectIsTracking } from '../reducers/tracker'
 import { purple } from "../constants/color";
 
 const ActiveTrackStyle: LineLayerStyle = {
@@ -28,15 +28,16 @@ const SelectedTrackStyle: LineLayerStyle = {
 const mapStateToProps = (state: State) => ({
     activeTrack: selectActiveTrack(state),
     selectedTrack: selectSelectedTrack(state),
+    tracking: selectIsTracking(state),
 });
 const connector = connect(mapStateToProps)
 type Props = ConnectedProps<typeof connector>
 
-const ActiveTrack: FC<Props> = ({ activeTrack, selectedTrack }) => {
-    const activeRoute = activeTrack && activeTrack.track.length > 1 ? lineString(activeTrack.track) : null
-    const selectedRoute = selectedTrack && selectedTrack.track.length > 1 ? lineString(selectedTrack.track) : null
+const ActiveTrack: FC<Props> = ({ activeTrack, selectedTrack, tracking }) => {
+    const activeRoute = activeTrack && activeTrack?.track?.length > 1 ? lineString(activeTrack.track) : null
+    const selectedRoute = selectedTrack && selectedTrack?.track?.length > 1 ? lineString(selectedTrack.track) : null
 
-    return (<>{activeRoute && <MapboxGL.ShapeSource id='active-track' shape={activeRoute}>
+    return (<>{activeRoute && tracking === Tracking.trackAndRecord && <MapboxGL.ShapeSource id='active-track' shape={activeRoute}>
         <MapboxGL.LineLayer id='activeLineLayer' style={ActiveTrackStyle} minZoomLevel={1} layerIndex={10000}/>
     </MapboxGL.ShapeSource>}
         {selectedRoute && <MapboxGL.ShapeSource id='selected-track' shape={selectedRoute}>

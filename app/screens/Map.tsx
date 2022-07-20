@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {connect, ConnectedProps} from 'react-redux';
-import {State, Mark} from '../store/types';
+import {State, Mark, Tracking} from '../store/types';
 import {
   featureToMark,
   editMarkAction,
@@ -94,7 +94,7 @@ class Map extends Component<Props> {
     MapboxGL.locationManager.start();
     this.interval = setInterval(() => {
       const {tracking, location} = this.props;
-      if (tracking && location) {
+      if ((tracking !== Tracking.none) && location) {
         this.camera?.moveTo(
           [location.coords.longitude, location.coords.latitude],
           100,
@@ -163,7 +163,7 @@ class Map extends Component<Props> {
     if (!location?.coords) {
       return;
     }
-    if (this.props.tracking) {
+    if (this.props.tracking !== Tracking.none) {
       this.props.addPoint(location);
     }
     this.props.setLocation(location);
@@ -187,7 +187,7 @@ class Map extends Component<Props> {
     console.log('--onTouchEnd');
     this.setState({selected: undefined});
     const {tracking, restartTracking} = this.props;
-    if (tracking) {
+    if (tracking !== Tracking.none) {
       restartTracking();
     }
   };
@@ -252,7 +252,7 @@ class Map extends Component<Props> {
         <MapboxGL.UserLocation
           visible={true}
           onUpdate={this.onUserLocationUpdate}
-          showsUserHeadingIndicator={tracking}
+          showsUserHeadingIndicator={tracking!==Tracking.none}
           minDisplacement={50}
         />
         {secondaryMap && (
