@@ -95,4 +95,8 @@ export enum ActionTypeEnum {
   UIAddModal = 'ui/ADD_MODAL',
   UIRemoveModal = 'ui/REMOVE_MODAL',
   SetAwake = 'ui/SET_AWAKE',
+  //drawing
+  ActiveDrawing = 'drawing/ACTIVE_DRAWING',
+  FinishDrawingChunk = 'drawing/FINISH_DRAWING_CHUNK',
+  SetActiveDrawing = 'drawing/SET_ACTIVE_DRAWING',
 }

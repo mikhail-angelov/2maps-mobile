@@ -38,6 +38,7 @@ import MarksLocation from '../components/MarksLocation';
 import Wikimapia from '../components/Wikimapia';
 import SelectedMark from '../components/SelectedMark';
 import * as _ from 'lodash';
+import Drawing from '../components/Drawing';
 
 MapboxGL.setAccessToken(
   process.env.MAPBOX_PUB_KEY ||
@@ -80,7 +81,8 @@ const mapDispatchToProps = {
 };
 const connector = connect(mapStateToProps, mapDispatchToProps);
 type Props = ConnectedProps<typeof connector> & {
-  setMap: (map: MapboxGL.Camera | undefined) => void;
+  setMap: (map: MapboxGL.MapView | undefined) => void;
+  setCamera: (map: MapboxGL.Camera | undefined) => void;
 };
 
 class Map extends Component<Props> {
@@ -178,10 +180,11 @@ class Map extends Component<Props> {
   };
   onSetMap = (map: MapboxGL.MapView) => {
     this.map = map;
+    this.props.setMap(map)
   };
   onSetCamera = (camera: MapboxGL.Camera) => {
     this.camera = camera;
-    this.props.setMap(camera);
+    this.props.setCamera(camera);
   };
   onTouchEnd = () => {
     console.log('--onTouchEnd');
@@ -191,7 +194,6 @@ class Map extends Component<Props> {
       restartTracking();
     }
   };
-
   render() {
     const {
       tracking,
@@ -274,6 +276,7 @@ class Map extends Component<Props> {
           unselect={this.onBalloonClick}
           openEdit={this.onBalloonLongClick}
         />
+        <Drawing />
       </StyledMap>
     );
   }
