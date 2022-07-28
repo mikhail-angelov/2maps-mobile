@@ -13,11 +13,12 @@ flex: 1;
 `
 
 const Main: FC<{}> = () =>{
- const [map, setMap] = useState<MapboxGL.Camera|undefined>() 
+ const [map, setMap] = useState<MapboxGL.MapView|undefined>() 
+ const [camera, setCamera] = useState<MapboxGL.Camera|undefined>() 
   return (<Container>
     <AuthManager />
-    <Map setMap={setMap}/>
-    <Overlay map={map}/>
+    <Map setMap={setMap} setCamera={setCamera} />
+    <Overlay map={map} camera={camera}/>
   </Container>)
 }
 export default Main

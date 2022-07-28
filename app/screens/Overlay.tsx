@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useState} from 'react';
+import React, {FC, useEffect, useRef, useState} from 'react';
 import MapboxGL from '@react-native-mapbox-gl/maps';
 import {connect, ConnectedProps} from 'react-redux';
 import {minBy} from 'lodash';
@@ -21,7 +21,7 @@ import {
   selectTracks,
   selectIsTracking,
 } from '../reducers/tracker';
-import {View, StyleSheet, Text} from 'react-native';
+import {View, StyleSheet, Text, GestureResponderEvent} from 'react-native';
 import {BottomSheet, ListItem} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import IconCommunity from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -79,7 +79,15 @@ import {requestLocationPermissions} from '../utils/permissions';
 // custom font icons: https://medium.com/bam-tech/add-custom-icons-to-your-react-native-application-f039c244386c
 import {createIconSetFromIcoMoon} from 'react-native-vector-icons';
 import iconMoonConfig from '../fontConfig.json';
+import { drawingChunkAction, finishDrawingChunkAction, startDrawNewChunkAction, removeLastDrawingChunkAction, saveActualDrawingAction } from '../actions/drawing-actions';
+import Drawings from './Drawings';
 const IconMoon = createIconSetFromIcoMoon(iconMoonConfig);
+
+enum DrawingStatus {
+  COMPLETE_CHUNK,
+  START_CHUNK,
+  IN_PROCESS
+}
 
 interface MenuItem {
   title: string;
@@ -150,9 +158,14 @@ const mapDispatchToProps = {
   showModal: showModalAction,
   setShowWikimapia: setShowWikimapiaAction,
   toggleAwake: toggleAwakeAction,
+  drawingChunk: drawingChunkAction,
+  finishDrawingChunk: finishDrawingChunkAction,
+  startDrawNewChunk: startDrawNewChunkAction,
+  removeLastDrawingChunk: removeLastDrawingChunkAction,
+  saveActualDrawing: saveActualDrawingAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps);
-type Props = ConnectedProps<typeof connector> & {map?: MapboxGL.Camera};
+type Props = ConnectedProps<typeof connector> & {map?: MapboxGL.MapView, camera?: MapboxGL.Camera};
 
 const getClosestMark = (location: any, marks: Mark[]) => {
   const closest = minBy(marks, mark =>
@@ -167,6 +180,7 @@ const getClosestMark = (location: any, marks: Mark[]) => {
 };
 const Overlay: FC<Props> = ({
   map,
+  camera,
   marks,
   setOpacity,
   editedMark,
@@ -194,6 +208,11 @@ const Overlay: FC<Props> = ({
   awake,
   toggleAwake,
   selectedMark,
+  drawingChunk,
+  finishDrawingChunk,
+  startDrawNewChunk,
+  removeLastDrawingChunk,
+  saveActualDrawing
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -202,6 +221,10 @@ const Overlay: FC<Props> = ({
   const [showMarkers, setShowMarkers] = useState(false);
   const [showTracks, setShowTracks] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [activeDrawingLayout, setActiveDrawingLayout] = useState(false);
+  const [showDrawingButtons, setShowDrawingButtons] = useState(true);
+  const activeDrawingStatus = useRef<DrawingStatus>(DrawingStatus.COMPLETE_CHUNK);
+  const [showDrawings, setShowDrawings] = useState(false);
   const {t} = useTranslation();
 
   const menuItems: MenuItem[] = [
@@ -230,6 +253,13 @@ const Overlay: FC<Props> = ({
       title: 'Tracks',
       onPress: () => {
         setShowTracks(true);
+        setShowMenu(false);
+      },
+    },
+    {
+      title: 'Drawings',
+      onPress: () => {
+        setShowDrawings(true);
         setShowMenu(false);
       },
     },
@@ -279,7 +309,7 @@ const Overlay: FC<Props> = ({
     if (!location) {
       return;
     }
-    map?.moveTo([location.coords.longitude, location.coords.latitude], 100);
+    camera?.moveTo([location.coords.longitude, location.coords.latitude], 100);
   };
   let trackingColor='white';
   if(tracking === Tracking.track){
@@ -304,7 +334,7 @@ const Overlay: FC<Props> = ({
   const selectMark = (mark: Mark) => {
     const selected = markToFeature(mark);
     setShowMarkers(false);
-    map?.moveTo(mark.geometry.coordinates, 100);
+    camera?.moveTo(mark.geometry.coordinates, 100);
   };
 
   const onHideSelectedTrack = () => {
@@ -315,6 +345,46 @@ const Overlay: FC<Props> = ({
     setShowWikimapia(!showWikimapia);
   };
 
+  const screenToLocation = async(event: GestureResponderEvent) => {
+    if (event.nativeEvent.touches.length !== 1) {
+      return
+    }
+    const x = Math.round(event.nativeEvent.locationX)
+    const y = Math.round(event.nativeEvent.locationY)
+
+    try{
+      const coords = await map?.getCoordinateFromView([x, y])
+      if (!coords || activeDrawingStatus.current === DrawingStatus.COMPLETE_CHUNK) {
+        return
+      }  
+      if(activeDrawingStatus.current === DrawingStatus.IN_PROCESS) {
+        drawingChunk(coords)
+      } else {
+        console.log('start new chunk!!!')
+        startDrawNewChunk(coords)
+        activeDrawingStatus.current = DrawingStatus.IN_PROCESS
+        setShowDrawingButtons(false)
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const stopScreenToLocation = () => {
+    activeDrawingStatus.current = DrawingStatus.COMPLETE_CHUNK
+    finishDrawingChunk()
+    setShowDrawingButtons(true)
+  }
+  const startScreenToLocation = () => {
+    activeDrawingStatus.current = DrawingStatus.START_CHUNK
+  }
+  const stepBackDrawing = () => {
+    removeLastDrawingChunk()
+  }
+  const saveDrawing = () => {
+    saveActualDrawing()
+    setActiveDrawingLayout(false)
+  }
   useEffect(() => {
     if (isItTheFirstTimeAppStarted) {
       setShowSettings(isItTheFirstTimeAppStarted);
@@ -330,100 +400,121 @@ const Overlay: FC<Props> = ({
           <Slider value={opacity} setValue={onOpacityChange} />
         </View>
       )}
-      <View style={styles.buttonPanel}>
-        <View style={styles.buttonSubPanelBottom}>
-          <IconCommunity.Button
-            name={showWikimapia ? 'window-close' : 'wikipedia'}
-            color="white"
-            backgroundColor="#00f5"
-            style={{
-              width: 48,
-              height: 48,
-              padding: 0,
-              justifyContent: 'center',
-            }}
-            iconStyle={{marginLeft: 10, width: 20}}
-            borderRadius={24}
-            onPress={toggleWikimapia}
-          />
-        </View>
-        <View style={styles.buttonSubPanel}>
-          {selectedTrack && (
-            <>
-              <MenuButton icon="visibility-off" onPress={onHideSelectedTrack} />
-              <View style={{height: 40}} />
-            </>
-          )}
-          <MenuButton
-            icon={awake ? 'brightness-high' : 'brightness-low'}
-            bgColor={awake ? '#0f0a' : '#00f5'}
-            onPress={toggleAwake}
-          />
-          <View style={{height: 40}} />
-          <MenuButton icon="settings" onPress={() => setShowMenu(true)} />
-          <View style={{height: 40}} />
-          <MenuButton
-            icon="track-changes"
-            color={trackingColor}
-            onPress={toggleTracking}
-            onLongPress={toggleTrackingAndRecord}
-          />
-        </View>
-        <View style={styles.buttonSubPanelBottom}>
-          {selectedMark && (
-            <View style={styles.navPanel}>
-              <View style={styles.navPanelRow}>
-                <View style={styles.navPanelItem}>
-                  <IconMoon.Button
-                    name="yandex"
-                    color="white"
-                    backgroundColor="#0f05"
-                    style={{
-                      width: 48,
-                      height: 48,
-                      padding: 0,
-                      justifyContent: 'center',
-                    }}
-                    iconStyle={{marginLeft: 10, width: 20}}
-                    borderRadius={24}
-                    onPress={() =>
-                      navigateYandex(selectedMark.geometry.coordinates)
-                    }
-                  />
-                </View>
-                <View style={styles.navPanelItem}>
-                  <IconMoon.Button
-                    name="osmc"
-                    color="white"
-                    backgroundColor="#0f05"
-                    style={{
-                      width: 48,
-                      height: 48,
-                      padding: 0,
-                      justifyContent: 'center',
-                    }}
-                    iconStyle={{marginLeft: 10, width: 20}}
-                    borderRadius={24}
-                    onPress={() =>
-                      navigateOsm(selectedMark.geometry.coordinates)
-                    }
-                  />
-                </View>
-                <View style={styles.navPanelItem}>
-                  <MenuButton
-                    icon="navigation"
-                    bgColor="#0f05"
-                    onPress={() =>
-                      navigateGoogle(selectedMark.geometry.coordinates)
-                    }
-                  />
+      {!activeDrawingLayout && (
+        <View style={styles.buttonPanel}>
+          <View style={styles.buttonSubPanelBottom}>
+            <IconCommunity.Button
+              name={showWikimapia ? 'window-close' : 'wikipedia'}
+              color="white"
+              backgroundColor="#00f5"
+              style={{
+                width: 48,
+                height: 48,
+                padding: 0,
+                justifyContent: 'center',
+              }}
+              iconStyle={{marginLeft: 10, width: 20}}
+              borderRadius={24}
+              onPress={toggleWikimapia}
+            />
+          </View>
+          <View style={styles.buttonSubPanel}>
+            {selectedTrack && (
+              <>
+                <MenuButton icon="visibility-off" onPress={onHideSelectedTrack} />
+                <View style={{height: 40}} />
+              </>
+            )}
+            <MenuButton
+              icon={awake ? 'brightness-high' : 'brightness-low'}
+              bgColor={awake ? '#0f0a' : '#00f5'}
+              onPress={toggleAwake}
+            />
+            <View style={{height: 40}} />
+            {!activeDrawingLayout && (
+              <>
+                <IconCommunity.Button
+                  name="brush"
+                  color="white"
+                  backgroundColor="#00f5"
+                  style={{
+                    width: 48,
+                    height: 48,
+                    padding: 0,
+                    justifyContent: 'center',
+                  }}
+                  iconStyle={{marginLeft: 10, width: 20}}
+                  borderRadius={24}
+                  onPress={() => setActiveDrawingLayout(true)}
+                />
+                <View style={{height: 20}} />
+              </>
+            )}
+            <MenuButton icon="settings" onPress={() => setShowMenu(true)} />
+            <View style={{height: 40}} />
+            <MenuButton
+              icon="track-changes"
+              color={trackingColor}
+              onPress={toggleTracking}
+              onLongPress={toggleTrackingAndRecord}
+            />
+          </View>
+          <View style={styles.buttonSubPanelBottom}>
+            {selectedMark && (
+              <View style={styles.navPanel}>
+                <View style={styles.navPanelRow}>
+                  <View style={styles.navPanelItem}>
+                    <IconMoon.Button
+                      name="yandex"
+                      color="white"
+                      backgroundColor="#0f05"
+                      style={{
+                        width: 48,
+                        height: 48,
+                        padding: 0,
+                        justifyContent: 'center',
+                      }}
+                      iconStyle={{marginLeft: 10, width: 20}}
+                      borderRadius={24}
+                      onPress={() =>
+                        navigateYandex(selectedMark.geometry.coordinates)
+                      }
+                    />
+                  </View>
+                  <View style={styles.navPanelItem}>
+                    <IconMoon.Button
+                      name="osmc"
+                      color="white"
+                      backgroundColor="#0f05"
+                      style={{
+                        width: 48,
+                        height: 48,
+                        padding: 0,
+                        justifyContent: 'center',
+                      }}
+                      iconStyle={{marginLeft: 10, width: 20}}
+                      borderRadius={24}
+                      onPress={() =>
+                        navigateOsm(selectedMark.geometry.coordinates)
+                      }
+                    />
+                  </View>
+                  <View style={styles.navPanelItem}>
+                    <MenuButton
+                      icon="navigation"
+                      bgColor="#0f05"
+                      onPress={() =>
+                        navigateGoogle(selectedMark.geometry.coordinates)
+                      }
+                    />
+                  </View>
                 </View>
               </View>
-            </View>
-          )}
-          <MenuButton icon="gps-fixed" onPress={toCurrentLocation} />
+            )}
+            <MenuButton icon="gps-fixed" onPress={toCurrentLocation} />
+          </View>
         </View>
-      </View>
+      )}
       <View style={styles.closestMark}>
         <Text style={styles.markLabel}>{closest}</Text>
       </View>
@@ -457,6 +548,7 @@ const Overlay: FC<Props> = ({
         />
       )}
       {showTracks && <Tracks close={() => setShowTracks(false)} />}
+      {showDrawings && <Drawings close={() => setShowDrawings(false)} />}
       {showMarkers && center && (
         <Markers
           center={center}
@@ -485,6 +577,65 @@ const Overlay: FC<Props> = ({
         />
       )}
       {showAbout && <About close={() => setShowAbout(false)} />}
+
+      {activeDrawingLayout && (
+        <>       
+          <View style={styles.drawingLayout} 
+            onTouchMove={screenToLocation}
+            onTouchEnd={stopScreenToLocation}
+            onTouchStart={startScreenToLocation}
+          >          
+          </View>
+          {showDrawingButtons && (
+            <View style={styles.drawingButtons}>
+              <IconCommunity.Button
+                name="close"
+                color="white"
+                backgroundColor="#00f5"
+                style={{
+                  width: 48,
+                  height: 48,
+                  padding: 0,
+                  justifyContent: 'center',
+                }}
+                iconStyle={{marginLeft: 10, width: 20}}
+                borderRadius={24}
+                onPress={() => setActiveDrawingLayout(false)}
+              />
+              <View style={{height: 40}}></View>
+              <IconCommunity.Button
+                name="reply-outline"
+                color="white"
+                backgroundColor="#00f5"
+                style={{
+                  width: 48,
+                  height: 48,
+                  padding: 0,
+                  justifyContent: 'center',
+                }}
+                iconStyle={{marginLeft: 10, width: 20}}
+                borderRadius={24}
+                onPress={stepBackDrawing}
+              />
+              <View style={{height: 40}}></View>
+              <IconCommunity.Button
+                name="content-save-outline"
+                color="white"
+                backgroundColor="#00f5"
+                style={{
+                  width: 48,
+                  height: 48,
+                  padding: 0,
+                  justifyContent: 'center',
+                }}
+                iconStyle={{marginLeft: 10, width: 20}}
+                borderRadius={24}
+                onPress={saveDrawing}
+              />
+            </View>
+          )}
+        </>
+      )}
     </>
   );
 };
@@ -536,4 +687,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff8',
     textAlign: 'center',
   },
+  drawingLayout: {
+    position: 'absolute',
+    bottom: 0,
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'transparent',
+  },
+  drawingButtons: {
+    position: 'absolute',
+    right: 10,
+    height: '100%',
+    width: 48,
+    flexDirection: 'column',
+    justifyContent: 'center',
+  }
 });
