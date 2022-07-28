@@ -31,7 +31,11 @@ const authPersistConfig = {
   storage: AsyncStorage,
   blacklist: ['isRequestInProgress', 'error'],
 }
-
+const drawingsPersistConfig = {
+  key: 'drawings',
+  storage: AsyncStorage,
+  blacklist: ['activeDrawingChunk'],
+}
 const rootReducer = combineReducers({
   marks: persistReducer(marksPersistConfig, marks),
   tracker: persistReducer(trackerPersistConfig, tracker),
@@ -39,8 +43,7 @@ const rootReducer = combineReducers({
   auth: persistReducer(authPersistConfig, auth),
   network,
   ui,
-  drawings,
-  
+  drawings: persistReducer(drawingsPersistConfig, drawings),
 } as any);
 
 export default rootReducer;

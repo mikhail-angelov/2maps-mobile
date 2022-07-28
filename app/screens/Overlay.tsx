@@ -79,7 +79,8 @@ import {requestLocationPermissions} from '../utils/permissions';
 // custom font icons: https://medium.com/bam-tech/add-custom-icons-to-your-react-native-application-f039c244386c
 import {createIconSetFromIcoMoon} from 'react-native-vector-icons';
 import iconMoonConfig from '../fontConfig.json';
-import { drawingChunkAction, finishDrawingChunkAction, startDrawNewChunkAction, removeLastDrawingChunkAction } from '../actions/drawing-actions';
+import { drawingChunkAction, finishDrawingChunkAction, startDrawNewChunkAction, removeLastDrawingChunkAction, saveActualDrawingAction } from '../actions/drawing-actions';
+import Drawings from './Drawings';
 const IconMoon = createIconSetFromIcoMoon(iconMoonConfig);
 
 enum DrawingStatus {
@@ -161,6 +162,7 @@ const mapDispatchToProps = {
   finishDrawingChunk: finishDrawingChunkAction,
   startDrawNewChunk: startDrawNewChunkAction,
   removeLastDrawingChunk: removeLastDrawingChunkAction,
+  saveActualDrawing: saveActualDrawingAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps);
 type Props = ConnectedProps<typeof connector> & {map?: MapboxGL.MapView, camera?: MapboxGL.Camera};
@@ -210,6 +212,7 @@ const Overlay: FC<Props> = ({
   finishDrawingChunk,
   startDrawNewChunk,
   removeLastDrawingChunk,
+  saveActualDrawing
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -221,6 +224,7 @@ const Overlay: FC<Props> = ({
   const [activeDrawingLayout, setActiveDrawingLayout] = useState(false);
   const [showDrawingButtons, setShowDrawingButtons] = useState(true);
   const activeDrawingStatus = useRef<DrawingStatus>(DrawingStatus.COMPLETE_CHUNK);
+  const [showDrawings, setShowDrawings] = useState(false);
   const {t} = useTranslation();
 
   const menuItems: MenuItem[] = [
@@ -249,6 +253,13 @@ const Overlay: FC<Props> = ({
       title: 'Tracks',
       onPress: () => {
         setShowTracks(true);
+        setShowMenu(false);
+      },
+    },
+    {
+      title: 'Drawings',
+      onPress: () => {
+        setShowDrawings(true);
         setShowMenu(false);
       },
     },
@@ -335,15 +346,15 @@ const Overlay: FC<Props> = ({
   };
 
   const screenToLocation = async(event: GestureResponderEvent) => {
+    if (event.nativeEvent.touches.length !== 1) {
+      return
+    }
     const x = Math.round(event.nativeEvent.locationX)
     const y = Math.round(event.nativeEvent.locationY)
 
     try{
       const coords = await map?.getCoordinateFromView([x, y])
-      if (!coords) {
-        return
-      }
-      if (activeDrawingStatus.current === DrawingStatus.COMPLETE_CHUNK) {
+      if (!coords || activeDrawingStatus.current === DrawingStatus.COMPLETE_CHUNK) {
         return
       }  
       if(activeDrawingStatus.current === DrawingStatus.IN_PROCESS) {
@@ -369,6 +380,10 @@ const Overlay: FC<Props> = ({
   }
   const stepBackDrawing = () => {
     removeLastDrawingChunk()
+  }
+  const saveDrawing = () => {
+    saveActualDrawing()
+    setActiveDrawingLayout(false)
   }
   useEffect(() => {
     if (isItTheFirstTimeAppStarted) {
@@ -416,6 +431,25 @@ const Overlay: FC<Props> = ({
               onPress={toggleAwake}
             />
             <View style={{height: 40}} />
+            {!activeDrawingLayout && (
+              <>
+                <IconCommunity.Button
+                  name="brush"
+                  color="white"
+                  backgroundColor="#00f5"
+                  style={{
+                    width: 48,
+                    height: 48,
+                    padding: 0,
+                    justifyContent: 'center',
+                  }}
+                  iconStyle={{marginLeft: 10, width: 20}}
+                  borderRadius={24}
+                  onPress={() => setActiveDrawingLayout(true)}
+                />
+                <View style={{height: 20}} />
+              </>
+            )}
             <MenuButton icon="settings" onPress={() => setShowMenu(true)} />
             <View style={{height: 40}} />
             <MenuButton
@@ -514,6 +548,7 @@ const Overlay: FC<Props> = ({
         />
       )}
       {showTracks && <Tracks close={() => setShowTracks(false)} />}
+      {showDrawings && <Drawings close={() => setShowDrawings(false)} />}
       {showMarkers && center && (
         <Markers
           center={center}
@@ -543,31 +578,10 @@ const Overlay: FC<Props> = ({
       )}
       {showAbout && <About close={() => setShowAbout(false)} />}
 
-      {!activeDrawingLayout && (
-        <View style={styles.drawingButtons}>
-          <IconCommunity.Button
-            name="brush"
-            color="white"
-            backgroundColor="#00f5"
-            style={{
-              width: 48,
-              height: 48,
-              padding: 0,
-              justifyContent: 'center',
-            }}
-            iconStyle={{marginLeft: 10, width: 20}}
-            borderRadius={24}
-            onPress={() => setActiveDrawingLayout(true)}
-          />
-        </View>
-      )}
       {activeDrawingLayout && (
         <>       
           <View style={styles.drawingLayout} 
-            onTouchMove={(e) => {
-                screenToLocation(e)
-              }
-            }
+            onTouchMove={screenToLocation}
             onTouchEnd={stopScreenToLocation}
             onTouchStart={startScreenToLocation}
           >          
@@ -602,6 +616,21 @@ const Overlay: FC<Props> = ({
                 iconStyle={{marginLeft: 10, width: 20}}
                 borderRadius={24}
                 onPress={stepBackDrawing}
+              />
+              <View style={{height: 40}}></View>
+              <IconCommunity.Button
+                name="content-save-outline"
+                color="white"
+                backgroundColor="#00f5"
+                style={{
+                  width: 48,
+                  height: 48,
+                  padding: 0,
+                  justifyContent: 'center',
+                }}
+                iconStyle={{marginLeft: 10, width: 20}}
+                borderRadius={24}
+                onPress={saveDrawing}
               />
             </View>
           )}
@@ -668,7 +697,7 @@ const styles = StyleSheet.create({
   },
   drawingButtons: {
     position: 'absolute',
-    marginLeft: 10,
+    right: 10,
     height: '100%',
     width: 48,
     flexDirection: 'column',

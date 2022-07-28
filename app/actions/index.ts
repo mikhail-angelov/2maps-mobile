@@ -99,4 +99,6 @@ export enum ActionTypeEnum {
   ActiveDrawing = 'drawing/ACTIVE_DRAWING',
   FinishDrawingChunk = 'drawing/FINISH_DRAWING_CHUNK',
   SetActiveDrawing = 'drawing/SET_ACTIVE_DRAWING',
+  SaveDrawing = 'drawing/SAVE_DRAWING',
+  SetDrawings = 'drawing/SET_DRAWINGS',
 }

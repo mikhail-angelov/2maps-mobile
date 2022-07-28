@@ -3,7 +3,8 @@ import { Position } from 'geojson';
 export interface Drawing {
   id: string;
   name: string;
-  track: Position[];
+  date: number;
+  drawing: Position[][];
 }
 
 export interface DrawingsState {

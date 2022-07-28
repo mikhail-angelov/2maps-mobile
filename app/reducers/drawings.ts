@@ -2,7 +2,7 @@ import { createSelector } from 'reselect';
 import { Position } from 'geojson';
 import { ActionTypeEnum } from '../actions';
 import { createReducer } from './reducer-utils';
-import { DrawingsState, State } from '../store/types';
+import { Drawing, DrawingsState, State } from '../store/types';
 
 const initialState: DrawingsState = Object.freeze({
   drawings: [],
@@ -23,6 +23,16 @@ export default createReducer<DrawingsState>(initialState, {
   [ActionTypeEnum.SetActiveDrawing]: (newActiveDrawing: Position[][]) => (state: DrawingsState) => ({
     ...state,
     activeDrawing: newActiveDrawing,
+  }),
+  [ActionTypeEnum.SaveDrawing]: (newDrawing: Drawing) => (state: DrawingsState) => ({
+    ...state,
+    drawings: [...state.drawings, newDrawing],
+    activeDrawing: [],
+    activeDrawingChunk: [],
+  }),
+  [ActionTypeEnum.SetDrawings]: (drawings: Drawing[]) => (state: DrawingsState) => ({
+    ...state,
+    drawings,
   })
 });
 
@@ -34,4 +44,8 @@ export const selectActiveDrawing = createSelector(
 export const selectActiveDrawingChunk = createSelector(
   selectDrawingState,
   state => state.activeDrawingChunk,
+);
+export const selectAllDrawings = createSelector(
+  selectDrawingState,
+  state => state.drawings,
 );
