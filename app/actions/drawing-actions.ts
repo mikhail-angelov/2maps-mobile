@@ -22,7 +22,7 @@ export const finishDrawingChunkAction = (): AppThunk => async (dispatch, getStat
 };
 
 export const removeLastDrawingChunkAction = (): AppThunk => async (dispatch, getState) => {
-  const activeDrawing = getState().drawings.activeDrawing
+  const activeDrawing = selectActiveDrawing(getState())
   dispatch({type: ActionTypeEnum.SetActiveDrawing, payload: activeDrawing.slice(0 ,-1)})
 }
 export const saveActualDrawingAction = (): AppThunk => async (dispatch, getState) => {
