@@ -11,14 +11,9 @@ const initialState: DrawingsState = Object.freeze({
 });
 
 export default createReducer<DrawingsState>(initialState, {
-  [ActionTypeEnum.ActiveDrawing]: (newActiveDrawingChunk: Position[]) => (state: DrawingsState) => ({
+  [ActionTypeEnum.SetDrawingChunk]: (newActiveDrawingChunk: Position[]) => (state: DrawingsState) => ({
     ...state,
     activeDrawingChunk: newActiveDrawingChunk,
-  }),
-  [ActionTypeEnum.FinishDrawingChunk]: () => (state: DrawingsState) => ({
-    ...state,
-    activeDrawing: [...state.activeDrawing, state.activeDrawingChunk],
-    activeDrawingChunk: [],
   }),
   [ActionTypeEnum.SetActiveDrawing]: (newActiveDrawing: Position[][]) => (state: DrawingsState) => ({
     ...state,
@@ -28,7 +23,7 @@ export default createReducer<DrawingsState>(initialState, {
     ...state,
     drawings: [...state.drawings, newDrawing],
     activeDrawing: [],
-    activeDrawingChunk: [],
+    activeDrawingChunk: undefined,
   }),
   [ActionTypeEnum.SetDrawings]: (drawings: Drawing[]) => (state: DrawingsState) => ({
     ...state,

@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import { Position } from 'geojson';
 
 const areCoordinatesTheSame = (coordinates: number[][]) => {
   const collection = _.groupBy(coordinates);
@@ -27,4 +28,22 @@ export const makeSvg = (
     <polyline points="${points}"
     style="fill:none;stroke:red;stroke-width:2" />
     </svg>`;
+};
+
+export const makeSvgMultiTracks = (
+  tracks: (number[][] | undefined)[],
+  height: number,
+  width: number,
+): string => {
+  if (!_.isArray(tracks)) {
+    return '';
+  }
+  const polylines = tracks.map(track => {
+    if (!track) return ''
+    const points = track.join(' ');
+    return `
+    <polyline points="${points}"
+    style="fill:none;stroke:red;stroke-width:2" />`
+  }).join('')
+  return `<svg height="${height}" width="${width}">${polylines}</svg>`;
 };

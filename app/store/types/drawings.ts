@@ -5,10 +5,11 @@ export interface Drawing {
   name: string;
   date: number;
   drawing: Position[][];
+  thumbnail?: string;
 }
 
 export interface DrawingsState {
   drawings: Drawing[];
   activeDrawing: Position[][],
-  activeDrawingChunk: Position[],
+  activeDrawingChunk: number[][] | undefined,
 }

@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useEffect } from "react";
 import { View, StyleSheet, Modal, TouchableOpacity } from "react-native";
 import { connect, ConnectedProps } from "react-redux";
 import { Button, ListItem, Text } from 'react-native-elements';
@@ -13,7 +13,7 @@ import { useTranslation } from "react-i18next";
 import { emptyListText, purple, red } from "../constants/color";
 import * as _ from 'lodash';
 import { selectAllDrawings } from "../reducers/drawings";
-import { setActualDrawingAction, removeDrawingAction } from "../actions/drawing-actions";
+import { setActualDrawingAction, removeDrawingAction, getDrawingThumbnailsFromSvgFilesAction, removeDrawingThumbnailFromStateAction } from "../actions/drawing-actions";
 
 interface Item {
     id: string;
@@ -29,11 +29,13 @@ const mapDispatchToProps = {
     showModal: showModalAction,
     setActualDrawing: setActualDrawingAction,
     removeDrawing: removeDrawingAction,
+    getDrawingThumbnailsFromSvgFiles: getDrawingThumbnailsFromSvgFilesAction,
+    removeDrawingThumbnailFromState: removeDrawingThumbnailFromStateAction
 };
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type Props = ConnectedProps<typeof connector> & { close: () => void }
 
-const Drawings: FC<Props> = ({ drawings, close, showModal, setActualDrawing, removeDrawing }) => {
+const Drawings: FC<Props> = ({ drawings, close, showModal, setActualDrawing, removeDrawing, getDrawingThumbnailsFromSvgFiles, removeDrawingThumbnailFromState }) => {
     const { t } = useTranslation();
 
     const onSelectDrawing = (id: string) => {
@@ -50,14 +52,14 @@ const Drawings: FC<Props> = ({ drawings, close, showModal, setActualDrawing, rem
         })
     }
 
-    const list: Item[] = orderBy(drawings, 'date', 'desc').map(({ id, name, date }) => {
+    const list: Item[] = orderBy(drawings, 'date', 'desc').map(({ id, name, date, thumbnail }) => {
         const subtitle = `T: ${dayjs(date).format('YY.MM.DD HH:mm')}`
         return {
             id,
             key: id,
-            title: name,
+            title: `${name}`,
             subtitle,
-            thumbnail: '',
+            thumbnail: thumbnail || '',
         }
     })
 
@@ -87,6 +89,11 @@ const Drawings: FC<Props> = ({ drawings, close, showModal, setActualDrawing, rem
             />
         </View>
     )
+    
+    useEffect(()=> {
+        getDrawingThumbnailsFromSvgFiles()
+        return () => removeDrawingThumbnailFromState()
+    }, [])
 
     return <Modal style={styles.container} visible onRequestClose={close}>
         <View style={styles.wrapper}>

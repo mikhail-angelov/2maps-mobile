@@ -79,15 +79,10 @@ import {requestLocationPermissions} from '../utils/permissions';
 // custom font icons: https://medium.com/bam-tech/add-custom-icons-to-your-react-native-application-f039c244386c
 import {createIconSetFromIcoMoon} from 'react-native-vector-icons';
 import iconMoonConfig from '../fontConfig.json';
-import { drawingChunkAction, finishDrawingChunkAction, startDrawNewChunkAction, removeLastDrawingChunkAction, saveActualDrawingAction } from '../actions/drawing-actions';
+import { addPointForDrawingChunkAction, finishDrawNewChunkAction, startDrawNewChunkAction, removeLastDrawingChunkAction, saveActualDrawingAction } from '../actions/drawing-actions';
 import Drawings from './Drawings';
+import DrawingChunk from '../components/DrawingChunk';
 const IconMoon = createIconSetFromIcoMoon(iconMoonConfig);
-
-enum DrawingStatus {
-  COMPLETE_CHUNK,
-  START_CHUNK,
-  IN_PROCESS
-}
 
 interface MenuItem {
   title: string;
@@ -158,8 +153,8 @@ const mapDispatchToProps = {
   showModal: showModalAction,
   setShowWikimapia: setShowWikimapiaAction,
   toggleAwake: toggleAwakeAction,
-  drawingChunk: drawingChunkAction,
-  finishDrawingChunk: finishDrawingChunkAction,
+  addPointForDrawingChunk: addPointForDrawingChunkAction,
+  finishDrawNewChunk: finishDrawNewChunkAction,
   startDrawNewChunk: startDrawNewChunkAction,
   removeLastDrawingChunk: removeLastDrawingChunkAction,
   saveActualDrawing: saveActualDrawingAction,
@@ -208,8 +203,8 @@ const Overlay: FC<Props> = ({
   awake,
   toggleAwake,
   selectedMark,
-  drawingChunk,
-  finishDrawingChunk,
+  addPointForDrawingChunk,
+  finishDrawNewChunk,
   startDrawNewChunk,
   removeLastDrawingChunk,
   saveActualDrawing
@@ -223,7 +218,6 @@ const Overlay: FC<Props> = ({
   const [showAbout, setShowAbout] = useState(false);
   const [activeDrawingLayout, setActiveDrawingLayout] = useState(false);
   const [showDrawingButtons, setShowDrawingButtons] = useState(true);
-  const activeDrawingStatus = useRef<DrawingStatus>(DrawingStatus.COMPLETE_CHUNK);
   const [showDrawings, setShowDrawings] = useState(false);
   const {t} = useTranslation();
 
@@ -345,38 +339,22 @@ const Overlay: FC<Props> = ({
     setShowWikimapia(!showWikimapia);
   };
 
-  const screenToLocation = async(event: GestureResponderEvent) => {
+  const onTouchStartDrawing = () => {
+    startDrawNewChunk()
+    setShowDrawingButtons(false)
+  }
+  const onTouchMoveDrawing = async(event: GestureResponderEvent) => {
     if (event.nativeEvent.touches.length !== 1) {
       return
     }
-    const x = Math.round(event.nativeEvent.locationX)
-    const y = Math.round(event.nativeEvent.locationY)
-
-    try{
-      const coords = await map?.getCoordinateFromView([x, y])
-      if (!coords || activeDrawingStatus.current === DrawingStatus.COMPLETE_CHUNK) {
-        return
-      }  
-      if(activeDrawingStatus.current === DrawingStatus.IN_PROCESS) {
-        drawingChunk(coords)
-      } else {
-        console.log('start new chunk!!!')
-        startDrawNewChunk(coords)
-        activeDrawingStatus.current = DrawingStatus.IN_PROCESS
-        setShowDrawingButtons(false)
-      }
-    } catch (e) {
-      console.error(e)
+    const {locationX, locationY} = event.nativeEvent
+    addPointForDrawingChunk(locationX, locationY)
+  }
+  const onTouchEndDrawing = () => {
+    if (map) {
+      finishDrawNewChunk(map)
     }
-  }
-
-  const stopScreenToLocation = () => {
-    activeDrawingStatus.current = DrawingStatus.COMPLETE_CHUNK
-    finishDrawingChunk()
     setShowDrawingButtons(true)
-  }
-  const startScreenToLocation = () => {
-    activeDrawingStatus.current = DrawingStatus.START_CHUNK
   }
   const stepBackDrawing = () => {
     removeLastDrawingChunk()
@@ -385,6 +363,7 @@ const Overlay: FC<Props> = ({
     saveActualDrawing()
     setActiveDrawingLayout(false)
   }
+
   useEffect(() => {
     if (isItTheFirstTimeAppStarted) {
       setShowSettings(isItTheFirstTimeAppStarted);
@@ -581,10 +560,11 @@ const Overlay: FC<Props> = ({
       {activeDrawingLayout && (
         <>       
           <View style={styles.drawingLayout} 
-            onTouchMove={screenToLocation}
-            onTouchEnd={stopScreenToLocation}
-            onTouchStart={startScreenToLocation}
-          >          
+            onTouchMove={onTouchMoveDrawing}
+            onTouchEnd={onTouchEndDrawing}
+            onTouchStart={onTouchStartDrawing}
+          >
+            <DrawingChunk />
           </View>
           {showDrawingButtons && (
             <View style={styles.drawingButtons}>
