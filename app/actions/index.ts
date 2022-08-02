@@ -100,4 +100,5 @@ export enum ActionTypeEnum {
   SetActiveDrawing = 'drawing/SET_ACTIVE_DRAWING',
   SaveDrawing = 'drawing/SAVE_DRAWING',
   SetDrawings = 'drawing/SET_DRAWINGS',
+  SetSelectedDrawingBBox= 'drawing/SET_SELECTED_DRAWING_BBOX',
 }

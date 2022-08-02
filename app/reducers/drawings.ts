@@ -28,7 +28,12 @@ export default createReducer<DrawingsState>(initialState, {
   [ActionTypeEnum.SetDrawings]: (drawings: Drawing[]) => (state: DrawingsState) => ({
     ...state,
     drawings,
-  })
+  }),
+  [ActionTypeEnum.SetSelectedDrawingBBox]:
+  (selectedDrawingBBox?: number[][]) => (state: DrawingsState) => ({
+    ...state,
+    selectedDrawingBBox,
+  }),
 });
 
 export const selectDrawingState = (state: State) => state.drawings;
@@ -43,4 +48,8 @@ export const selectActiveDrawingChunk = createSelector(
 export const selectAllDrawings = createSelector(
   selectDrawingState,
   state => state.drawings,
+);
+export const selectDrawingBBox = createSelector(
+  selectDrawingState,
+  state => state.selectedDrawingBBox,
 );

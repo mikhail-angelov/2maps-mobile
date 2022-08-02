@@ -25,21 +25,32 @@ const removeAdjacentDuplicates = (coordinates: number[][]) => {
   return coordinates.reduce((acc: number[][], item) => (_.isEqual(_.last(acc), item) ? acc : [...acc, item]), [])
 }
 
-export const findMinMaxCoordinates = (coordinatesXY: number[][]) => {
-  const maxX = _.maxBy(coordinatesXY, ([x, _]) => x)?.[0]
-  const minX = _.minBy(coordinatesXY, ([x, _]) => x)?.[0]
-  const maxY = _.maxBy(coordinatesXY, ([_, y]) => y)?.[1]
-  const minY = _.minBy(coordinatesXY, ([_, y]) => y)?.[1]
-  return {maxX, maxY, minX, minY}
+export const findMinMaxCoordinates = (multipleCoordinatesXY: number[][][]) => {
+  const result = { maxX: 0, maxY: 0, minX: 0, minY: 0 }
+  multipleCoordinatesXY.forEach((coordsXY: number[][], indexJ) => {
+    coordsXY.forEach(([x, y]: number[], indexK) => {
+      if (indexJ === 0 && indexK === 0) {
+        result.maxX = x
+        result.minX = x
+        result.maxY = y
+        result.minY = y
+        return
+      }
+      result.maxX = Math.max(x, result.maxX)
+      result.minX = Math.min(x, result.minX)
+      result.maxY = Math.max(y, result.maxY)
+      result.minY = Math.min(y, result.minY)
+    })
+  })
+  return result
 }
 
-export const convertToBoxSize = (coordinatesXY: number[][], boxX: number, boxY: number) => {
+export const convertToBoxSize = (coordinatesXY: number[][][], boxX: number, boxY: number): number[][][] => {
   const { maxX, maxY, minX, minY } = findMinMaxCoordinates(coordinatesXY)
-  if (!maxX || !maxY || !minX || !minY) {
-    return
-  }
-  const boxSizeCoordinates = _.map(coordinatesXY, ([x, y]) => ([normalizeBetweenTwoRanges(x, minX, maxX, 1, boxX), normalizeBetweenTwoRanges(y, minY, maxY, 1, boxY)]))
-  return removeAdjacentDuplicates(boxSizeCoordinates)
+  return coordinatesXY.map((coords: number[][]) => {
+    const boxSizeCoordinates = _.map(coords, ([x, y]) => ([normalizeBetweenTwoRanges(x, minX, maxX, 1, boxX), normalizeBetweenTwoRanges(y, minY, maxY, 1, boxY)]))
+    return removeAdjacentDuplicates(boxSizeCoordinates)
+  })
 }
 
 export const markToDistance = (center: Position) => (mark: Mark) => {

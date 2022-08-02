@@ -13,8 +13,8 @@ import {showModalAction} from './ui-actions';
 import {ThunkDispatch} from 'redux-thunk';
 import {getDrawingsDirectoryPath} from './api';
 import i18next from 'i18next';
-import {convertToBoxSize, latLngToTileIndex} from '../utils/normalize';
-import {makeSvgMultiTracks} from '../utils/svg';
+import {convertToBoxSize, findMinMaxCoordinates, latLngToTileIndex} from '../utils/normalize';
+import {makeSvg} from '../utils/svg';
 import MapboxGL from '@react-native-mapbox-gl/maps';
 
 const DRAWINGS_EXT = '.drawing';
@@ -115,9 +115,33 @@ export const setActualDrawingAction =
   async (dispatch, getState) => {
     const drawings = selectAllDrawings(getState());
     const result = drawings.find(item => item.id === id);
+    if (!result || !result.drawing) {
+      dispatch({
+        type: ActionTypeEnum.SetActiveDrawing,
+        payload: [],
+      })
+      dispatch({
+        type: ActionTypeEnum.SetSelectedDrawingBBox,
+        payload: undefined,
+      });
+      return
+    }
     dispatch({
       type: ActionTypeEnum.SetActiveDrawing,
-      payload: result?.drawing || [],
+      payload: result.drawing,
+    })
+    let {maxX, maxY, minX, minY} = findMinMaxCoordinates(result.drawing)
+    if (Math.abs(maxX - minX) < 0.005 && Math.abs(maxY - minY) < 0.006) {
+      minX -= 0.0025;
+      maxX += 0.0025;
+      minY -= 0.003;
+      maxY += 0.003;
+    }
+    const start = [minX, minY];
+    const end = [maxX, maxY];
+    dispatch({
+      type: ActionTypeEnum.SetSelectedDrawingBBox,
+      payload: [start, end],
     });
   };
 
@@ -182,21 +206,14 @@ const renderDrawingIcon = (drawing: Position[][]) => {
     return coordinatesXY;
   });
   const boxCoordinates = convertToBoxSize(
-    _.flatten(chunksSvgList),
+    chunksSvgList,
     boxX - 1,
     boxY - 1,
   );
   if (!boxCoordinates || _.isEmpty(boxCoordinates)) {
     return;
   }
-  let skipItems = 0;
-  const separatedChunks = chunksSvgList.map(item => {
-    const nextSkip = skipItems + item.length
-    const chunk = boxCoordinates.slice(skipItems, nextSkip);
-    skipItems = nextSkip;
-    return chunk;
-  });
-  const resultSvg = makeSvgMultiTracks(separatedChunks, boxX, boxY);
+  const resultSvg = makeSvg(boxCoordinates, boxX, boxY);
   return resultSvg;
 };
 

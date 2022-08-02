@@ -39,6 +39,7 @@ import Wikimapia from '../components/Wikimapia';
 import SelectedMark from '../components/SelectedMark';
 import * as _ from 'lodash';
 import Drawing from '../components/Drawing';
+import { selectDrawingBBox } from '../reducers/drawings';
 
 MapboxGL.setAccessToken(
   process.env.MAPBOX_PUB_KEY ||
@@ -68,6 +69,7 @@ const mapStateToProps = (state: State) => ({
   location: selectLocation(state),
   showWikimapia: selectShowWikimapia(state),
   selectedMark: selectSelectedMark(state),
+  selectedDrawingBBox: selectDrawingBBox(state)
 });
 const mapDispatchToProps = {
   setCenter: setCenterAction,
@@ -123,11 +125,24 @@ class Map extends Component<Props> {
   componentDidUpdate(prevProps: any) {
     if (
       this.props.selectedTrackBBox &&
-      !_.isEqual(this.props.selectedTrackBBox, prevProps.selectedTrackBBox)
+      !_.isEqual(this.props.selectedTrackBBox, prevProps.selectedTrackBBox) || 
+      this.props.selectedDrawingBBox &&
+      !_.isEqual(this.props.selectedDrawingBBox, prevProps.selectedDrawingBBox)
     ) {
-      const start = this.props.selectedTrackBBox?.[0];
-      const end = this.props.selectedTrackBBox?.[1];
-      this.camera?.fitBounds(start, end, 70, 100);
+      const trackStart = this.props.selectedTrackBBox?.[0];
+      const trackEnd = this.props.selectedTrackBBox?.[1];
+
+      const drawingStart = this.props.selectedDrawingBBox?.[0];
+      const drawingEnd = this.props.selectedDrawingBBox?.[1];
+
+      const startX = _.min([trackStart?.[0], drawingStart?.[0]])
+      const startY = _.min([trackStart?.[1], drawingStart?.[1]])
+      const endX = _.max([trackEnd?.[0], drawingEnd?.[0]])
+      const endY = _.max([trackEnd?.[1], drawingEnd?.[1]])
+      if (startX === undefined || startY === undefined || endX === undefined || endY === undefined) {
+        return
+      }
+      this.camera?.fitBounds([startX, startY], [endX, endY], 70, 100);
     }
   }
 

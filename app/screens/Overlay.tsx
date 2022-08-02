@@ -79,9 +79,10 @@ import {requestLocationPermissions} from '../utils/permissions';
 // custom font icons: https://medium.com/bam-tech/add-custom-icons-to-your-react-native-application-f039c244386c
 import {createIconSetFromIcoMoon} from 'react-native-vector-icons';
 import iconMoonConfig from '../fontConfig.json';
-import { addPointForDrawingChunkAction, finishDrawNewChunkAction, startDrawNewChunkAction, removeLastDrawingChunkAction, saveActualDrawingAction } from '../actions/drawing-actions';
+import { addPointForDrawingChunkAction, finishDrawNewChunkAction, startDrawNewChunkAction, removeLastDrawingChunkAction, saveActualDrawingAction, setActualDrawingAction } from '../actions/drawing-actions';
 import Drawings from './Drawings';
 import DrawingChunk from '../components/DrawingChunk';
+import { selectActiveDrawing } from '../reducers/drawings';
 const IconMoon = createIconSetFromIcoMoon(iconMoonConfig);
 
 interface MenuItem {
@@ -133,6 +134,7 @@ const mapStateToProps = (state: State) => ({
   showWikimapia: selectShowWikimapia(state),
   awake: selectAwake(state),
   selectedMark: selectSelectedMark(state),
+  selectedDrawing: selectActiveDrawing(state),
 });
 const mapDispatchToProps = {
   removeMark: removeMarkAction,
@@ -158,6 +160,7 @@ const mapDispatchToProps = {
   startDrawNewChunk: startDrawNewChunkAction,
   removeLastDrawingChunk: removeLastDrawingChunkAction,
   saveActualDrawing: saveActualDrawingAction,
+  setActualDrawing: setActualDrawingAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps);
 type Props = ConnectedProps<typeof connector> & {map?: MapboxGL.MapView, camera?: MapboxGL.Camera};
@@ -207,7 +210,9 @@ const Overlay: FC<Props> = ({
   finishDrawNewChunk,
   startDrawNewChunk,
   removeLastDrawingChunk,
-  saveActualDrawing
+  saveActualDrawing,
+  selectedDrawing,
+  setActualDrawing
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -333,6 +338,7 @@ const Overlay: FC<Props> = ({
 
   const onHideSelectedTrack = () => {
     selectTrack(undefined);
+    setActualDrawing("")
   };
 
   const toggleWikimapia = () => {
@@ -398,7 +404,7 @@ const Overlay: FC<Props> = ({
             />
           </View>
           <View style={styles.buttonSubPanel}>
-            {selectedTrack && (
+            {(selectedTrack || !!selectedDrawing.length) && (
               <>
                 <MenuButton icon="visibility-off" onPress={onHideSelectedTrack} />
                 <View style={{height: 40}} />
@@ -410,8 +416,6 @@ const Overlay: FC<Props> = ({
               onPress={toggleAwake}
             />
             <View style={{height: 40}} />
-            {!activeDrawingLayout && (
-              <>
                 <IconCommunity.Button
                   name="brush"
                   color="white"
@@ -427,8 +431,6 @@ const Overlay: FC<Props> = ({
                   onPress={() => setActiveDrawingLayout(true)}
                 />
                 <View style={{height: 20}} />
-              </>
-            )}
             <MenuButton icon="settings" onPress={() => setShowMenu(true)} />
             <View style={{height: 40}} />
             <MenuButton

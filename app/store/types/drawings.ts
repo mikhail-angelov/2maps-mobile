@@ -12,4 +12,5 @@ export interface DrawingsState {
   drawings: Drawing[];
   activeDrawing: Position[][],
   activeDrawingChunk: number[][] | undefined,
+  selectedDrawingBBox?: number[][];
 }
