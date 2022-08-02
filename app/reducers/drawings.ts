@@ -7,7 +7,8 @@ import { Drawing, DrawingsState, State } from '../store/types';
 const initialState: DrawingsState = Object.freeze({
   drawings: [],
   activeDrawing: [],
-  activeDrawingChunk: [],
+  activeDrawingChunk: undefined,
+  selectedDrawingBBox: undefined,
 });
 
 export default createReducer<DrawingsState>(initialState, {
@@ -24,6 +25,7 @@ export default createReducer<DrawingsState>(initialState, {
     drawings: [...state.drawings, newDrawing],
     activeDrawing: [],
     activeDrawingChunk: undefined,
+    selectedDrawingBBox: undefined,
   }),
   [ActionTypeEnum.SetDrawings]: (drawings: Drawing[]) => (state: DrawingsState) => ({
     ...state,

@@ -1,48 +1,132 @@
-import React, {FC} from 'react';
-import {connect, ConnectedProps} from 'react-redux';
-import {State} from '../store/types';
-import MapboxGL, {LineLayerStyle} from '@react-native-mapbox-gl/maps';
-import {lineString} from '@turf/helpers';
-import {selectActiveDrawing} from '../reducers/drawings';
-import {red} from '../constants/color';
+import React, { FC, useState } from 'react';
+import { connect, ConnectedProps } from 'react-redux';
+import { GestureResponderEvent, StyleSheet, View } from 'react-native';
+import DrawingChunk from './DrawingChunk';
+import MapboxGL from '@react-native-mapbox-gl/maps';
+import { addPointForDrawingChunkAction, finishDrawNewChunkAction, removeLastDrawingChunkAction, saveActualDrawingAction, setActualDrawingAction, startDrawNewChunkAction } from '../actions/drawing-actions';
+import IconCommunity from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const DrawingStyle: LineLayerStyle = {
-  lineCap: 'round',
-  lineWidth: 6,
-  lineOpacity: 0.84,
-  lineColor: red,
+interface OwnProps {
+  setActiveDrawingLayout: (value: boolean) => void
+  map?: MapboxGL.MapView
+}
+
+const mapDispatchToProps = {
+  addPointForDrawingChunk: addPointForDrawingChunkAction,
+  finishDrawNewChunk: finishDrawNewChunkAction,
+  startDrawNewChunk: startDrawNewChunkAction,
+  removeLastDrawingChunk: removeLastDrawingChunkAction,
+  saveActualDrawing: saveActualDrawingAction,
+  setActualDrawing: setActualDrawingAction,
 };
+const connector = connect(null, mapDispatchToProps);
+type Props = ConnectedProps<typeof connector> & OwnProps;
 
-const mapStateToProps = (state: State) => ({
-  activeDrawing: selectActiveDrawing(state),
-});
-const connector = connect(mapStateToProps);
-type Props = ConnectedProps<typeof connector>;
+const Drawing: FC<Props> = ({ map, setActiveDrawingLayout, addPointForDrawingChunk, finishDrawNewChunk, startDrawNewChunk, removeLastDrawingChunk, saveActualDrawing }) => {
+  const [showDrawingButtons, setShowDrawingButtons] = useState(true);
 
-const Drawing: FC<Props> = ({activeDrawing}): any => {
-  if (!activeDrawing) {
-    return null;
+  const onTouchStartDrawing = () => {
+    startDrawNewChunk()
+    setShowDrawingButtons(false)
   }
-  return activeDrawing
-    .filter(chunk => chunk && chunk.length > 1)
-    .map((chunk, index) => {
-      const activeRoute = chunk && chunk.length > 1 ? lineString(chunk) : null;
-      if (!activeRoute) return null;
-      return (
-        <MapboxGL.ShapeSource
-          id={`active-drawing${index}`}
-          shape={activeRoute}
-          key={index}>
-          <MapboxGL.LineLayer
-            id={`drawingLayer${index}`}
-            style={DrawingStyle}
-            minZoomLevel={1}
-            layerIndex={500000}
-            key={index}
+  const onTouchMoveDrawing = async (event: GestureResponderEvent) => {
+    if (event.nativeEvent.touches.length !== 1) {
+      return
+    }
+    const { locationX, locationY } = event.nativeEvent
+    addPointForDrawingChunk(locationX, locationY)
+  }
+  const onTouchEndDrawing = () => {
+    if (map) {
+      finishDrawNewChunk(map)
+      setShowDrawingButtons(true)
+    }
+  }
+  const stepBackDrawing = () => {
+    removeLastDrawingChunk()
+  }
+  const saveDrawing = () => {
+    saveActualDrawing()
+    setActiveDrawingLayout(false)
+  }
+  return (
+    <>
+      <View style={styles.drawingLayout}
+        onTouchMove={onTouchMoveDrawing}
+        onTouchEnd={onTouchEndDrawing}
+        onTouchStart={onTouchStartDrawing}
+      >
+        <DrawingChunk />
+      </View>
+      {showDrawingButtons && (
+        <View style={styles.drawingButtons}>
+          <IconCommunity.Button
+            name="close"
+            color="white"
+            backgroundColor="#00f5"
+            style={{
+              width: 48,
+              height: 48,
+              padding: 0,
+              justifyContent: 'center',
+            }}
+            iconStyle={{ marginLeft: 10, width: 20 }}
+            borderRadius={24}
+            onPress={() => setActiveDrawingLayout(false)}
           />
-        </MapboxGL.ShapeSource>
-      );
-    });
+          <View style={{ height: 40 }}></View>
+          <IconCommunity.Button
+            name="reply-outline"
+            color="white"
+            backgroundColor="#00f5"
+            style={{
+              width: 48,
+              height: 48,
+              padding: 0,
+              justifyContent: 'center',
+            }}
+            iconStyle={{ marginLeft: 10, width: 20 }}
+            borderRadius={24}
+            onPress={stepBackDrawing}
+          />
+          <View style={{ height: 40 }}></View>
+          <IconCommunity.Button
+            name="content-save-outline"
+            color="white"
+            backgroundColor="#00f5"
+            style={{
+              width: 48,
+              height: 48,
+              padding: 0,
+              justifyContent: 'center',
+            }}
+            iconStyle={{ marginLeft: 10, width: 20 }}
+            borderRadius={24}
+            onPress={saveDrawing}
+          />
+        </View>
+      )}
+    </>
+  );
 };
 
 export default connector(Drawing);
+
+const styles = StyleSheet.create({
+  drawingLayout: {
+    position: 'absolute',
+    bottom: 0,
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'transparent',
+  },
+  drawingButtons: {
+    position: 'absolute',
+    right: 10,
+    height: '100%',
+    width: 48,
+    flexDirection: 'column',
+    justifyContent: 'center',
+  }
+})

@@ -38,7 +38,7 @@ import MarksLocation from '../components/MarksLocation';
 import Wikimapia from '../components/Wikimapia';
 import SelectedMark from '../components/SelectedMark';
 import * as _ from 'lodash';
-import Drawing from '../components/Drawing';
+import Drawing from '../components/DrawingMapLayer';
 import { selectDrawingBBox } from '../reducers/drawings';
 
 MapboxGL.setAccessToken(

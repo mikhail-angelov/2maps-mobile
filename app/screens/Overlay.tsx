@@ -21,7 +21,7 @@ import {
   selectTracks,
   selectIsTracking,
 } from '../reducers/tracker';
-import {View, StyleSheet, Text, GestureResponderEvent} from 'react-native';
+import {View, StyleSheet, Text} from 'react-native';
 import {BottomSheet, ListItem} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import IconCommunity from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -81,8 +81,8 @@ import {createIconSetFromIcoMoon} from 'react-native-vector-icons';
 import iconMoonConfig from '../fontConfig.json';
 import { addPointForDrawingChunkAction, finishDrawNewChunkAction, startDrawNewChunkAction, removeLastDrawingChunkAction, saveActualDrawingAction, setActualDrawingAction } from '../actions/drawing-actions';
 import Drawings from './Drawings';
-import DrawingChunk from '../components/DrawingChunk';
 import { selectActiveDrawing } from '../reducers/drawings';
+import Drawing from '../components/Drawing';
 const IconMoon = createIconSetFromIcoMoon(iconMoonConfig);
 
 interface MenuItem {
@@ -206,11 +206,6 @@ const Overlay: FC<Props> = ({
   awake,
   toggleAwake,
   selectedMark,
-  addPointForDrawingChunk,
-  finishDrawNewChunk,
-  startDrawNewChunk,
-  removeLastDrawingChunk,
-  saveActualDrawing,
   selectedDrawing,
   setActualDrawing
 }) => {
@@ -222,7 +217,6 @@ const Overlay: FC<Props> = ({
   const [showTracks, setShowTracks] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [activeDrawingLayout, setActiveDrawingLayout] = useState(false);
-  const [showDrawingButtons, setShowDrawingButtons] = useState(true);
   const [showDrawings, setShowDrawings] = useState(false);
   const {t} = useTranslation();
 
@@ -345,31 +339,6 @@ const Overlay: FC<Props> = ({
     setShowWikimapia(!showWikimapia);
   };
 
-  const onTouchStartDrawing = () => {
-    startDrawNewChunk()
-    setShowDrawingButtons(false)
-  }
-  const onTouchMoveDrawing = async(event: GestureResponderEvent) => {
-    if (event.nativeEvent.touches.length !== 1) {
-      return
-    }
-    const {locationX, locationY} = event.nativeEvent
-    addPointForDrawingChunk(locationX, locationY)
-  }
-  const onTouchEndDrawing = () => {
-    if (map) {
-      finishDrawNewChunk(map)
-    }
-    setShowDrawingButtons(true)
-  }
-  const stepBackDrawing = () => {
-    removeLastDrawingChunk()
-  }
-  const saveDrawing = () => {
-    saveActualDrawing()
-    setActiveDrawingLayout(false)
-  }
-
   useEffect(() => {
     if (isItTheFirstTimeAppStarted) {
       setShowSettings(isItTheFirstTimeAppStarted);
@@ -387,7 +356,7 @@ const Overlay: FC<Props> = ({
       )}
       {!activeDrawingLayout && (
         <View style={styles.buttonPanel}>
-          <View style={styles.buttonSubPanelBottom}>
+          <View style={styles.buttonSubPanelTop}>
             <IconCommunity.Button
               name={showWikimapia ? 'window-close' : 'wikipedia'}
               color="white"
@@ -405,34 +374,30 @@ const Overlay: FC<Props> = ({
           </View>
           <View style={styles.buttonSubPanel}>
             {(selectedTrack || !!selectedDrawing.length) && (
-              <>
+              <View style={styles.visibilityOffButton}>
                 <MenuButton icon="visibility-off" onPress={onHideSelectedTrack} />
-                <View style={{height: 40}} />
-              </>
+              </View>
             )}
             <MenuButton
               icon={awake ? 'brightness-high' : 'brightness-low'}
               bgColor={awake ? '#0f0a' : '#00f5'}
               onPress={toggleAwake}
             />
-            <View style={{height: 40}} />
-                <IconCommunity.Button
-                  name="brush"
-                  color="white"
-                  backgroundColor="#00f5"
-                  style={{
-                    width: 48,
-                    height: 48,
-                    padding: 0,
-                    justifyContent: 'center',
-                  }}
-                  iconStyle={{marginLeft: 10, width: 20}}
-                  borderRadius={24}
-                  onPress={() => setActiveDrawingLayout(true)}
-                />
-                <View style={{height: 20}} />
+            <IconCommunity.Button
+              name="brush"
+              color="white"
+              backgroundColor="#00f5"
+              style={{
+                width: 48,
+                height: 48,
+                padding: 0,
+                justifyContent: 'center',
+              }}
+              iconStyle={{marginLeft: 10, width: 20}}
+              borderRadius={24}
+              onPress={() => setActiveDrawingLayout(true)}
+            />
             <MenuButton icon="settings" onPress={() => setShowMenu(true)} />
-            <View style={{height: 40}} />
             <MenuButton
               icon="track-changes"
               color={trackingColor}
@@ -560,63 +525,7 @@ const Overlay: FC<Props> = ({
       {showAbout && <About close={() => setShowAbout(false)} />}
 
       {activeDrawingLayout && (
-        <>       
-          <View style={styles.drawingLayout} 
-            onTouchMove={onTouchMoveDrawing}
-            onTouchEnd={onTouchEndDrawing}
-            onTouchStart={onTouchStartDrawing}
-          >
-            <DrawingChunk />
-          </View>
-          {showDrawingButtons && (
-            <View style={styles.drawingButtons}>
-              <IconCommunity.Button
-                name="close"
-                color="white"
-                backgroundColor="#00f5"
-                style={{
-                  width: 48,
-                  height: 48,
-                  padding: 0,
-                  justifyContent: 'center',
-                }}
-                iconStyle={{marginLeft: 10, width: 20}}
-                borderRadius={24}
-                onPress={() => setActiveDrawingLayout(false)}
-              />
-              <View style={{height: 40}}></View>
-              <IconCommunity.Button
-                name="reply-outline"
-                color="white"
-                backgroundColor="#00f5"
-                style={{
-                  width: 48,
-                  height: 48,
-                  padding: 0,
-                  justifyContent: 'center',
-                }}
-                iconStyle={{marginLeft: 10, width: 20}}
-                borderRadius={24}
-                onPress={stepBackDrawing}
-              />
-              <View style={{height: 40}}></View>
-              <IconCommunity.Button
-                name="content-save-outline"
-                color="white"
-                backgroundColor="#00f5"
-                style={{
-                  width: 48,
-                  height: 48,
-                  padding: 0,
-                  justifyContent: 'center',
-                }}
-                iconStyle={{marginLeft: 10, width: 20}}
-                borderRadius={24}
-                onPress={saveDrawing}
-              />
-            </View>
-          )}
-        </>
+        <Drawing setActiveDrawingLayout={setActiveDrawingLayout} map={map} />
       )}
     </>
   );
@@ -630,15 +539,25 @@ const styles = StyleSheet.create({
     height: '100%',
     right: 10,
   },
+  buttonSubPanelTop: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    minHeight: 90,
+  },
   buttonSubPanel: {
-    height: '30%',
-    justifyContent: 'center',
-    marginVertical: 10,
+    flexGrow: 1,
+    justifyContent: 'space-between',
+    paddingTop: 90,
+    position: 'relative',
+    marginVertical: 20,
+  },
+  visibilityOffButton: {
+    position: 'absolute',
+    top: 10,
   },
   buttonSubPanelBottom: {
-    height: '30%',
-    justifyContent: 'flex-end',
-    marginBottom: 10,
+    flex: 1,
+    minHeight: 50,
   },
   navPanel: {
     width: 48,
@@ -668,21 +587,5 @@ const styles = StyleSheet.create({
     padding: 4,
     backgroundColor: '#fff8',
     textAlign: 'center',
-  },
-  drawingLayout: {
-    position: 'absolute',
-    bottom: 0,
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'transparent',
-  },
-  drawingButtons: {
-    position: 'absolute',
-    right: 10,
-    height: '100%',
-    width: 48,
-    flexDirection: 'column',
-    justifyContent: 'center',
   }
 });
