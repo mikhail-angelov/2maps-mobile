@@ -349,7 +349,7 @@ const Overlay: FC<Props> = ({
   console.log('render overlay', zoom, opacity, editedMark);
   return (
     <>
-      {!!secondaryMap && (
+      {!!secondaryMap && !activeDrawingLayout && (
         <View style={styles.slider}>
           <Slider value={opacity} setValue={onOpacityChange} />
         </View>
