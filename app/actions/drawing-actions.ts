@@ -1,74 +1,75 @@
-import {ActionTypeEnum, AppThunk} from '.';
+import { ActionTypeEnum, AppThunk } from '.';
 import * as _ from 'lodash';
-import {Position} from 'geojson';
+import { Position } from 'geojson';
 import {
   selectActiveDrawing,
   selectActiveDrawingChunk,
   selectAllDrawings,
 } from '../reducers/drawings';
-import {Drawing, ModalActionType, State} from '../store/types';
-import {v4 as uuid} from '@lukeed/uuid';
+import { Drawing, ModalActionType, State } from '../store/types';
+import { v4 as uuid } from '@lukeed/uuid';
 import RNFS from 'react-native-fs';
-import {showModalAction} from './ui-actions';
-import {ThunkDispatch} from 'redux-thunk';
-import {getDrawingsDirectoryPath} from './api';
+import { showModalAction } from './ui-actions';
+import { ThunkDispatch } from 'redux-thunk';
+import { getDrawingsDirectoryPath } from './api';
 import i18next from 'i18next';
-import {convertToBoxSize, findMinMaxCoordinates, latLngToTileIndex} from '../utils/normalize';
-import {makeSvg} from '../utils/svg';
+import { convertToBoxSize, findMinMaxCoordinates, latLngToTileIndex } from '../utils/normalize';
+import { makeSvg } from '../utils/svg';
 import MapboxGL from '@react-native-mapbox-gl/maps';
+import Share from 'react-native-share';
 
 const DRAWINGS_EXT = '.drawing';
 const SVG_EXT = '.svg';
 
 export const addPointForDrawingChunkAction =
   (locationX: number, locationY: number): AppThunk =>
-  async (dispatch, getState) => {
-    const x = Math.round(locationX);
-    const y = Math.round(locationY);
+    async (dispatch, getState) => {
+      const x = Math.round(locationX);
+      const y = Math.round(locationY);
 
-    const activeDrawingChunk = selectActiveDrawingChunk(getState());
-    if (!activeDrawingChunk) {
-      return;
-    }
-    const lastRecord = _.last(activeDrawingChunk);
-    if (!_.isEqual(lastRecord, [x, y])) {
-      dispatch({
-        type: ActionTypeEnum.SetDrawingChunk,
-        payload: [...activeDrawingChunk, [x, y]],
-      });
-    }
-  };
+      const activeDrawingChunk = selectActiveDrawingChunk(getState());
+      if (!activeDrawingChunk) {
+        return;
+      }
+      const lastRecord = _.last(activeDrawingChunk);
+      if (!_.isEqual(lastRecord, [x, y])) {
+        dispatch({
+          type: ActionTypeEnum.SetDrawingChunk,
+          payload: [...activeDrawingChunk, [x, y]],
+        });
+      }
+    };
 
 export const startDrawNewChunkAction =
   (): AppThunk => async (dispatch, getState) => {
     const activeDrawingChunk = selectActiveDrawingChunk(getState());
     if (!activeDrawingChunk) {
-      dispatch({type: ActionTypeEnum.SetDrawingChunk, payload: []});
+      dispatch({ type: ActionTypeEnum.SetDrawingChunk, payload: [] });
     }
   };
 
 export const finishDrawNewChunkAction =
   (map: MapboxGL.MapView): AppThunk =>
-  async (dispatch, getState) => {
-    const activeDrawingChunk = selectActiveDrawingChunk(getState());
-    if (!activeDrawingChunk) {
-      return;
-    }
-    try{
-      const getCoordPromises = activeDrawingChunk.map(viewPosition =>
-        map.getCoordinateFromView(viewPosition),
-      );
-      const coords = await Promise.all(getCoordPromises);
-      const activeDrawing = selectActiveDrawing(getState());
-      dispatch({
-        type: ActionTypeEnum.SetActiveDrawing,
-        payload: [...activeDrawing, coords],
-      });
-      dispatch({type: ActionTypeEnum.SetDrawingChunk, payload: undefined});
-    } catch (e) {
-      console.error(e)
-    }
-  };
+    async (dispatch, getState) => {
+      const activeDrawingChunk = selectActiveDrawingChunk(getState());
+      if (!activeDrawingChunk) {
+        return;
+      }
+      try {
+        const getCoordPromises = activeDrawingChunk.map(viewPosition =>
+          map.getCoordinateFromView(viewPosition),
+        );
+        const coords = await Promise.all(getCoordPromises);
+        const activeDrawing = selectActiveDrawing(getState());
+        dispatch({
+          type: ActionTypeEnum.SetActiveDrawing,
+          payload: [...activeDrawing, coords],
+        });
+        dispatch({ type: ActionTypeEnum.SetDrawingChunk, payload: undefined });
+      } catch (e) {
+        console.error(e)
+      }
+    };
 
 export const removeLastDrawingChunkAction =
   (): AppThunk => async (dispatch, getState) => {
@@ -95,13 +96,13 @@ export const saveActualDrawingAction =
         title: `${i18next.t('Save drawing')}`,
         text: `${i18next.t('Enter drawing name:')}`,
         actions: [
-          {type: ModalActionType.input},
+          { type: ModalActionType.input },
           {
             text: 'Ok',
             type: ModalActionType.cancel,
             handler: async text => {
               newDrawing.name = text || '';
-              dispatch({type: ActionTypeEnum.SaveDrawing, payload: newDrawing});
+              dispatch({ type: ActionTypeEnum.SaveDrawing, payload: newDrawing });
               await writeDrawingToFile(newDrawing, dispatch);
             },
           },
@@ -112,46 +113,46 @@ export const saveActualDrawingAction =
 
 export const setActualDrawingAction =
   (id: string): AppThunk =>
-  async (dispatch, getState) => {
-    const drawings = selectAllDrawings(getState());
-    const result = drawings.find(item => item.id === id);
-    if (!result || !result.drawing) {
+    async (dispatch, getState) => {
+      const drawings = selectAllDrawings(getState());
+      const result = drawings.find(item => item.id === id);
+      if (!result || !result.drawing) {
+        dispatch({
+          type: ActionTypeEnum.SetActiveDrawing,
+          payload: [],
+        })
+        dispatch({
+          type: ActionTypeEnum.SetSelectedDrawingBBox,
+          payload: undefined,
+        });
+        return
+      }
       dispatch({
         type: ActionTypeEnum.SetActiveDrawing,
-        payload: [],
+        payload: result.drawing,
       })
+      let { maxX, maxY, minX, minY } = findMinMaxCoordinates(result.drawing)
+      if (Math.abs(maxX - minX) < 0.005 && Math.abs(maxY - minY) < 0.006) {
+        minX -= 0.0025;
+        maxX += 0.0025;
+        minY -= 0.003;
+        maxY += 0.003;
+      }
+      const start = [minX, minY];
+      const end = [maxX, maxY];
       dispatch({
         type: ActionTypeEnum.SetSelectedDrawingBBox,
-        payload: undefined,
+        payload: [start, end],
       });
-      return
-    }
-    dispatch({
-      type: ActionTypeEnum.SetActiveDrawing,
-      payload: result.drawing,
-    })
-    let {maxX, maxY, minX, minY} = findMinMaxCoordinates(result.drawing)
-    if (Math.abs(maxX - minX) < 0.005 && Math.abs(maxY - minY) < 0.006) {
-      minX -= 0.0025;
-      maxX += 0.0025;
-      minY -= 0.003;
-      maxY += 0.003;
-    }
-    const start = [minX, minY];
-    const end = [maxX, maxY];
-    dispatch({
-      type: ActionTypeEnum.SetSelectedDrawingBBox,
-      payload: [start, end],
-    });
-  };
+    };
 
 export const removeDrawingAction =
   (id: string): AppThunk =>
-  async (dispatch, getState) => {
-    const drawings = selectAllDrawings(getState());
-    const result = drawings.filter(item => item.id !== id);
-    dispatch({type: ActionTypeEnum.SetDrawings, payload: result});
-  };
+    async (dispatch, getState) => {
+      const drawings = selectAllDrawings(getState());
+      const result = drawings.filter(item => item.id !== id);
+      dispatch({ type: ActionTypeEnum.SetDrawings, payload: result });
+    };
 
 const writeDrawingToFile = async (
   activeDrawing: Drawing,
@@ -177,7 +178,7 @@ const writeDrawingToFile = async (
         showModalAction({
           title,
           text,
-          actions: [{text: 'Ok', type: ModalActionType.cancel}],
+          actions: [{ text: 'Ok', type: ModalActionType.cancel }],
         }),
       );
       throw e;
@@ -201,7 +202,7 @@ const renderDrawingIcon = (drawing: Position[][]) => {
   const boxY = 50;
   const chunksSvgList = drawing.map(drawingChunk => {
     const coordinatesXY = drawingChunk.map(point =>
-      latLngToTileIndex({lng: point[0], lat: point[1], zoom: 100}),
+      latLngToTileIndex({ lng: point[0], lat: point[1], zoom: 100 }),
     );
     return coordinatesXY;
   });
@@ -259,3 +260,24 @@ export const removeDrawingThumbnailFromStateAction =
       payload: resultWithoutThumbnail,
     });
   };
+
+export const shareActualDrawing = async (map: MapboxGL.MapView) => {
+  let imagePngPath
+  try {
+    imagePngPath = await map.takeSnap(true)
+    if (!imagePngPath) {
+      throw "No image path"
+    }
+    await Share.open({
+      message: i18next.t('My Drawing from 2Maps App'),
+      url: imagePngPath,
+    });
+  } catch (e) {
+    console.error("share error", e)
+    throw e
+  } finally {
+    if (imagePngPath) {
+      await RNFS.unlink(imagePngPath)
+    }
+  }
+}

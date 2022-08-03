@@ -3,7 +3,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import { GestureResponderEvent, StyleSheet, View } from 'react-native';
 import DrawingChunk from './DrawingChunk';
 import MapboxGL from '@react-native-mapbox-gl/maps';
-import { addPointForDrawingChunkAction, finishDrawNewChunkAction, removeLastDrawingChunkAction, saveActualDrawingAction, setActualDrawingAction, startDrawNewChunkAction } from '../actions/drawing-actions';
+import { addPointForDrawingChunkAction, finishDrawNewChunkAction, removeLastDrawingChunkAction, saveActualDrawingAction, setActualDrawingAction, startDrawNewChunkAction, shareActualDrawing } from '../actions/drawing-actions';
 import IconCommunity from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface OwnProps {
@@ -24,6 +24,7 @@ type Props = ConnectedProps<typeof connector> & OwnProps;
 
 const Drawing: FC<Props> = ({ map, setActiveDrawingLayout, addPointForDrawingChunk, finishDrawNewChunk, startDrawNewChunk, removeLastDrawingChunk, saveActualDrawing }) => {
   const [showDrawingButtons, setShowDrawingButtons] = useState(true);
+  const [isPressedShareButton, setIsPressedShareButton] = useState(false);
 
   const onTouchStartDrawing = () => {
     startDrawNewChunk()
@@ -48,6 +49,17 @@ const Drawing: FC<Props> = ({ map, setActiveDrawingLayout, addPointForDrawingChu
   const saveDrawing = () => {
     saveActualDrawing()
     setActiveDrawingLayout(false)
+  }
+  const shareDrawing = async () => {
+    if (map) {
+      setIsPressedShareButton(true)
+      try {
+        await shareActualDrawing(map)
+        setActiveDrawingLayout(false)
+      } catch (e) {
+        setIsPressedShareButton(false)
+      }
+    }
   }
   return (
     <>
@@ -76,7 +88,7 @@ const Drawing: FC<Props> = ({ map, setActiveDrawingLayout, addPointForDrawingChu
           />
           <View style={{ height: 40 }}></View>
           <IconCommunity.Button
-            name="reply-outline"
+            name="restore"
             color="white"
             backgroundColor="#00f5"
             style={{
@@ -103,6 +115,22 @@ const Drawing: FC<Props> = ({ map, setActiveDrawingLayout, addPointForDrawingChu
             iconStyle={{ marginLeft: 10, width: 20 }}
             borderRadius={24}
             onPress={saveDrawing}
+          />
+          <View style={{ height: 40 }}></View>
+          <IconCommunity.Button
+            name="image-move"
+            color="white"
+            backgroundColor={isPressedShareButton ? "#7474fe54" : "#00f5"}
+            style={{
+              width: 48,
+              height: 48,
+              padding: 0,
+              justifyContent: 'center',
+            }}
+            iconStyle={{ marginLeft: 10, width: 20 }}
+            borderRadius={24}
+            onPress={shareDrawing}
+            disabled={isPressedShareButton}
           />
         </View>
       )}
