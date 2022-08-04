@@ -95,4 +95,6 @@ export enum ActionTypeEnum {
   UIAddModal = 'ui/ADD_MODAL',
   UIRemoveModal = 'ui/REMOVE_MODAL',
   SetAwake = 'ui/SET_AWAKE',
+  //trips
+  SetTrips = 'trips/SET_TRIPS'
 }

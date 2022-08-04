@@ -79,6 +79,7 @@ import {requestLocationPermissions} from '../utils/permissions';
 // custom font icons: https://medium.com/bam-tech/add-custom-icons-to-your-react-native-application-f039c244386c
 import {createIconSetFromIcoMoon} from 'react-native-vector-icons';
 import iconMoonConfig from '../fontConfig.json';
+import TripSelectionDialog from '../components/TripSelectionDialog';
 const IconMoon = createIconSetFromIcoMoon(iconMoonConfig);
 
 interface MenuItem {
@@ -201,6 +202,8 @@ const Overlay: FC<Props> = ({
   const [showSettings, setShowSettings] = useState(false);
   const [showMarkers, setShowMarkers] = useState(false);
   const [showTracks, setShowTracks] = useState(false);
+  const [showTrips, setShowTrips] = useState(false);
+  const [markAppendedToTrip, setMarkAppendedToTrip] = useState<Mark>();
   const [showAbout, setShowAbout] = useState(false);
   const {t} = useTranslation();
 
@@ -230,6 +233,13 @@ const Overlay: FC<Props> = ({
       title: 'Tracks',
       onPress: () => {
         setShowTracks(true);
+        setShowMenu(false);
+      },
+    },
+    {
+      title: 'Trips',
+      onPress: () => {
+        setShowTrips(true);
         setShowMenu(false);
       },
     },
@@ -454,7 +464,11 @@ const Overlay: FC<Props> = ({
           cancel={() => editMark(undefined)}
           remove={() => (editedMark.id ? removeMark(editedMark.id) : null)}
           showModal={showModal}
+          setMarkAppendedToTrip={setMarkAppendedToTrip}
         />
+      )}
+      {markAppendedToTrip && (
+        <TripSelectionDialog markAppendedToTrip={markAppendedToTrip} onClose={() => setMarkAppendedToTrip(undefined)} />
       )}
       {showTracks && <Tracks close={() => setShowTracks(false)} />}
       {showMarkers && center && (

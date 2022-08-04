@@ -31,6 +31,7 @@ interface Props {
   remove?: (id: string) => void;
   cancel: () => void;
   showModal: (params: ModalParams) => void;
+  setMarkAppendedToTrip: (mark: Mark) => void;
 }
 
 const EditMark: FC<Props> = ({
@@ -40,6 +41,7 @@ const EditMark: FC<Props> = ({
   cancel,
   remove,
   showModal,
+  setMarkAppendedToTrip
 }) => {
   const [name, setName] = useState<string>(mark?.name || '');
   const [description, setDescription] = useState<string>(
@@ -103,6 +105,10 @@ const EditMark: FC<Props> = ({
   const onSetMap = (map: MapboxGL.MapView) => {
     snapshotMapRef.current = map;
   };
+
+  const addMarkToTrip = () => {
+    setMarkAppendedToTrip(mark)
+  }
 
   const renderNavigators = () => {
     if(!mark?.geometry?.coordinates) {
@@ -238,6 +244,12 @@ const EditMark: FC<Props> = ({
           type="clear"
           onPress={shareImage}
           icon={<Icon name="image" size={26} color={purple} />}
+        />
+        <Button
+          buttonStyle={styles.btn}
+          type="clear"
+          onPress={addMarkToTrip}
+          icon={<Icon name="car" size={26} color={purple} />}
         />
       </View>
       {renderNavigators()}

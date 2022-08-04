@@ -7,6 +7,7 @@ import tracker from "./tracker";
 import map from "./map";
 import auth from "./auth";
 import ui from "./ui";
+import trips from "./trips";
 
 const marksPersistConfig = {
   key: 'marks',
@@ -30,6 +31,10 @@ const authPersistConfig = {
   storage: AsyncStorage,
   blacklist: ['isRequestInProgress', 'error'],
 }
+const tripsPersistConfig = {
+  key: 'trips',
+  storage: AsyncStorage,
+}
 
 const rootReducer = combineReducers({
   marks: persistReducer(marksPersistConfig, marks),
@@ -38,6 +43,7 @@ const rootReducer = combineReducers({
   auth: persistReducer(authPersistConfig, auth),
   network,
   ui,
+  trips: persistReducer(tripsPersistConfig, trips),
 } as any);
 
 export default rootReducer;
