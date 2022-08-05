@@ -9,11 +9,18 @@ export const addMarkToTripAction = (mark: Mark, tripId: string): AppThunk => (di
     if (targetTripIndex === -1) {
         return
     }
-    const updatedTripWithNewMark = {...trips[targetTripIndex], marks: [...trips[targetTripIndex].marks, mark]}
+    const markExistInTripIndex = trips[targetTripIndex].marks.findIndex(item => item.id === mark.id)
+    let updatedTripWithNewMark
+    if (markExistInTripIndex === -1) {
+        updatedTripWithNewMark = { ...trips[targetTripIndex], marks: [...trips[targetTripIndex].marks, mark] }
+    } else {
+        updatedTripWithNewMark = {
+            ...trips[targetTripIndex], marks: [...trips[targetTripIndex].marks.slice(0, markExistInTripIndex), ...trips[targetTripIndex].marks.slice(markExistInTripIndex + 1), mark]
+        }
+    }
     const newTrips = [...trips.slice(0, targetTripIndex), ...trips.slice(targetTripIndex + 1), updatedTripWithNewMark]
-    dispatch({ type: ActionTypeEnum.SetTrips, payload: newTrips})
+    dispatch({ type: ActionTypeEnum.SetTrips, payload: newTrips })
 }
-
 export const addMarkToNewTripAction = (tripName: string, mark: Mark): AppThunk => (dispatch, getState) => {
     const trips = selectTrips(getState())
     const createdTrip: Trip = {
@@ -22,5 +29,6 @@ export const addMarkToNewTripAction = (tripName: string, mark: Mark): AppThunk =
         marks: [mark],
         date: Date.now()
     }
-    
+    const newTrips = [...trips, createdTrip]
+    dispatch({ type: ActionTypeEnum.SetTrips, payload: newTrips })
 }
