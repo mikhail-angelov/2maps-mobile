@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useState} from 'react';
+import React, {FC, useEffect, useRef, useState} from 'react';
 import MapboxGL from '@react-native-mapbox-gl/maps';
 import {connect, ConnectedProps} from 'react-redux';
 import {minBy} from 'lodash';
@@ -79,6 +79,10 @@ import {requestLocationPermissions} from '../utils/permissions';
 // custom font icons: https://medium.com/bam-tech/add-custom-icons-to-your-react-native-application-f039c244386c
 import {createIconSetFromIcoMoon} from 'react-native-vector-icons';
 import iconMoonConfig from '../fontConfig.json';
+import { addPointForDrawingChunkAction, finishDrawNewChunkAction, startDrawNewChunkAction, removeLastDrawingChunkAction, saveActualDrawingAction, setActualDrawingAction } from '../actions/drawing-actions';
+import Drawings from './Drawings';
+import { selectActiveDrawing } from '../reducers/drawings';
+import Drawing from '../components/Drawing';
 const IconMoon = createIconSetFromIcoMoon(iconMoonConfig);
 
 interface MenuItem {
@@ -130,6 +134,7 @@ const mapStateToProps = (state: State) => ({
   showWikimapia: selectShowWikimapia(state),
   awake: selectAwake(state),
   selectedMark: selectSelectedMark(state),
+  selectedDrawing: selectActiveDrawing(state),
 });
 const mapDispatchToProps = {
   removeMark: removeMarkAction,
@@ -150,9 +155,15 @@ const mapDispatchToProps = {
   showModal: showModalAction,
   setShowWikimapia: setShowWikimapiaAction,
   toggleAwake: toggleAwakeAction,
+  addPointForDrawingChunk: addPointForDrawingChunkAction,
+  finishDrawNewChunk: finishDrawNewChunkAction,
+  startDrawNewChunk: startDrawNewChunkAction,
+  removeLastDrawingChunk: removeLastDrawingChunkAction,
+  saveActualDrawing: saveActualDrawingAction,
+  setActualDrawing: setActualDrawingAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps);
-type Props = ConnectedProps<typeof connector> & {map?: MapboxGL.Camera};
+type Props = ConnectedProps<typeof connector> & {map?: MapboxGL.MapView, camera?: MapboxGL.Camera};
 
 const getClosestMark = (location: any, marks: Mark[]) => {
   const closest = minBy(marks, mark =>
@@ -167,6 +178,7 @@ const getClosestMark = (location: any, marks: Mark[]) => {
 };
 const Overlay: FC<Props> = ({
   map,
+  camera,
   marks,
   setOpacity,
   editedMark,
@@ -194,6 +206,8 @@ const Overlay: FC<Props> = ({
   awake,
   toggleAwake,
   selectedMark,
+  selectedDrawing,
+  setActualDrawing
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -202,6 +216,8 @@ const Overlay: FC<Props> = ({
   const [showMarkers, setShowMarkers] = useState(false);
   const [showTracks, setShowTracks] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [activeDrawingLayout, setActiveDrawingLayout] = useState(false);
+  const [showDrawings, setShowDrawings] = useState(false);
   const {t} = useTranslation();
 
   const menuItems: MenuItem[] = [
@@ -230,6 +246,13 @@ const Overlay: FC<Props> = ({
       title: 'Tracks',
       onPress: () => {
         setShowTracks(true);
+        setShowMenu(false);
+      },
+    },
+    {
+      title: 'Drawings',
+      onPress: () => {
+        setShowDrawings(true);
         setShowMenu(false);
       },
     },
@@ -279,7 +302,7 @@ const Overlay: FC<Props> = ({
     if (!location) {
       return;
     }
-    map?.moveTo([location.coords.longitude, location.coords.latitude], 100);
+    camera?.moveTo([location.coords.longitude, location.coords.latitude], 100);
   };
   let trackingColor='white';
   if(tracking === Tracking.track){
@@ -304,11 +327,12 @@ const Overlay: FC<Props> = ({
   const selectMark = (mark: Mark) => {
     const selected = markToFeature(mark);
     setShowMarkers(false);
-    map?.moveTo(mark.geometry.coordinates, 100);
+    camera?.moveTo(mark.geometry.coordinates, 100);
   };
 
   const onHideSelectedTrack = () => {
     selectTrack(undefined);
+    setActualDrawing("")
   };
 
   const toggleWikimapia = () => {
@@ -325,105 +349,118 @@ const Overlay: FC<Props> = ({
   console.log('render overlay', zoom, opacity, editedMark);
   return (
     <>
-      {!!secondaryMap && (
+      {!!secondaryMap && !activeDrawingLayout && (
         <View style={styles.slider}>
           <Slider value={opacity} setValue={onOpacityChange} />
         </View>
       )}
-      <View style={styles.buttonPanel}>
-        <View style={styles.buttonSubPanelBottom}>
-          <IconCommunity.Button
-            name={showWikimapia ? 'window-close' : 'wikipedia'}
-            color="white"
-            backgroundColor="#00f5"
-            style={{
-              width: 48,
-              height: 48,
-              padding: 0,
-              justifyContent: 'center',
-            }}
-            iconStyle={{marginLeft: 10, width: 20}}
-            borderRadius={24}
-            onPress={toggleWikimapia}
-          />
-        </View>
-        <View style={styles.buttonSubPanel}>
-          {selectedTrack && (
-            <>
-              <MenuButton icon="visibility-off" onPress={onHideSelectedTrack} />
-              <View style={{height: 40}} />
-            </>
-          )}
-          <MenuButton
-            icon={awake ? 'brightness-high' : 'brightness-low'}
-            bgColor={awake ? '#0f0a' : '#00f5'}
-            onPress={toggleAwake}
-          />
-          <View style={{height: 40}} />
-          <MenuButton icon="settings" onPress={() => setShowMenu(true)} />
-          <View style={{height: 40}} />
-          <MenuButton
-            icon="track-changes"
-            color={trackingColor}
-            onPress={toggleTracking}
-            onLongPress={toggleTrackingAndRecord}
-          />
-        </View>
-        <View style={styles.buttonSubPanelBottom}>
-          {selectedMark && (
-            <View style={styles.navPanel}>
-              <View style={styles.navPanelRow}>
-                <View style={styles.navPanelItem}>
-                  <IconMoon.Button
-                    name="yandex"
-                    color="white"
-                    backgroundColor="#0f05"
-                    style={{
-                      width: 48,
-                      height: 48,
-                      padding: 0,
-                      justifyContent: 'center',
-                    }}
-                    iconStyle={{marginLeft: 10, width: 20}}
-                    borderRadius={24}
-                    onPress={() =>
-                      navigateYandex(selectedMark.geometry.coordinates)
-                    }
-                  />
-                </View>
-                <View style={styles.navPanelItem}>
-                  <IconMoon.Button
-                    name="osmc"
-                    color="white"
-                    backgroundColor="#0f05"
-                    style={{
-                      width: 48,
-                      height: 48,
-                      padding: 0,
-                      justifyContent: 'center',
-                    }}
-                    iconStyle={{marginLeft: 10, width: 20}}
-                    borderRadius={24}
-                    onPress={() =>
-                      navigateOsm(selectedMark.geometry.coordinates)
-                    }
-                  />
-                </View>
-                <View style={styles.navPanelItem}>
-                  <MenuButton
-                    icon="navigation"
-                    bgColor="#0f05"
-                    onPress={() =>
-                      navigateGoogle(selectedMark.geometry.coordinates)
-                    }
-                  />
+      {!activeDrawingLayout && (
+        <View style={styles.buttonPanel}>
+          <View style={styles.buttonSubPanelTop}>
+            <IconCommunity.Button
+              name={showWikimapia ? 'window-close' : 'wikipedia'}
+              color="white"
+              backgroundColor="#00f5"
+              style={{
+                width: 48,
+                height: 48,
+                padding: 0,
+                justifyContent: 'center',
+              }}
+              iconStyle={{marginLeft: 10, width: 20}}
+              borderRadius={24}
+              onPress={toggleWikimapia}
+            />
+          </View>
+          <View style={styles.buttonSubPanel}>
+            {(selectedTrack || !!selectedDrawing.length) && (
+              <View style={styles.visibilityOffButton}>
+                <MenuButton icon="visibility-off" onPress={onHideSelectedTrack} />
+              </View>
+            )}
+            <MenuButton
+              icon={awake ? 'brightness-high' : 'brightness-low'}
+              bgColor={awake ? '#0f0a' : '#00f5'}
+              onPress={toggleAwake}
+            />
+            <IconCommunity.Button
+              name="brush"
+              color="white"
+              backgroundColor="#00f5"
+              style={{
+                width: 48,
+                height: 48,
+                padding: 0,
+                justifyContent: 'center',
+              }}
+              iconStyle={{marginLeft: 10, width: 20}}
+              borderRadius={24}
+              onPress={() => setActiveDrawingLayout(true)}
+            />
+            <MenuButton icon="settings" onPress={() => setShowMenu(true)} />
+            <MenuButton
+              icon="track-changes"
+              color={trackingColor}
+              onPress={toggleTracking}
+              onLongPress={toggleTrackingAndRecord}
+            />
+          </View>
+          <View style={styles.buttonSubPanelBottom}>
+            {selectedMark && (
+              <View style={styles.navPanel}>
+                <View style={styles.navPanelRow}>
+                  <View style={styles.navPanelItem}>
+                    <IconMoon.Button
+                      name="yandex"
+                      color="white"
+                      backgroundColor="#0f05"
+                      style={{
+                        width: 48,
+                        height: 48,
+                        padding: 0,
+                        justifyContent: 'center',
+                      }}
+                      iconStyle={{marginLeft: 10, width: 20}}
+                      borderRadius={24}
+                      onPress={() =>
+                        navigateYandex(selectedMark.geometry.coordinates)
+                      }
+                    />
+                  </View>
+                  <View style={styles.navPanelItem}>
+                    <IconMoon.Button
+                      name="osmc"
+                      color="white"
+                      backgroundColor="#0f05"
+                      style={{
+                        width: 48,
+                        height: 48,
+                        padding: 0,
+                        justifyContent: 'center',
+                      }}
+                      iconStyle={{marginLeft: 10, width: 20}}
+                      borderRadius={24}
+                      onPress={() =>
+                        navigateOsm(selectedMark.geometry.coordinates)
+                      }
+                    />
+                  </View>
+                  <View style={styles.navPanelItem}>
+                    <MenuButton
+                      icon="navigation"
+                      bgColor="#0f05"
+                      onPress={() =>
+                        navigateGoogle(selectedMark.geometry.coordinates)
+                      }
+                    />
+                  </View>
                 </View>
               </View>
-            </View>
-          )}
-          <MenuButton icon="gps-fixed" onPress={toCurrentLocation} />
+            )}
+            <MenuButton icon="gps-fixed" onPress={toCurrentLocation} />
+          </View>
         </View>
-      </View>
+      )}
       <View style={styles.closestMark}>
         <Text style={styles.markLabel}>{closest}</Text>
       </View>
@@ -457,6 +494,7 @@ const Overlay: FC<Props> = ({
         />
       )}
       {showTracks && <Tracks close={() => setShowTracks(false)} />}
+      {showDrawings && <Drawings close={() => setShowDrawings(false)} />}
       {showMarkers && center && (
         <Markers
           center={center}
@@ -485,6 +523,10 @@ const Overlay: FC<Props> = ({
         />
       )}
       {showAbout && <About close={() => setShowAbout(false)} />}
+
+      {activeDrawingLayout && (
+        <Drawing setActiveDrawingLayout={setActiveDrawingLayout} map={map} />
+      )}
     </>
   );
 };
@@ -497,15 +539,25 @@ const styles = StyleSheet.create({
     height: '100%',
     right: 10,
   },
+  buttonSubPanelTop: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    minHeight: 90,
+  },
   buttonSubPanel: {
-    height: '30%',
-    justifyContent: 'center',
-    marginVertical: 10,
+    flexGrow: 1,
+    justifyContent: 'space-between',
+    paddingTop: 90,
+    position: 'relative',
+    marginVertical: 20,
+  },
+  visibilityOffButton: {
+    position: 'absolute',
+    top: 10,
   },
   buttonSubPanelBottom: {
-    height: '30%',
-    justifyContent: 'flex-end',
-    marginBottom: 10,
+    flex: 1,
+    minHeight: 50,
   },
   navPanel: {
     width: 48,
@@ -535,5 +587,5 @@ const styles = StyleSheet.create({
     padding: 4,
     backgroundColor: '#fff8',
     textAlign: 'center',
-  },
+  }
 });
