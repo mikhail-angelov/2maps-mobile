@@ -1,12 +1,13 @@
 export enum ModalActionType {
   default='default',
   cancel='cancel',
+  input='input',
 }
 
 export interface ModalAction {
-  text: string;
+  text?: string;
   type?: string;
-  handler?: ()=>void;
+  handler?: (text?: string)=>void;
 }
 export interface ModalParams {
   title: string;

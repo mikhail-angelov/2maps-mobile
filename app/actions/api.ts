@@ -82,3 +82,9 @@ export const getTracksDirectoryPath = async() => {
   const destinationPath = primaryStoragePath && `${primaryStoragePath}/tracks/`
   return destinationPath
 }
+
+export const getDrawingsDirectoryPath = async() => {
+  const primaryStoragePath = await getStorageDirectoryPath()
+  const destinationPath = primaryStoragePath && `${primaryStoragePath}/drawings/`
+  return destinationPath
+}

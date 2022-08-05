@@ -1,16 +1,17 @@
-import React from "react";
+import dayjs from "dayjs";
+import React, { useState } from "react";
 import {
-  KeyboardAvoidingView,
   Modal,
   StyleSheet,
   Text,
   TouchableOpacity,
   View
 } from 'react-native';
+import { Input } from "react-native-elements";
 import { connect, ConnectedProps } from "react-redux";
 import { removeModalAction } from './actions/ui-actions'
 import { selectModal } from './reducers/ui'
-import { State, ModalActionType } from './store/types'
+import { State, ModalActionType, ModalAction } from './store/types'
 
 const mapStateToProps = (state: State) => ({
   modal: selectModal(state),
@@ -23,29 +24,50 @@ type Props = ConnectedProps<typeof connector>
 
 
 const ModalManager: React.FC<Props> = ({ removeModal, modal }) => {
-  const onPress = (handler?: () => void) => {
+  const defaultInputValue = dayjs().format('YY.MM.DD')
+  const [name, setName] = useState(defaultInputValue)
+  const onPress = (handler?: (text: any) => void) => {
     removeModal()
-    handler && handler()
+    setName(defaultInputValue)
+    handler && handler(name)
   }
   if (!modal) {
     return <></>
   }
   const { title, text, actions } = modal
+  let buttonsData: ModalAction[] = []
+  let inputsData: ModalAction[] = []
+  actions.forEach(item => {
+    if (item.type === ModalActionType.input) {
+      inputsData.push(item)
+    } else {
+      buttonsData.push(item)
+    }
+  })
   return <Modal
     visible={true}
     style={[styles.modal]}
     animationType='fade'
     transparent={true}
   >
-    <KeyboardAvoidingView behavior="padding" enabled style={styles.container}>
+    <View style={styles.container}>
     <View style={styles.modalOverlay} />
       <View style={styles.alertWrapper}>
         <View style={styles.topArea}>
           {!!title && <Text style={styles.title}>{title}</Text>}
           {!!text && <Text style={styles.text}>{text}</Text>}
         </View>
+        <View>
+          {inputsData.map((action, index)=> (
+            <TouchableOpacity
+                  style={styles.optionInput}
+                  key={index}
+                ><Input onChangeText={value => setName(value)} selectTextOnFocus value={name}></Input></TouchableOpacity>
+          ))}
+        </View>
         <View style={styles.buttonRow}>
-          {actions.map((action, index) => (<TouchableOpacity
+          {buttonsData.map((action, index) => (
+            <TouchableOpacity
             onPress={() => onPress(action.handler)}
             style={styles.optionButton}
             key={index}
@@ -54,7 +76,7 @@ const ModalManager: React.FC<Props> = ({ removeModal, modal }) => {
           </TouchableOpacity>))}
         </View>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   </Modal>
 }
 
@@ -133,6 +155,11 @@ const styles = StyleSheet.create({
     color: 'rgba(24,127,254,1)',
     fontSize: 17,
   },
+  optionInput: {
+    width: '100%',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  }
 });
 
 export default connector(ModalManager)
