@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {connect, ConnectedProps} from 'react-redux';
-import {State, Mark, Tracking} from '../store/types';
+import {State, Tracking} from '../store/types';
 import {
   featureToMark,
   editMarkAction,
@@ -14,6 +14,7 @@ import {
 } from '../reducers/tracker';
 import styled from 'styled-components/native';
 import MapboxGL, {
+  OnPressEvent,
   RasterSourceProps,
   RegionPayload,
 } from '@react-native-mapbox-gl/maps';
@@ -40,6 +41,9 @@ import SelectedMark from '../components/SelectedMark';
 import * as _ from 'lodash';
 import Drawing from '../components/DrawingMapLayer';
 import { selectDrawingBBox } from '../reducers/drawings';
+import TripMapLayer from '../components/TripMapLayer';
+import { selectTripMarkAction } from '../actions/trips-actions';
+import { selectActiveTripMark } from '../reducers/trips';
 
 MapboxGL.setAccessToken(
   process.env.MAPBOX_PUB_KEY ||
@@ -69,7 +73,8 @@ const mapStateToProps = (state: State) => ({
   location: selectLocation(state),
   showWikimapia: selectShowWikimapia(state),
   selectedMark: selectSelectedMark(state),
-  selectedDrawingBBox: selectDrawingBBox(state)
+  selectedDrawingBBox: selectDrawingBBox(state),
+  selectedTripMark: selectActiveTripMark(state)
 });
 const mapDispatchToProps = {
   setCenter: setCenterAction,
@@ -80,6 +85,7 @@ const mapDispatchToProps = {
   setLocation: setLocationAction,
   restartTracking: restartTrackingAction,
   selectMark: selectMarkAction,
+  selectTripMark: selectTripMarkAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps);
 type Props = ConnectedProps<typeof connector> & {
@@ -170,6 +176,12 @@ class Map extends Component<Props> {
     this.camera?.moveTo(feature.geometry.coordinates, 100);
   };
 
+  onTripMarkPress = (event: OnPressEvent) => {
+    console.log('on trip mark press', event.features);
+    const selectedMark = featureToMark(event.features[0] as Feature<Point>);
+    this.props.selectTripMark(selectedMark);
+  }
+
   updateCenter = (e: Feature<Point, RegionPayload>) => {
     console.log('update center', e.properties);
     this.props.setCenter(e.geometry.coordinates);
@@ -219,6 +231,7 @@ class Map extends Component<Props> {
       zoom,
       showWikimapia,
       selectedMark,
+      selectedTripMark
     } = this.props;
 
     let styleURL = primaryMap.url;
@@ -291,7 +304,12 @@ class Map extends Component<Props> {
           unselect={this.onBalloonClick}
           openEdit={this.onBalloonLongClick}
         />
+        <SelectedMark 
+          mark={selectedTripMark}
+          unselect={()=>{}}
+          openEdit={()=>{}}/>
         <Drawing />
+        <TripMapLayer camera={this.camera} onMarkPress={this.onTripMarkPress} />
       </StyledMap>
     );
   }

@@ -84,6 +84,9 @@ import Drawings from './Drawings';
 import { selectActiveDrawing } from '../reducers/drawings';
 import Drawing from '../components/Drawing';
 import TripSelectionDialog from '../components/TripSelectionDialog';
+import Trips from './Trips'
+import { selectActiveTrip } from '../reducers/trips';
+import { setActualTripAction } from '../actions/trips-actions';
 const IconMoon = createIconSetFromIcoMoon(iconMoonConfig);
 
 interface MenuItem {
@@ -136,6 +139,7 @@ const mapStateToProps = (state: State) => ({
   awake: selectAwake(state),
   selectedMark: selectSelectedMark(state),
   selectedDrawing: selectActiveDrawing(state),
+  selectedActiveTrip: selectActiveTrip(state),
 });
 const mapDispatchToProps = {
   removeMark: removeMarkAction,
@@ -162,6 +166,7 @@ const mapDispatchToProps = {
   removeLastDrawingChunk: removeLastDrawingChunkAction,
   saveActualDrawing: saveActualDrawingAction,
   setActualDrawing: setActualDrawingAction,
+  setActualTrip: setActualTripAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps);
 type Props = ConnectedProps<typeof connector> & {map?: MapboxGL.MapView, camera?: MapboxGL.Camera};
@@ -208,7 +213,9 @@ const Overlay: FC<Props> = ({
   toggleAwake,
   selectedMark,
   selectedDrawing,
-  setActualDrawing
+  setActualDrawing,
+  selectedActiveTrip,
+  setActualTrip
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -343,6 +350,7 @@ const Overlay: FC<Props> = ({
   const onHideSelectedTrack = () => {
     selectTrack(undefined);
     setActualDrawing("")
+    setActualTrip("")
   };
 
   const toggleWikimapia = () => {
@@ -383,7 +391,7 @@ const Overlay: FC<Props> = ({
             />
           </View>
           <View style={styles.buttonSubPanel}>
-            {(selectedTrack || !!selectedDrawing.length) && (
+            {(selectedTrack || !!selectedDrawing.length || !!selectedActiveTrip) && (
               <View style={styles.visibilityOffButton}>
                 <MenuButton icon="visibility-off" onPress={onHideSelectedTrack} />
               </View>
@@ -537,7 +545,7 @@ const Overlay: FC<Props> = ({
         />
       )}
       {showAbout && <About close={() => setShowAbout(false)} />}
-
+      {showTrips && <Trips close={() => setShowTrips(false)} />}
       {activeDrawingLayout && (
         <Drawing setActiveDrawingLayout={setActiveDrawingLayout} map={map} />
       )}

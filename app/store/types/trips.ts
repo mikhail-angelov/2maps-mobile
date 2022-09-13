@@ -8,4 +8,7 @@ export interface Trip {
 }
 export interface TripsState {
   trips: Trip[];
+  selectedTripBBox: number[][];
+  activeTrip?: Trip;
+  selectedMark?: Mark;
 }
