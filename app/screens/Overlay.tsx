@@ -1,9 +1,9 @@
-import React, {FC, useEffect, useRef, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import MapboxGL from '@react-native-mapbox-gl/maps';
 import {connect, ConnectedProps} from 'react-redux';
 import {minBy} from 'lodash';
 import distance from '@turf/distance';
-import {State, Mark, ModalActionType, Tracking} from '../store/types';
+import {State, Mark, ModalActionType, Tracking, MarkType} from '../store/types';
 import {
   selectMarks,
   selectEditedMark,
@@ -85,8 +85,8 @@ import { selectActiveDrawing } from '../reducers/drawings';
 import Drawing from '../components/Drawing';
 import TripSelectionDialog from '../components/TripSelectionDialog';
 import Trips from './Trips'
-import { selectActiveTrip } from '../reducers/trips';
-import { setActualTripAction } from '../actions/trips-actions';
+import { selectActiveTrip, selectActiveTripMark } from '../reducers/trips';
+import { removeActiveTripMarkAction, setActualTripAction } from '../actions/trips-actions';
 const IconMoon = createIconSetFromIcoMoon(iconMoonConfig);
 
 interface MenuItem {
@@ -137,9 +137,10 @@ const mapStateToProps = (state: State) => ({
   isItTheFirstTimeAppStarted: selectIsItTheFirstTimeAppStarted(state),
   showWikimapia: selectShowWikimapia(state),
   awake: selectAwake(state),
-  selectedMark: selectSelectedMark(state),
+  selectedMarkState: selectSelectedMark(state),
   selectedDrawing: selectActiveDrawing(state),
   selectedActiveTrip: selectActiveTrip(state),
+  selectedActiveTripMarkState: selectActiveTripMark(state),
 });
 const mapDispatchToProps = {
   removeMark: removeMarkAction,
@@ -167,6 +168,7 @@ const mapDispatchToProps = {
   saveActualDrawing: saveActualDrawingAction,
   setActualDrawing: setActualDrawingAction,
   setActualTrip: setActualTripAction,
+  removeTripMark: removeActiveTripMarkAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps);
 type Props = ConnectedProps<typeof connector> & {map?: MapboxGL.MapView, camera?: MapboxGL.Camera};
@@ -211,11 +213,13 @@ const Overlay: FC<Props> = ({
   setShowWikimapia,
   awake,
   toggleAwake,
-  selectedMark,
+  selectedMarkState,
   selectedDrawing,
   setActualDrawing,
   selectedActiveTrip,
-  setActualTrip
+  setActualTrip,
+  selectedActiveTripMarkState,
+  removeTripMark
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -229,6 +233,8 @@ const Overlay: FC<Props> = ({
   const [activeDrawingLayout, setActiveDrawingLayout] = useState(false);
   const [showDrawings, setShowDrawings] = useState(false);
   const {t} = useTranslation();
+
+  const selectedMark = selectedActiveTripMarkState ? selectedActiveTripMarkState : selectedMarkState
 
   const menuItems: MenuItem[] = [
     {
@@ -357,6 +363,27 @@ const Overlay: FC<Props> = ({
     setShowWikimapia(!showWikimapia);
   };
 
+  const onMarkSave = (data: {name: string; description: string; rate: number}) => {
+    if (!editedMark) {
+      return
+    }
+    if (editedMark.type === MarkType.TRIP) {
+      // saveTripMark()
+      return
+    }
+    saveMark({...editedMark, ...data})
+  }
+  const onMarkRemove = () => {
+    if (!editedMark?.id) {
+      return
+    }
+    if (editedMark.type === MarkType.TRIP) {
+      removeTripMark(editedMark.id)
+      return
+    }
+    return editedMark.id ? removeMark(editedMark.id) : null
+  }
+  
   useEffect(() => {
     if (isItTheFirstTimeAppStarted) {
       setShowSettings(isItTheFirstTimeAppStarted);
@@ -505,9 +532,9 @@ const Overlay: FC<Props> = ({
         <EditMark
           mark={editedMark}
           center={[location.coords.longitude, location.coords.latitude]}
-          save={data => saveMark({...editedMark, ...data})}
+          save={onMarkSave}
           cancel={() => editMark(undefined)}
-          remove={() => (editedMark.id ? removeMark(editedMark.id) : null)}
+          remove={onMarkRemove}
           showModal={showModal}
           setMarkAppendedToTrip={setMarkAppendedToTrip}
         />

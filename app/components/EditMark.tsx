@@ -65,7 +65,10 @@ const EditMark: FC<Props> = ({
         {
           text: t('Yes'),
           type: ModalActionType.default,
-          handler: () => remove(mark.id?.toString() || ''),
+          handler: () => {
+            remove(mark.id?.toString() || '')
+            cancel()
+          },
         },
       ],
     });

@@ -221,6 +221,14 @@ class Map extends Component<Props> {
       restartTracking();
     }
   };
+  onTripMarkBalloonClick = () => {
+    this.props.editMark(this.props.selectedTripMark);
+    this.props.selectTripMark()
+  }
+  onTripMarkBalloonLongClick = () => {
+    this.props.editMark(this.props.selectedTripMark);
+    this.props.selectTripMark()
+  }
   render() {
     const {
       tracking,
@@ -306,8 +314,8 @@ class Map extends Component<Props> {
         />
         <SelectedMark 
           mark={selectedTripMark}
-          unselect={()=>{}}
-          openEdit={()=>{}}/>
+          unselect={this.onTripMarkBalloonClick}
+          openEdit={this.onTripMarkBalloonLongClick}/>
         <Drawing />
         <TripMapLayer camera={this.camera} onMarkPress={this.onTripMarkPress} />
       </StyledMap>

@@ -1,7 +1,7 @@
 import { v4 as uuid } from "@lukeed/uuid";
 import { ActionTypeEnum, AppThunk } from ".";
 import { selectActiveTrip, selectTrips } from "../reducers/trips";
-import { Mark, Trip } from "../store/types";
+import { Mark, MarkType, Trip } from "../store/types";
 import { findMinMaxCoordinates } from "../utils/normalize";
 import i18next from 'i18next';
 
@@ -79,8 +79,30 @@ export const removeTripAction = (id: string): AppThunk => async(dispatch, getSta
 }
 
 export const selectTripMarkAction = (mark?: Mark): AppThunk => async (dispatch, getState) => {
+  if (!mark) {
+    return dispatch({type: ActionTypeEnum.SelectActiveTripMark})
+  }
   const trip = selectActiveTrip(getState())
   const markIndex = trip?.marks.findIndex((item) => item.id === mark?.id) || 0
-  const markForActiveTrip = {...mark, name: `${markIndex + 1}. ${i18next.t('Trip')} "${trip?.name || ''}"${mark?.name ? `: ${mark.name}` : ''}`}
+  const markForActiveTrip = {...mark, type: MarkType.TRIP, name: `${markIndex + 1}. ${i18next.t('Trip')} "${trip?.name || ''}"${mark?.name ? `: ${mark.name}` : ''}`}
   dispatch({type: ActionTypeEnum.SelectActiveTripMark, payload: markForActiveTrip})
+}
+
+export const removeActiveTripMarkAction = (markId: string):AppThunk => async (dispatch, getState) => {
+  const activeTrip = selectActiveTrip(getState())
+  if (!activeTrip) {
+    return
+  }
+
+  const newMarks = activeTrip.marks.filter(item => item.id !== markId)
+  const updatedTrip = {...activeTrip , marks: newMarks}
+  if (newMarks.length > 0) {
+    dispatch({ type: ActionTypeEnum.SetActiveTrip, payload: updatedTrip })
+  } else {
+    dispatch({ type: ActionTypeEnum.SetActiveTrip, payload: undefined })
+  }
+  
+  const trips = selectTrips(getState())
+  const newTrips = trips.map(item => item.id === updatedTrip.id ? updatedTrip: item)
+  dispatch({ type: ActionTypeEnum.SetTrips, payload: newTrips })
 }
