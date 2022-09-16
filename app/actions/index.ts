@@ -105,5 +105,5 @@ export enum ActionTypeEnum {
   SetTrips = 'trips/SET_TRIPS',
   SetActiveTrip = 'trips/SET_ACTIVE_TRIP',
   SetSelectedTripBBox = 'trips/SET_SELECTED_TRIP_BBOX',
-  SelectActiveTripMark = 'trips/SELECT_ACTIVE_TRIP_MARK'
+  SetActiveTripMark = 'trips/SELECT_ACTIVE_TRIP_MARK'
 }

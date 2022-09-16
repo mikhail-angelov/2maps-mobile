@@ -25,7 +25,7 @@ export default createReducer<TripsState>(initialState, {
     activeTrip: newActiveTrip,
     selectedMark: undefined
   }),
-  [ActionTypeEnum.SelectActiveTripMark]: (selectedMark?: Mark) => (state: TripsState) => ({
+  [ActionTypeEnum.SetActiveTripMark]: (selectedMark?: Mark) => (state: TripsState) => ({
     ...state,
     selectedMark,
   }),

@@ -43,7 +43,7 @@ import Drawing from '../components/DrawingMapLayer';
 import { selectDrawingBBox } from '../reducers/drawings';
 import TripMapLayer from '../components/TripMapLayer';
 import { selectTripMarkAction } from '../actions/trips-actions';
-import { selectActiveTripMark } from '../reducers/trips';
+import { selectActiveTrip, selectActiveTripMark } from '../reducers/trips';
 
 MapboxGL.setAccessToken(
   process.env.MAPBOX_PUB_KEY ||
@@ -74,7 +74,8 @@ const mapStateToProps = (state: State) => ({
   showWikimapia: selectShowWikimapia(state),
   selectedMark: selectSelectedMark(state),
   selectedDrawingBBox: selectDrawingBBox(state),
-  selectedTripMark: selectActiveTripMark(state)
+  selectedTripMark: selectActiveTripMark(state),
+  selectedTrip: selectActiveTrip(state)
 });
 const mapDispatchToProps = {
   setCenter: setCenterAction,
@@ -239,7 +240,8 @@ class Map extends Component<Props> {
       zoom,
       showWikimapia,
       selectedMark,
-      selectedTripMark
+      selectedTripMark,
+      selectedTrip
     } = this.props;
 
     let styleURL = primaryMap.url;
@@ -314,6 +316,7 @@ class Map extends Component<Props> {
         />
         <SelectedMark 
           mark={selectedTripMark}
+          trip={selectedTrip}
           unselect={this.onTripMarkBalloonClick}
           openEdit={this.onTripMarkBalloonLongClick}/>
         <Drawing />

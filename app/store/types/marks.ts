@@ -14,6 +14,7 @@ export interface Mark {
   geometry: Point;
   deleted?: boolean;
   type?: MarkType
+  selectedMarkIndex?: number;
 }
 
 export interface POI {

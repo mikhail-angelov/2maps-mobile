@@ -86,7 +86,7 @@ import Drawing from '../components/Drawing';
 import TripSelectionDialog from '../components/TripSelectionDialog';
 import Trips from './Trips'
 import { selectActiveTrip, selectActiveTripMark } from '../reducers/trips';
-import { removeActiveTripMarkAction, setActualTripAction } from '../actions/trips-actions';
+import { removeActiveTripMarkAction, setActualTripAction, saveTripMarkAction } from '../actions/trips-actions';
 const IconMoon = createIconSetFromIcoMoon(iconMoonConfig);
 
 interface MenuItem {
@@ -169,6 +169,7 @@ const mapDispatchToProps = {
   setActualDrawing: setActualDrawingAction,
   setActualTrip: setActualTripAction,
   removeTripMark: removeActiveTripMarkAction,
+  saveTripMark: saveTripMarkAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps);
 type Props = ConnectedProps<typeof connector> & {map?: MapboxGL.MapView, camera?: MapboxGL.Camera};
@@ -219,7 +220,8 @@ const Overlay: FC<Props> = ({
   selectedActiveTrip,
   setActualTrip,
   selectedActiveTripMarkState,
-  removeTripMark
+  removeTripMark,
+  saveTripMark,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -367,11 +369,12 @@ const Overlay: FC<Props> = ({
     if (!editedMark) {
       return
     }
+    const newMark = {...editedMark, ...data}
     if (editedMark.type === MarkType.TRIP) {
-      // saveTripMark()
+      saveTripMark(newMark)
       return
     }
-    saveMark({...editedMark, ...data})
+    saveMark(newMark)
   }
   const onMarkRemove = () => {
     if (!editedMark?.id) {
