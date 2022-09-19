@@ -8,6 +8,7 @@ import map from "./map";
 import auth from "./auth";
 import ui from "./ui";
 import drawings from "./drawings";
+import trips from "./trips";
 
 const marksPersistConfig = {
   key: 'marks',
@@ -31,6 +32,10 @@ const authPersistConfig = {
   storage: AsyncStorage,
   blacklist: ['isRequestInProgress', 'error'],
 }
+const tripsPersistConfig = {
+  key: 'trips',
+  storage: AsyncStorage,
+}
 const drawingsPersistConfig = {
   key: 'drawings',
   storage: AsyncStorage,
@@ -44,6 +49,7 @@ const rootReducer = combineReducers({
   network,
   ui,
   drawings: persistReducer(drawingsPersistConfig, drawings),
+  trips: persistReducer(tripsPersistConfig, trips),
 } as any);
 
 export default rootReducer;

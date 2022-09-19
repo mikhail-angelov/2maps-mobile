@@ -101,4 +101,9 @@ export enum ActionTypeEnum {
   SaveDrawing = 'drawing/SAVE_DRAWING',
   SetDrawings = 'drawing/SET_DRAWINGS',
   SetSelectedDrawingBBox= 'drawing/SET_SELECTED_DRAWING_BBOX',
+  //trips
+  SetTrips = 'trips/SET_TRIPS',
+  SetActiveTrip = 'trips/SET_ACTIVE_TRIP',
+  SetSelectedTripBBox = 'trips/SET_SELECTED_TRIP_BBOX',
+  SetActiveTripMark = 'trips/SELECT_ACTIVE_TRIP_MARK'
 }

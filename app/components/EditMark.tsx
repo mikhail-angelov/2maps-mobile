@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import {Button, Divider, AirbnbRating} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import {Mark, ModalActionType, ModalParams} from '../store/types';
+import {Mark, MarkType, ModalActionType, ModalParams} from '../store/types';
 import MapModal from './Modal';
 import {purple} from '../constants/color';
 import {markToDistance} from '../utils/normalize';
@@ -31,6 +31,7 @@ interface Props {
   remove?: (id: string) => void;
   cancel: () => void;
   showModal: (params: ModalParams) => void;
+  setMarkAppendedToTrip: (mark: Mark) => void;
 }
 
 const EditMark: FC<Props> = ({
@@ -40,6 +41,7 @@ const EditMark: FC<Props> = ({
   cancel,
   remove,
   showModal,
+  setMarkAppendedToTrip
 }) => {
   const [name, setName] = useState<string>(mark?.name || '');
   const [description, setDescription] = useState<string>(
@@ -63,7 +65,10 @@ const EditMark: FC<Props> = ({
         {
           text: t('Yes'),
           type: ModalActionType.default,
-          handler: () => remove(mark.id?.toString() || ''),
+          handler: () => {
+            remove(mark.id?.toString() || '')
+            cancel()
+          },
         },
       ],
     });
@@ -103,6 +108,10 @@ const EditMark: FC<Props> = ({
   const onSetMap = (map: MapboxGL.MapView) => {
     snapshotMapRef.current = map;
   };
+
+  const addMarkToTrip = () => {
+    setMarkAppendedToTrip(mark)
+  }
 
   const renderNavigators = () => {
     if(!mark?.geometry?.coordinates) {
@@ -197,53 +206,63 @@ const EditMark: FC<Props> = ({
       <SnapshotMark onSetMap={onSetMap} mark={mark} />
     </MapModal>
   );
-  const renderViewMark = () => (
-    <MapModal onRequestClose={cancel} accessibilityLabel="info mark">
-      <View style={styles.header}>
-        <Text style={styles.title}>{name}</Text>
-        <View style={styles.ratingAndDistance}>
-          <Pressable disabled={true}>
-            <AirbnbRating
-              showRating={false}
-              isDisabled={true}
-              size={20}
-              defaultRating={rate}
-            />
-          </Pressable>
-          <Text style={styles.distanceText}>{distance}</Text>
+  const renderViewMark = () => {
+
+  const showAddToTripButton = mark.type !== MarkType.TRIP
+    return (
+      <MapModal onRequestClose={cancel} accessibilityLabel="info mark">
+        <View style={styles.header}>
+          <Text style={styles.title}>{name}</Text>
+          <View style={styles.ratingAndDistance}>
+            <Pressable disabled={true}>
+              <AirbnbRating
+                showRating={false}
+                isDisabled={true}
+                size={20}
+                defaultRating={rate}
+              />
+            </Pressable>
+            <Text style={styles.distanceText}>{distance}</Text>
+          </View>
         </View>
-      </View>
-      <View style={styles.content}>
-        {description ? (
-          <Text style={styles.description}>{description}</Text>
-        ) : (
-          <Text style={styles.description}>{t('no description')}</Text>
-        )}
-      </View>
-      <View style={styles.buttonsRow}>
-        <Button
-          buttonStyle={styles.btn}
-          type="clear"
-          onPress={() => setIsEdit(true)}
-          icon={<Icon name="edit" size={26} color={purple} />}
-        />
-        <Button
-          buttonStyle={styles.btn}
-          type="clear"
-          onPress={shareMark}
-          icon={<Icon name="share" size={26} color={purple} />}
-        />
-        <Button
-          buttonStyle={styles.btn}
-          type="clear"
-          onPress={shareImage}
-          icon={<Icon name="image" size={26} color={purple} />}
-        />
-      </View>
-      {renderNavigators()}
-      <SnapshotMark onSetMap={onSetMap} mark={mark} />
-    </MapModal>
-  );
+        <View style={styles.content}>
+          {description ? (
+            <Text style={styles.description}>{description}</Text>
+          ) : (
+            <Text style={styles.description}>{t('no description')}</Text>
+          )}
+        </View>
+        <View style={styles.buttonsRow}>
+          <Button
+            buttonStyle={styles.btn}
+            type="clear"
+            onPress={() => setIsEdit(true)}
+            icon={<Icon name="edit" size={26} color={purple} />}
+          />
+          <Button
+            buttonStyle={styles.btn}
+            type="clear"
+            onPress={shareMark}
+            icon={<Icon name="share" size={26} color={purple} />}
+          />
+          <Button
+            buttonStyle={styles.btn}
+            type="clear"
+            onPress={shareImage}
+            icon={<Icon name="image" size={26} color={purple} />}
+          />
+          {showAddToTripButton && (<Button
+            buttonStyle={styles.btn}
+            type="clear"
+            onPress={addMarkToTrip}
+            icon={<Icon name="car" size={26} color={purple} />}
+          />)}
+        </View>
+        {renderNavigators()}
+        <SnapshotMark onSetMap={onSetMap} mark={mark} />
+      </MapModal>
+    )
+  }
 
   if (!mark?.id && !createNew && isEdit) {
     return renderBlank();

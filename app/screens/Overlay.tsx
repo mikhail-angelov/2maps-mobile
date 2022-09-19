@@ -1,9 +1,9 @@
-import React, {FC, useEffect, useRef, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import MapboxGL from '@react-native-mapbox-gl/maps';
 import {connect, ConnectedProps} from 'react-redux';
 import {minBy} from 'lodash';
 import distance from '@turf/distance';
-import {State, Mark, ModalActionType, Tracking} from '../store/types';
+import {State, Mark, ModalActionType, Tracking, MarkType} from '../store/types';
 import {
   selectMarks,
   selectEditedMark,
@@ -83,6 +83,10 @@ import { addPointForDrawingChunkAction, finishDrawNewChunkAction, startDrawNewCh
 import Drawings from './Drawings';
 import { selectActiveDrawing } from '../reducers/drawings';
 import Drawing from '../components/Drawing';
+import TripSelectionDialog from '../components/TripSelectionDialog';
+import Trips from './Trips'
+import { selectActiveTrip, selectActiveTripMark } from '../reducers/trips';
+import { removeActiveTripMarkAction, setActualTripAction, saveTripMarkAction } from '../actions/trips-actions';
 const IconMoon = createIconSetFromIcoMoon(iconMoonConfig);
 
 interface MenuItem {
@@ -133,8 +137,10 @@ const mapStateToProps = (state: State) => ({
   isItTheFirstTimeAppStarted: selectIsItTheFirstTimeAppStarted(state),
   showWikimapia: selectShowWikimapia(state),
   awake: selectAwake(state),
-  selectedMark: selectSelectedMark(state),
+  selectedMarkState: selectSelectedMark(state),
   selectedDrawing: selectActiveDrawing(state),
+  selectedActiveTrip: selectActiveTrip(state),
+  selectedActiveTripMarkState: selectActiveTripMark(state),
 });
 const mapDispatchToProps = {
   removeMark: removeMarkAction,
@@ -161,6 +167,9 @@ const mapDispatchToProps = {
   removeLastDrawingChunk: removeLastDrawingChunkAction,
   saveActualDrawing: saveActualDrawingAction,
   setActualDrawing: setActualDrawingAction,
+  setActualTrip: setActualTripAction,
+  removeTripMark: removeActiveTripMarkAction,
+  saveTripMark: saveTripMarkAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps);
 type Props = ConnectedProps<typeof connector> & {map?: MapboxGL.MapView, camera?: MapboxGL.Camera};
@@ -205,9 +214,14 @@ const Overlay: FC<Props> = ({
   setShowWikimapia,
   awake,
   toggleAwake,
-  selectedMark,
+  selectedMarkState,
   selectedDrawing,
-  setActualDrawing
+  setActualDrawing,
+  selectedActiveTrip,
+  setActualTrip,
+  selectedActiveTripMarkState,
+  removeTripMark,
+  saveTripMark,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -215,10 +229,14 @@ const Overlay: FC<Props> = ({
   const [showSettings, setShowSettings] = useState(false);
   const [showMarkers, setShowMarkers] = useState(false);
   const [showTracks, setShowTracks] = useState(false);
+  const [showTrips, setShowTrips] = useState(false);
+  const [markAppendedToTrip, setMarkAppendedToTrip] = useState<Mark>();
   const [showAbout, setShowAbout] = useState(false);
   const [activeDrawingLayout, setActiveDrawingLayout] = useState(false);
   const [showDrawings, setShowDrawings] = useState(false);
   const {t} = useTranslation();
+
+  const selectedMark = selectedActiveTripMarkState ? selectedActiveTripMarkState : selectedMarkState
 
   const menuItems: MenuItem[] = [
     {
@@ -253,6 +271,13 @@ const Overlay: FC<Props> = ({
       title: 'Drawings',
       onPress: () => {
         setShowDrawings(true);
+        setShowMenu(false);
+      },
+    },
+    {
+      title: 'Trips',
+      onPress: () => {
+        setShowTrips(true);
         setShowMenu(false);
       },
     },
@@ -333,12 +358,35 @@ const Overlay: FC<Props> = ({
   const onHideSelectedTrack = () => {
     selectTrack(undefined);
     setActualDrawing("")
+    setActualTrip("")
   };
 
   const toggleWikimapia = () => {
     setShowWikimapia(!showWikimapia);
   };
 
+  const onMarkSave = (data: {name: string; description: string; rate: number}) => {
+    if (!editedMark) {
+      return
+    }
+    const newMark = {...editedMark, ...data}
+    if (editedMark.type === MarkType.TRIP) {
+      saveTripMark(newMark)
+      return
+    }
+    saveMark(newMark)
+  }
+  const onMarkRemove = () => {
+    if (!editedMark?.id) {
+      return
+    }
+    if (editedMark.type === MarkType.TRIP) {
+      removeTripMark(editedMark.id)
+      return
+    }
+    return editedMark.id ? removeMark(editedMark.id) : null
+  }
+  
   useEffect(() => {
     if (isItTheFirstTimeAppStarted) {
       setShowSettings(isItTheFirstTimeAppStarted);
@@ -373,7 +421,7 @@ const Overlay: FC<Props> = ({
             />
           </View>
           <View style={styles.buttonSubPanel}>
-            {(selectedTrack || !!selectedDrawing.length) && (
+            {(selectedTrack || !!selectedDrawing.length || !!selectedActiveTrip) && (
               <View style={styles.visibilityOffButton}>
                 <MenuButton icon="visibility-off" onPress={onHideSelectedTrack} />
               </View>
@@ -487,11 +535,15 @@ const Overlay: FC<Props> = ({
         <EditMark
           mark={editedMark}
           center={[location.coords.longitude, location.coords.latitude]}
-          save={data => saveMark({...editedMark, ...data})}
+          save={onMarkSave}
           cancel={() => editMark(undefined)}
-          remove={() => (editedMark.id ? removeMark(editedMark.id) : null)}
+          remove={onMarkRemove}
           showModal={showModal}
+          setMarkAppendedToTrip={setMarkAppendedToTrip}
         />
+      )}
+      {markAppendedToTrip && (
+        <TripSelectionDialog markAppendedToTrip={markAppendedToTrip} onClose={() => setMarkAppendedToTrip(undefined)} />
       )}
       {showTracks && <Tracks close={() => setShowTracks(false)} />}
       {showDrawings && <Drawings close={() => setShowDrawings(false)} />}
@@ -523,7 +575,7 @@ const Overlay: FC<Props> = ({
         />
       )}
       {showAbout && <About close={() => setShowAbout(false)} />}
-
+      {showTrips && <Trips close={() => setShowTrips(false)} />}
       {activeDrawingLayout && (
         <Drawing setActiveDrawingLayout={setActiveDrawingLayout} map={map} />
       )}
