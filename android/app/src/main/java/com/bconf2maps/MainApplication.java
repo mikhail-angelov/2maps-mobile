@@ -2,6 +2,7 @@ package com.bconf2maps;
 
 import android.app.Application;
 import android.content.Context;
+import android.util.Log;
 
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
@@ -17,6 +18,8 @@ import java.util.List;
 public class MainApplication extends Application implements ReactApplication {
 
   private LocalHost localHost;
+  private int port = 8081;
+  private static final String TAG = "MainApplication";
 
   private final ReactNativeHost mReactNativeHost =
       new ReactNativeHost(this) {
@@ -48,19 +51,29 @@ public class MainApplication extends Application implements ReactApplication {
     return mReactNativeHost;
   }
 
+  private void createLocalHostInstance() {
+    localHost = LocalHost.createInstance(this, port);
+    try {
+      localHost.start();
+      Log.d(TAG, "LocalHost is started on port: " + port);
+    } catch(IOException e) {
+      e.printStackTrace();
+      Log.d(TAG, "Port is in use: " + port);
+      if (port < 10000) {
+        port++;
+        Log.d(TAG, "Try with new port: " + port);
+        createLocalHostInstance();
+      }
+    }
+  }
+
   @Override
   public void onCreate() {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
     initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
 
-    localHost = LocalHost.createInstance(this);
-    try {
-      localHost.start();
-    }
-    catch(IOException e) {
-      e.printStackTrace();
-    }
+    createLocalHostInstance();
   }
 
   /**
