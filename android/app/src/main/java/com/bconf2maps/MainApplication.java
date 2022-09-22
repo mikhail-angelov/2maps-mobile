@@ -18,7 +18,7 @@ import java.util.List;
 public class MainApplication extends Application implements ReactApplication {
 
   private LocalHost localHost;
-  private int port = 8081;
+  private static int port = 8081;
   private static final String TAG = "MainApplication";
 
   private final ReactNativeHost mReactNativeHost =
@@ -52,17 +52,20 @@ public class MainApplication extends Application implements ReactApplication {
   }
 
   private void createLocalHostInstance() {
-    localHost = LocalHost.createInstance(this, port);
+    int actualPort = getLocalHostPort();
+    localHost = LocalHost.createInstance(this, actualPort);
     try {
       localHost.start();
-      Log.d(TAG, "LocalHost is started on port: " + port);
+      Log.d(TAG, "LocalHost is started on port: " + actualPort);
     } catch(IOException e) {
       e.printStackTrace();
-      Log.d(TAG, "Port is in use: " + port);
-      if (port < 10000) {
-        port++;
-        Log.d(TAG, "Try with new port: " + port);
+      Log.d(TAG, "Port is in use: " + actualPort);
+      if (actualPort < 10000) {
+        setLocalHostPort(actualPort + 1);
+        Log.d(TAG, "Try with new port: " + getLocalHostPort());
         createLocalHostInstance();
+      } else {
+        setLocalHostPort(0);
       }
     }
   }
@@ -105,5 +108,13 @@ public class MainApplication extends Application implements ReactApplication {
         e.printStackTrace();
       }
     }
+  }
+
+  public static int getLocalHostPort() {
+    return port;
+  }
+
+  public static void setLocalHostPort(int value) {
+    port = value;
   }
 }

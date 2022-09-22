@@ -99,7 +99,7 @@ public class LocalHost extends NanoHTTPD {
 
     public static LocalHost createInstance(Context context, int port) {
         synchronized (LocalHost.class) {
-            Log.d(TAG, "Create LocalHost instance with port: " + port);
+            Log.d(TAG, "Create LocalHost instance on port: " + port);
             INSTANCE = new LocalHost(context, port);
         }
         return INSTANCE;
