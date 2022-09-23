@@ -1,7 +1,7 @@
 import { ActionTypeEnum, AppThunk } from ".";
 import { Position } from 'geojson';
 import { NativeModules } from "react-native";
-import { getLocal, get, post, HOST, HOST_LOCAL, getMapsDirectoryPath } from './api'
+import { getLocal, get, post, HOST, getLocalhost, getMapsDirectoryPath } from './api'
 import { MapInfo, PrimaryMapInfo, StorageMemory } from "../store/types";
 import { selectToken } from '../reducers/auth'
 import { selectDownloadId } from '../reducers/map'
@@ -47,7 +47,7 @@ export const getLocalMapListAction = (): AppThunk => {
       const res: AxiosResponse<{[key: string]: LocalMapFile}> = await getLocal('maps');
       console.log('get maps', res.data); 
       const validLocalMaps = validateLocalMapList(res.data)
-      const list = Object.values(validLocalMaps).map(({name, size, storage}) => ({ name, url: `${HOST_LOCAL}/map/${name}/{z}/{x}/{y}.png`, size, storage }));
+      const list = Object.values(validLocalMaps).map(({name, size, storage}) => ({ name, url: `${getLocalhost()}/map/${name}/{z}/{x}/{y}.png`, size, storage }));
       dispatch({ type: ActionTypeEnum.GetMapListSuccess, payload: list });
     } catch (err) {
       console.log("error", err);

@@ -1,9 +1,10 @@
 import axios from 'axios';
 import FormData from "form-data";
+import { Alert, NativeModules } from 'react-native';
 import RNFS from 'react-native-fs';
 
 export const HOST = 'https://2maps.xyz'
-export const HOST_LOCAL = 'http://localhost:5555'
+let HOST_LOCAL = 'http://localhost:5555'
 // export const HOST = 'http://192.168.31.251:3000'
 
 export const TERMS_OF_SERVICE_RU_URL = `${HOST}/2maps-tos-ru.html`
@@ -52,13 +53,13 @@ export const postLarge = async ({ url, token, data }: {
 }
 
 export const getLocal = (url: string) => {
-  return axios.get(`${HOST_LOCAL}/${url}`);
+  return axios.get(`${getLocalhost()}/${url}`);
 }
 
 export const postLocal = ({ url, data }: {
   url: string; data: any
 }) => {
-  return axios.post(`${HOST_LOCAL}/${url}`, data);
+  return axios.post(`${getLocalhost()}/${url}`, data);
 }
 
 const getStorageDirectoryPath = async() => {
@@ -87,4 +88,28 @@ export const getDrawingsDirectoryPath = async() => {
   const primaryStoragePath = await getStorageDirectoryPath()
   const destinationPath = primaryStoragePath && `${primaryStoragePath}/drawings/`
   return destinationPath
+}
+
+const setLocalhost = (port: number) => {
+  HOST_LOCAL = `http://localhost:${port}`
+  console.log('set localhost', HOST_LOCAL);
+}
+
+export const getLocalhost = () => {
+  return HOST_LOCAL
+}
+
+export const getLocalhostPortNativeModule = async() => {
+  try {
+    const raw = await NativeModules.MapsModule.getLocalhostPort();
+    const result: { port: number } = JSON.parse(raw)
+    if (+result.port > 0) {
+      setLocalhost(result.port)
+    } else {
+      Alert.alert("Can't start application, getting port error!");
+    }
+  } catch (e) {
+    console.log('error', e);
+    Alert.alert("Can't start application!");
+  }
 }

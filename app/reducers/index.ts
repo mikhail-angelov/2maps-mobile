@@ -25,7 +25,7 @@ const trackerPersistConfig = {
 const mapPersistConfig = {
   key: 'map',
   storage: AsyncStorage,
-  blacklist: ['relocating', 'loading', 'relocateProgress', 'error']
+  blacklist: ['relocating', 'loading', 'relocateProgress', 'error', 'secondaryMap']
 }
 const authPersistConfig = {
   key: 'auth',

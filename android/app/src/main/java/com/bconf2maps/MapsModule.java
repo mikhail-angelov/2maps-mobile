@@ -383,4 +383,17 @@ public class MapsModule extends ReactContextBaseJavaModule {
             promise.reject("err","nav");
         }
     }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @ReactMethod
+    public void getLocalhostPort(Promise promise) {
+        Map<String, String> payload = new HashMap<>();
+
+        int localhostPort = MainApplication.getLocalHostPort();
+        payload.put("port", String.valueOf(localhostPort));
+            
+        String result = new Gson().toJson(payload);
+        Log.d(TAG, result);
+        promise.resolve(result);
+    }
 }
