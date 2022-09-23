@@ -18,7 +18,7 @@ import java.util.List;
 public class MainApplication extends Application implements ReactApplication {
 
   private LocalHost localHost;
-  private static int port = 8081;
+  private static int port = 5555;
   private static final String TAG = "MainApplication";
 
   private final ReactNativeHost mReactNativeHost =
