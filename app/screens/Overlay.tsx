@@ -87,6 +87,8 @@ import TripSelectionDialog from '../components/TripSelectionDialog';
 import Trips from './Trips'
 import { selectActiveTrip, selectActiveTripMark } from '../reducers/trips';
 import { removeActiveTripMarkAction, setActualTripAction, saveTripMarkAction } from '../actions/trips-actions';
+import { MIN_LOCATION_ACCURACY } from '../constants/geolocation';
+
 const IconMoon = createIconSetFromIcoMoon(iconMoonConfig);
 
 interface MenuItem {
@@ -324,7 +326,7 @@ const Overlay: FC<Props> = ({
         actions: [{text: t('Ok'), type: ModalActionType.cancel}],
       });
     }
-    if (!location || (!!location && !!location?.coords && !!location?.coords?.accuracy && location?.coords?.accuracy > 20)) {
+    if (!location || (!!location && !!location?.coords && !!location?.coords?.accuracy && location?.coords?.accuracy > MIN_LOCATION_ACCURACY)) {
       return;
     }
     camera?.moveTo([location.coords.longitude, location.coords.latitude], 100);
