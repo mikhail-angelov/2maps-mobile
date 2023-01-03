@@ -1,23 +1,26 @@
-import React, { FC, useState} from "react";
-import styled from 'styled-components/native'
-import { View } from "react-native";
-import MapboxGL from "@react-native-mapbox-gl/maps";
+import React, {FC, useState} from 'react';
+import {View, StyleSheet} from 'react-native';
+import MapboxGL from '@rnmapbox/maps';
 import Map from './Map';
 import Overlay from './Overlay';
-import AuthManager from "../components/AuthManager";
+import AuthManager from '../components/AuthManager';
 
-const Container = styled(View)`
-flex-direction: column;
-position: relative;
-flex: 1;
-`
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'column',
+    position: 'relative',
+    flex: 1,
+  },
+});
 
-const Main: FC<{}> = () =>{
- const [map, setMap] = useState<MapboxGL.Camera|undefined>() 
-  return (<Container>
-    <AuthManager />
-    <Map setMap={setMap}/>
-    <Overlay map={map}/>
-  </Container>)
-}
-export default Main
+const Main = () => {
+  const [map, setMap] = useState<MapboxGL.Camera | undefined>();
+  return (
+    <View style={styles.container}>
+      <AuthManager />
+      <Map setMap={setMap} />
+      <Overlay map={map} />
+    </View>
+  );
+};
+export default Main;

@@ -1,7 +1,7 @@
 import React, { FC } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { State } from '../store/types'
-import MapboxGL, { CircleLayerStyle, OnPressEvent } from "@react-native-mapbox-gl/maps";
+import MapboxGL, { CircleLayerStyle, OnPressEvent } from "@rnmapbox/maps";
 import { featureCollection } from '@turf/helpers';
 import { selectMarks } from "../reducers/marks";
 import { markToFeature } from "../actions/marks-actions";

@@ -1,5 +1,5 @@
 import React from "react";
-import MapboxGL from "@react-native-mapbox-gl/maps";
+import MapboxGL from "@rnmapbox/maps";
 import { Mark, State } from "../store/types";
 import { selectCenter, selectOpacity, selectPrimaryMap, selectSecondaryMap, selectZoom } from "../reducers/map";
 import { connect, ConnectedProps } from "react-redux";

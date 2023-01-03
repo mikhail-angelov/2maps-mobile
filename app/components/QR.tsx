@@ -6,7 +6,7 @@ import {
     TouchableOpacity,
     Linking,
 } from 'react-native';
-import QRCodeScanner from 'react-native-qrcode-scanner';
+// import QRCodeScanner from 'react-native-qrcode-scanner';
 import { useTranslation } from "react-i18next";
 import { green, purple } from "../constants/color";
 
@@ -26,30 +26,31 @@ const QR: FC<Props> = ({ select, close }) => {
         close()
     };
 
-    return <QRCodeScanner
-        onRead={onSuccess}
-        cameraType='back'
-        showMarker
-        markerStyle={styles.markerStyle}
-        topContent={
-            <View style={styles.titleContainer}>
-                <Text style={styles.titleText}>
-                    {t('Scan map QR code')}
-                </Text>
-                <View style={styles.linkContainer}>
-                    <Text style={styles.titleText}>
-                        {t('For example: ')}
-                    </Text>
-                    <Text style={styles.link} onPress={() => Linking.openURL(LINKING_URL)}>{t('EtoMesto.ru')}</Text>
-                </View>
-            </View>
-        }
-        bottomContent={
-            <TouchableOpacity style={styles.buttonTouchable} onPress={close}>
-                <Text style={styles.buttonText}>{t('Cancel')}</Text>
-            </TouchableOpacity>
-        }
-    />
+    return null;
+    // return <QRCodeScanner
+    //     onRead={onSuccess}
+    //     cameraType='back'
+    //     showMarker
+    //     markerStyle={styles.markerStyle}
+    //     topContent={
+    //         <View style={styles.titleContainer}>
+    //             <Text style={styles.titleText}>
+    //                 {t('Scan map QR code')}
+    //             </Text>
+    //             <View style={styles.linkContainer}>
+    //                 <Text style={styles.titleText}>
+    //                     {t('For example: ')}
+    //                 </Text>
+    //                 <Text style={styles.link} onPress={() => Linking.openURL(LINKING_URL)}>{t('EtoMesto.ru')}</Text>
+    //             </View>
+    //         </View>
+    //     }
+    //     bottomContent={
+    //         <TouchableOpacity style={styles.buttonTouchable} onPress={close}>
+    //             <Text style={styles.buttonText}>{t('Cancel')}</Text>
+    //         </TouchableOpacity>
+    //     }
+    // />
 }
 
 export default QR

@@ -1,5 +1,5 @@
 import React, { FC } from "react";
-import MapboxGL, { FillLayerStyle, LineLayerStyle, SymbolLayerStyle } from "@react-native-mapbox-gl/maps";
+import MapboxGL, { FillLayerStyle, LineLayerStyle, SymbolLayerStyle } from "@rnmapbox/maps";
 
 const tileUrl = 'https://2maps.xyz/wikimapia/{z}/{x}/{y}.mvt'
 

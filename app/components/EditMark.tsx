@@ -15,7 +15,7 @@ import {purple} from '../constants/color';
 import {markToDistance} from '../utils/normalize';
 import {Position} from 'geojson';
 import {useTranslation} from 'react-i18next';
-import MapboxGL from '@react-native-mapbox-gl/maps';
+import MapboxGL from '@rnmapbox/maps';
 import SnapshotMark from './SnapshotMark';
 import Share from 'react-native-share';
 import {

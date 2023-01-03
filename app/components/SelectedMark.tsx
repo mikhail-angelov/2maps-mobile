@@ -2,7 +2,7 @@ import React, { FC } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { connect, ConnectedProps } from "react-redux";
 import { State, Mark } from '../store/types'
-import MapboxGL, { LineLayerStyle, SymbolLayerStyle } from "@react-native-mapbox-gl/maps";
+import MapboxGL, { LineLayerStyle, SymbolLayerStyle } from "@rnmapbox/maps";
 
 const WikiStyle: LineLayerStyle = {
     lineWidth: 2,

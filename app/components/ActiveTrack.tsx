@@ -1,7 +1,7 @@
 import React, { FC } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { State, Tracking } from '../store/types'
-import MapboxGL, { LineLayerStyle } from "@react-native-mapbox-gl/maps";
+import MapboxGL, { LineLayerStyle } from "@rnmapbox/maps";
 import { lineString } from '@turf/helpers';
 import { selectActiveTrack, selectSelectedTrack, selectIsTracking } from '../reducers/tracker'
 import { purple } from "../constants/color";

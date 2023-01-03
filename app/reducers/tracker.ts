@@ -1,5 +1,5 @@
 import {createSelector} from 'reselect';
-import MapboxGL from '@react-native-mapbox-gl/maps';
+import MapboxGL from '@rnmapbox/maps';
 import {Position} from 'geojson';
 import {TrackerState, State, Track, Tracking} from '../store/types';
 import {ActionTypeEnum} from '../actions';

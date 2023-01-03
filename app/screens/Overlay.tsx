@@ -1,5 +1,5 @@
 import React, {FC, useEffect, useState} from 'react';
-import MapboxGL from '@react-native-mapbox-gl/maps';
+import MapboxGL from '@rnmapbox/maps';
 import {connect, ConnectedProps} from 'react-redux';
 import {minBy} from 'lodash';
 import distance from '@turf/distance';

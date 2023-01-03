@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import { StyleSheet } from "react-native";
 import {connect, ConnectedProps} from 'react-redux';
 import {State, Mark, Tracking} from '../store/types';
 import {
@@ -12,11 +13,10 @@ import {
   selectLocation,
   selectSelectedTrackBBox,
 } from '../reducers/tracker';
-import styled from 'styled-components/native';
 import MapboxGL, {
   RasterSourceProps,
   RegionPayload,
-} from '@react-native-mapbox-gl/maps';
+} from '@rnmapbox/maps';
 import {Feature, Point} from '@turf/helpers';
 import {checkAction} from '../actions/auth-actions';
 import {setCenterAction, setZoomAction} from '../actions/map-actions';
@@ -51,10 +51,12 @@ export const rasterSourceProps: RasterSourceProps = {
   tileSize: 256,
 };
 
-const StyledMap = styled(MapboxGL.MapView)`
-  flex: 1;
-  width: 100%;
-`;
+const styles = StyleSheet.create({
+  map: {
+    flex: 1,
+    width: '100%'
+  }
+})
 
 const mapStateToProps = (state: State) => ({
   center: selectCenter(state),
@@ -91,7 +93,7 @@ class Map extends Component<Props> {
   componentDidMount() {
     MapboxGL.setTelemetryEnabled(false);
     this.props.checkAuth();
-    MapboxGL.locationManager.start();
+    // MapboxGL.locationManager.start();
     this.interval = setInterval(() => {
       const {tracking, location} = this.props;
       if ((tracking !== Tracking.none) && location) {
@@ -103,7 +105,7 @@ class Map extends Component<Props> {
     }, 20000);
   }
   componentWillUnmount() {
-    MapboxGL.locationManager.stop();
+    // MapboxGL.locationManager.stop();
     this.interval && clearInterval(this.interval);
   }
   shouldComponentUpdate(nextProps: Props) {
@@ -233,7 +235,8 @@ class Map extends Component<Props> {
     }
 
     return (
-      <StyledMap
+      <MapboxGL.MapView
+        style={styles.map}
         zoomEnabled
         compassEnabled
         styleURL={styleURL}
@@ -274,7 +277,7 @@ class Map extends Component<Props> {
           unselect={this.onBalloonClick}
           openEdit={this.onBalloonLongClick}
         />
-      </StyledMap>
+      </MapboxGL.MapView>
     );
   }
 }

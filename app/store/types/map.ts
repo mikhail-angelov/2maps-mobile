@@ -1,6 +1,6 @@
 
 import { Position } from 'geojson';
-import MapboxGL from "@react-native-mapbox-gl/maps";
+import MapboxGL from "@rnmapbox/maps";
 
 export type Storage = 'internal' | 'sd-card'
 export interface MapInfo {

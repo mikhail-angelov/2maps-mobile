@@ -1,5 +1,5 @@
 import {ActionTypeEnum, AppThunk} from '.';
-import MapboxGL from '@react-native-mapbox-gl/maps';
+import MapboxGL from '@rnmapbox/maps';
 import {Track, ModalActionType, State, Tracking} from '../store/types';
 import {selectIsTracking, selectLocation, selectActiveTrack} from '../reducers/tracker';
 import RNFS from 'react-native-fs';

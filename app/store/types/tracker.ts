@@ -1,4 +1,4 @@
-import MapboxGL from "@react-native-mapbox-gl/maps";
+import MapboxGL from "@rnmapbox/maps";
 import { Position } from 'geojson';
 
 export interface Track {
