@@ -15,7 +15,7 @@ import { getDrawingsDirectoryPath } from './api';
 import i18next from 'i18next';
 import { convertToBoxSize, findMinMaxCoordinates, latLngToTileIndex } from '../utils/normalize';
 import { makeSvg } from '../utils/svg';
-import MapboxGL from '@rnmapbox/maps/maps';
+import MapboxGL from '@rnmapbox/maps';
 import Share from 'react-native-share';
 
 const DRAWINGS_EXT = '.drawing';

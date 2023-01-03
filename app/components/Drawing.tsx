@@ -2,7 +2,7 @@ import React, { FC, useState } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { GestureResponderEvent, StyleSheet, View } from 'react-native';
 import DrawingChunk from './DrawingChunk';
-import MapboxGL from '@rnmapbox/maps/maps';
+import MapboxGL from '@rnmapbox/maps';
 import { addPointForDrawingChunkAction, finishDrawNewChunkAction, removeLastDrawingChunkAction, saveActualDrawingAction, setActualDrawingAction, startDrawNewChunkAction, shareActualDrawing } from '../actions/drawing-actions';
 import IconCommunity from 'react-native-vector-icons/MaterialCommunityIcons';
 

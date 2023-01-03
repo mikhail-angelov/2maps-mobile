@@ -1,7 +1,7 @@
 import React, {FC} from 'react';
 import {connect, ConnectedProps} from 'react-redux';
 import {State} from '../store/types';
-import MapboxGL, {LineLayerStyle} from '@rnmapbox/maps/maps';
+import MapboxGL, {LineLayerStyle} from '@rnmapbox/maps';
 import {lineString} from '@turf/helpers';
 import {selectActiveDrawing} from '../reducers/drawings';
 import {red} from '../constants/color';

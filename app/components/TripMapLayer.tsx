@@ -1,7 +1,7 @@
 import React, { FC, useEffect } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { State } from '../store/types'
-import MapboxGL, { CircleLayerStyle, OnPressEvent } from "@rnmapbox/maps/maps";
+import MapboxGL, { CircleLayerStyle, OnPressEvent } from "@rnmapbox/maps";
 import { featureCollection } from '@turf/helpers';
 import { markToFeature } from "../actions/marks-actions";
 import { colorPalette } from "../constants/color";
