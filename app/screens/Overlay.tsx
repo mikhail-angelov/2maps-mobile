@@ -324,7 +324,7 @@ const Overlay: FC<Props> = ({
         actions: [{text: t('Ok'), type: ModalActionType.cancel}],
       });
     }
-    if (!location) {
+    if (!location || (!!location && !!location?.coords && !!location?.coords?.accuracy && location?.coords?.accuracy > 20)) {
       return;
     }
     camera?.moveTo([location.coords.longitude, location.coords.latitude], 100);

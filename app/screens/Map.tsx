@@ -204,7 +204,7 @@ class Map extends Component<Props> {
   };
   onUserLocationUpdate = (location: MapboxGL.Location) => {
     console.log('update user location', location);
-    if (!location?.coords) {
+    if (!location?.coords || (!!location?.coords && !!location?.coords?.accuracy && location?.coords?.accuracy > 20)) {
       return;
     }
     if (this.props.tracking !== Tracking.none) {
@@ -306,6 +306,7 @@ class Map extends Component<Props> {
         />
         <MapboxGL.UserLocation
           visible={true}
+          renderMode="native"
           onUpdate={this.onUserLocationUpdate}
           showsUserHeadingIndicator={tracking !== Tracking.none}
           minDisplacement={50}
