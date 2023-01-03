@@ -2,6 +2,7 @@ package com.bconf2maps;
 
 import android.app.Application;
 import android.content.Context;
+import android.util.Log;
 
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
@@ -17,6 +18,8 @@ import java.util.List;
 public class MainApplication extends Application implements ReactApplication {
 
   private LocalHost localHost;
+  private static int port = 5555;
+  private static final String TAG = "MainApplication";
 
   private final ReactNativeHost mReactNativeHost =
       new ReactNativeHost(this) {
@@ -48,19 +51,32 @@ public class MainApplication extends Application implements ReactApplication {
     return mReactNativeHost;
   }
 
+  private void createLocalHostInstance() {
+    int actualPort = getLocalHostPort();
+    localHost = LocalHost.createInstance(this, actualPort);
+    try {
+      localHost.start();
+      Log.d(TAG, "LocalHost is started on port: " + actualPort);
+    } catch(IOException e) {
+      e.printStackTrace();
+      Log.d(TAG, "Port is in use: " + actualPort);
+      if (actualPort < 10000) {
+        setLocalHostPort(actualPort + 1);
+        Log.d(TAG, "Try with new port: " + getLocalHostPort());
+        createLocalHostInstance();
+      } else {
+        setLocalHostPort(0);
+      }
+    }
+  }
+
   @Override
   public void onCreate() {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
     initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
 
-    localHost = LocalHost.createInstance(this);
-    try {
-      localHost.start();
-    }
-    catch(IOException e) {
-      e.printStackTrace();
-    }
+    createLocalHostInstance();
   }
 
   /**
@@ -92,5 +108,13 @@ public class MainApplication extends Application implements ReactApplication {
         e.printStackTrace();
       }
     }
+  }
+
+  public static int getLocalHostPort() {
+    return port;
+  }
+
+  public static void setLocalHostPort(int value) {
+    port = value;
   }
 }

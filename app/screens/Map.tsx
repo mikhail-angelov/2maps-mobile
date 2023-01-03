@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
-import { StyleSheet } from "react-native";
+import {StyleSheet} from 'react-native';
 import {connect, ConnectedProps} from 'react-redux';
-import {State, Mark, Tracking} from '../store/types';
+import {State, Tracking} from '../store/types';
 import {
   featureToMark,
   editMarkAction,
@@ -14,6 +14,7 @@ import {
   selectSelectedTrackBBox,
 } from '../reducers/tracker';
 import MapboxGL, {
+  OnPressEvent,
   RasterSourceProps,
   RegionPayload,
 } from '@rnmapbox/maps';
@@ -38,6 +39,11 @@ import MarksLocation from '../components/MarksLocation';
 import Wikimapia from '../components/Wikimapia';
 import SelectedMark from '../components/SelectedMark';
 import * as _ from 'lodash';
+import Drawing from '../components/DrawingMapLayer';
+import {selectDrawingBBox} from '../reducers/drawings';
+import TripMapLayer from '../components/TripMapLayer';
+import {selectTripMarkAction} from '../actions/trips-actions';
+import {selectActiveTrip, selectActiveTripMark} from '../reducers/trips';
 
 MapboxGL.setAccessToken(
   process.env.MAPBOX_PUB_KEY ||
@@ -54,9 +60,9 @@ export const rasterSourceProps: RasterSourceProps = {
 const styles = StyleSheet.create({
   map: {
     flex: 1,
-    width: '100%'
-  }
-})
+    width: '100%',
+  },
+});
 
 const mapStateToProps = (state: State) => ({
   center: selectCenter(state),
@@ -69,6 +75,9 @@ const mapStateToProps = (state: State) => ({
   location: selectLocation(state),
   showWikimapia: selectShowWikimapia(state),
   selectedMark: selectSelectedMark(state),
+  selectedDrawingBBox: selectDrawingBBox(state),
+  selectedTripMark: selectActiveTripMark(state),
+  selectedTrip: selectActiveTrip(state),
 });
 const mapDispatchToProps = {
   setCenter: setCenterAction,
@@ -79,10 +88,12 @@ const mapDispatchToProps = {
   setLocation: setLocationAction,
   restartTracking: restartTrackingAction,
   selectMark: selectMarkAction,
+  selectTripMark: selectTripMarkAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps);
 type Props = ConnectedProps<typeof connector> & {
-  setMap: (map: MapboxGL.Camera | undefined) => void;
+  setMap: (map: MapboxGL.MapView | undefined) => void;
+  setCamera: (map: MapboxGL.Camera | undefined) => void;
 };
 
 class Map extends Component<Props> {
@@ -96,7 +107,7 @@ class Map extends Component<Props> {
     // MapboxGL.locationManager.start();
     this.interval = setInterval(() => {
       const {tracking, location} = this.props;
-      if ((tracking !== Tracking.none) && location) {
+      if (tracking !== Tracking.none && location) {
         this.camera?.moveTo(
           [location.coords.longitude, location.coords.latitude],
           100,
@@ -122,12 +133,36 @@ class Map extends Component<Props> {
 
   componentDidUpdate(prevProps: any) {
     if (
-      this.props.selectedTrackBBox &&
-      !_.isEqual(this.props.selectedTrackBBox, prevProps.selectedTrackBBox)
+      (this.props.selectedTrackBBox &&
+        !_.isEqual(
+          this.props.selectedTrackBBox,
+          prevProps.selectedTrackBBox,
+        )) ||
+      (this.props.selectedDrawingBBox &&
+        !_.isEqual(
+          this.props.selectedDrawingBBox,
+          prevProps.selectedDrawingBBox,
+        ))
     ) {
-      const start = this.props.selectedTrackBBox?.[0];
-      const end = this.props.selectedTrackBBox?.[1];
-      this.camera?.fitBounds(start, end, 70, 100);
+      const trackStart = this.props.selectedTrackBBox?.[0];
+      const trackEnd = this.props.selectedTrackBBox?.[1];
+
+      const drawingStart = this.props.selectedDrawingBBox?.[0];
+      const drawingEnd = this.props.selectedDrawingBBox?.[1];
+
+      const startX = _.min([trackStart?.[0], drawingStart?.[0]]);
+      const startY = _.min([trackStart?.[1], drawingStart?.[1]]);
+      const endX = _.max([trackEnd?.[0], drawingEnd?.[0]]);
+      const endY = _.max([trackEnd?.[1], drawingEnd?.[1]]);
+      if (
+        startX === undefined ||
+        startY === undefined ||
+        endX === undefined ||
+        endY === undefined
+      ) {
+        return;
+      }
+      this.camera?.fitBounds([startX, startY], [endX, endY], 70, 100);
     }
   }
 
@@ -155,6 +190,12 @@ class Map extends Component<Props> {
     this.camera?.moveTo(feature.geometry.coordinates, 100);
   };
 
+  onTripMarkPress = (event: OnPressEvent) => {
+    console.log('on trip mark press', event.features);
+    const selectedMark = featureToMark(event.features[0] as Feature<Point>);
+    this.props.selectTripMark(selectedMark);
+  };
+
   updateCenter = (e: Feature<Point, RegionPayload>) => {
     console.log('update center', e.properties);
     this.props.setCenter(e.geometry.coordinates);
@@ -180,10 +221,11 @@ class Map extends Component<Props> {
   };
   onSetMap = (map: MapboxGL.MapView) => {
     this.map = map;
+    this.props.setMap(map);
   };
   onSetCamera = (camera: MapboxGL.Camera) => {
     this.camera = camera;
-    this.props.setMap(camera);
+    this.props.setCamera(camera);
   };
   onTouchEnd = () => {
     console.log('--onTouchEnd');
@@ -193,7 +235,14 @@ class Map extends Component<Props> {
       restartTracking();
     }
   };
-
+  onTripMarkBalloonClick = () => {
+    this.props.editMark(this.props.selectedTripMark);
+    this.props.selectTripMark();
+  };
+  onTripMarkBalloonLongClick = () => {
+    this.props.editMark(this.props.selectedTripMark);
+    this.props.selectTripMark();
+  };
   render() {
     const {
       tracking,
@@ -204,6 +253,8 @@ class Map extends Component<Props> {
       zoom,
       showWikimapia,
       selectedMark,
+      selectedTripMark,
+      selectedTrip,
     } = this.props;
 
     let styleURL = primaryMap.url;
@@ -255,7 +306,7 @@ class Map extends Component<Props> {
         <MapboxGL.UserLocation
           visible={true}
           onUpdate={this.onUserLocationUpdate}
-          showsUserHeadingIndicator={tracking!==Tracking.none}
+          showsUserHeadingIndicator={tracking !== Tracking.none}
           minDisplacement={50}
         />
         {secondaryMap && (
@@ -277,6 +328,15 @@ class Map extends Component<Props> {
           unselect={this.onBalloonClick}
           openEdit={this.onBalloonLongClick}
         />
+
+        <SelectedMark
+          mark={selectedTripMark}
+          trip={selectedTrip}
+          unselect={this.onTripMarkBalloonClick}
+          openEdit={this.onTripMarkBalloonLongClick}
+        />
+        <Drawing />
+        <TripMapLayer camera={this.camera} onMarkPress={this.onTripMarkPress} />
       </MapboxGL.MapView>
     );
   }

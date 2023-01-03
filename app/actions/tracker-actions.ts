@@ -137,10 +137,7 @@ export const selectTrackAction = (track: Track | undefined): AppThunk => {
       );
       return;
     }
-    let {maxX, maxY, minX, minY} = findMinMaxCoordinates(trackFromFile.track);
-    if (!maxX || !maxY || !minX || !minY) {
-      return;
-    }
+    let {maxX, maxY, minX, minY} = findMinMaxCoordinates([trackFromFile.track]);
     // delta 0.005 of Latitude or 0.006 of Longitude ≈ 0.5km
     if (Math.abs(maxX - minX) < 0.005 && Math.abs(maxY - minY) < 0.006) {
       minX -= 0.0025;
@@ -269,7 +266,7 @@ const renderTrackIcon = (activeTrack: Track) => {
   );
   const boxX = 50;
   const boxY = 50;
-  const boxCoordinates = convertToBoxSize(coordinatesXY, boxX - 1, boxY - 1);
+  const boxCoordinates = convertToBoxSize([coordinatesXY], boxX - 1, boxY - 1);
   if (!boxCoordinates) return;
   const svg = makeSvg(boxCoordinates, boxX, boxY);
   return svg;
@@ -399,6 +396,7 @@ export const importTrackAction = (): AppThunk => {
         end: trackFromKml.end,
         name: trackFromKml.name,
         track: trackFromKml.coordinates,
+        prevPosition: []
       };
       await writeTrackToFile(newTrack, dispatch);
       dispatch(updateTrackListAction());

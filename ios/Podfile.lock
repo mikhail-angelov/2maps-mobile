@@ -401,7 +401,7 @@ DEPENDENCIES:
   - react-native-config (from `../node_modules/react-native-config`)
   - react-native-document-picker (from `../node_modules/react-native-document-picker`)
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
-  - "react-native-mapbox-gl (from `../node_modules/@react-native-mapbox-gl/maps`)"
+  - "react-native-mapbox-gl (from `../node_modules/@rnmapbox/maps/maps`)"
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
@@ -479,7 +479,7 @@ EXTERNAL SOURCES:
   react-native-geolocation:
     :path: "../node_modules/@react-native-community/geolocation"
   react-native-mapbox-gl:
-    :path: "../node_modules/@react-native-mapbox-gl/maps"
+    :path: "../node_modules/@rnmapbox/maps/maps"
   react-native-netinfo:
     :path: "../node_modules/@react-native-community/netinfo"
   react-native-safe-area-context:

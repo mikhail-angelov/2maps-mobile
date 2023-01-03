@@ -25,8 +25,8 @@ public class LocalHost extends NanoHTTPD {
     private Map<String, DB> maps;
     private Context ctx;
 
-    private LocalHost(Context context) {
-        super("127.0.0.1", 5555);
+    private LocalHost(Context context, int port) {
+        super("127.0.0.1", port);
         ctx = context;
         init(context);
     }
@@ -97,11 +97,10 @@ public class LocalHost extends NanoHTTPD {
         }
     } 
 
-    public static LocalHost createInstance(Context context) {
+    public static LocalHost createInstance(Context context, int port) {
         synchronized (LocalHost.class) {
-            if (INSTANCE == null) {
-                INSTANCE = new LocalHost(context);
-            }
+            Log.d(TAG, "Create LocalHost instance on port: " + port);
+            INSTANCE = new LocalHost(context, port);
         }
         return INSTANCE;
     }

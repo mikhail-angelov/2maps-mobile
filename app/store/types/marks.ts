@@ -1,6 +1,10 @@
 
 import { Point } from 'geojson';
 
+export enum MarkType {
+  'TRIP'
+}
+
 export interface Mark {
   id?: string;
   name: string;
@@ -9,6 +13,8 @@ export interface Mark {
   timestamp: number;
   geometry: Point;
   deleted?: boolean;
+  type?: MarkType
+  selectedMarkIndex?: number;
 }
 
 export interface POI {

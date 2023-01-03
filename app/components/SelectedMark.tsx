@@ -1,23 +1,13 @@
 import React, { FC } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { connect, ConnectedProps } from "react-redux";
-import { State, Mark } from '../store/types'
-import MapboxGL, { LineLayerStyle, SymbolLayerStyle } from "@rnmapbox/maps";
-
-const WikiStyle: LineLayerStyle = {
-    lineWidth: 2,
-    lineColor: 'red',
-    lineOpacity: 0.6,
-}
-const WikiStyleLabel: SymbolLayerStyle = {
-    textColor: 'red',
-    textSize: 18,
-    textField: ['get', 'title'],
-    textAnchor: 'bottom',
-}
+import { State, Mark, MarkType, Trip } from '../store/types'
+import MapboxGL from "@rnmapbox/maps";
+import { useTranslation } from "react-i18next";
 
 interface OwnProps {
     mark?: Mark;
+    trip?: Trip;
     unselect: () => void;
     openEdit: () => void;
 }
@@ -27,19 +17,22 @@ const mapStateToProps = (state: State) => ({
 const connector = connect(mapStateToProps)
 type Props = ConnectedProps<typeof connector> & OwnProps;
 
-const SelectedMark: FC<Props> = ({ mark, unselect, openEdit }) => {
+const SelectedMark: FC<Props> = ({ mark, trip, unselect, openEdit }) => {
+    const {t} = useTranslation()
     if (!mark) {
         return null
     }
 
+    const markName = mark.type === MarkType.TRIP ? `${(mark.selectedMarkIndex || 0) + 1}. ${trip?.name ? trip.name: t('Trip')}: ${mark.name}`: mark.name
+
     return (<MapboxGL.MarkerView
         id="sel"
         coordinate={mark.geometry.coordinates}
-        title={mark.name}
+        title={markName}
         anchor={{ x: 0.5, y: 1.2 }}
     >
         <TouchableOpacity delayLongPress={500} onLongPress={openEdit} onPress={unselect} style={styles.touchable}>
-            <MapboxGL.Callout title={mark.name} />
+            <MapboxGL.Callout title={markName} />
         </TouchableOpacity>
     </MapboxGL.MarkerView>);
 }
