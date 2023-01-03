@@ -94,11 +94,11 @@ const Drawings: FC<Props> = ({ trips, close, showModal, setActualTrip, removeTri
                 <Text style={styles.title}>{t('Trips')}</Text>
             </View>
             {_.isEmpty(list) ?
-                <View style={styles.scroll} accessibilityLabel={t('No Items')}>
+                <View style={styles.scroll} accessibilityLabel={t('No Items') as string}>
                     <Text style={styles.sheetText}>{t('No Items')}</Text>
                 </View>
                 :
-                <View style={styles.scroll} accessibilityLabel={t('Trips')}>
+                <View style={styles.scroll} accessibilityLabel={t('Trips') as string}>
                     <SwipeListView
                         data={list}
                         renderItem={renderItem}

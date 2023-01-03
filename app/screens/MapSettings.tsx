@@ -169,7 +169,8 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
     const confirmMovementMapToSdCard = (item: MapItem) => {
         if (isSDCardExist) {
             showModal({
-                title: '', text: t('Move to SD Card', { name: item.name }), actions: [
+                title: '', text: t('Move to SD Card', { name: item.name }),
+                actions: [
                     { text: t('No'), type: ModalActionType.cancel },
                     { text: t('Yes'), type: ModalActionType.default, handler: () => { moveMapToSdCard(item.id) } },
                 ]
@@ -302,7 +303,7 @@ const MapSettings: FC<Props> = ({ primaryMap, secondaryMap, isLoading, isDownLoa
                     keyExtractor={(item: MapItem) => item.id}
                 />
                 {!isAuthenticated &&
-                    <Button buttonStyle={styles.btn} title={t('Login to download maps')} onPress={showAuth} />
+                    <Button buttonStyle={styles.btn} title={t('Login to download maps') as string} onPress={showAuth} />
                 }
             </View>
             {!!error && <Text style={styles.errors}>{t(error)}</Text>}

@@ -147,11 +147,11 @@ const Tracks: FC<Props> = ({ tracks, selectedTrack, selectTrack, close, removeTr
                     </Menu>
                 </View>
                 {_.isEmpty(list) ? 
-                <View style={styles.scroll} accessibilityLabel={t('No Items')}>
+                <View style={styles.scroll} accessibilityLabel={t('No Items') as string}>
                     <Text style={styles.sheetText}>{t('No Items')}</Text>
                 </View>
                 : 
-                <View style={styles.scroll} accessibilityLabel={t('Tracks')}>
+                <View style={styles.scroll} accessibilityLabel={t('Tracks') as string}>
                     <SwipeListView
                         data={list}
                         renderItem={renderItem}

@@ -56,7 +56,7 @@ const MarkersHeader: FC<MarkersHeaderProps> = ({ importPois, exportPois, removeA
             {isFilterMarks ? (
                 <View style={styles.filterContainer}>
                     <TextInput
-                        placeholder={t('filter')}
+                        placeholder={t('filter') as string}
                         style={styles.filterInput}
                         onChangeText={(value) => filter(value)}
                         value={filterText}
@@ -166,8 +166,8 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, showModal, close
         const item = markers.find(item => item.id === id)
         showModal({
             title: t('Warning!'), text: t(`Are you sure to remove: ${item?.name}?`), actions: [
-                { text: t('No'), type: ModalActionType.cancel },
-                { text: t('Yes'), type: ModalActionType.default, handler: () => removeMark(id) },
+                { text: t('No') as string, type: ModalActionType.cancel },
+                { text: t('Yes') as string, type: ModalActionType.default, handler: () => removeMark(id) },
             ]
         })
     }
@@ -229,11 +229,11 @@ const Markers: FC<Props> = ({ markers, center, isAuthenticated, showModal, close
                 <MarkersHeader importPois={importPois} exportPois={exportPois} removeAllPois={removeAllPois} syncMarks={syncMarks}
                     close={close} showModal={showModal} filter={onFilterMarks} filterText={filterText} isAuthenticated={isAuthenticated} />
                 {isBlank ?
-                    <View style={styles.scroll} accessibilityLabel={t('No Items')}>
+                    <View style={styles.scroll} accessibilityLabel={t('No Items') as string}>
                         <Text style={styles.sheetText}>{t('No Items')}</Text>
                     </View>
                     :
-                    <View style={styles.scroll} accessibilityLabel={t('Marks')}>
+                    <View style={styles.scroll} accessibilityLabel={t('Marks') as string}>
                         <SwipeListView
                             data={list}
                             renderItem={renderItem}

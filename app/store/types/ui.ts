@@ -5,7 +5,7 @@ export enum ModalActionType {
 }
 
 export interface ModalAction {
-  text?: string;
+  text?: string|null;
   type?: string;
   handler?: (text?: string)=>void;
 }
