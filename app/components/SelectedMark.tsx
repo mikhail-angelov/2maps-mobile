@@ -29,7 +29,7 @@ const SelectedMark: FC<Props> = ({ mark, trip, unselect, openEdit }) => {
         id="sel"
         coordinate={mark.geometry.coordinates}
         title={markName}
-        anchor={{ x: 0.5, y: 1.2 }}
+        anchor={{ x: 0.5, y: 0.99 }}
     >
         <TouchableOpacity delayLongPress={500} onLongPress={openEdit} onPress={unselect} style={styles.touchable}>
             <MapboxGL.Callout title={markName} />
