@@ -45,6 +45,7 @@ import TripMapLayer from '../components/TripMapLayer';
 import {selectTripMarkAction} from '../actions/trips-actions';
 import {selectActiveTrip, selectActiveTripMark} from '../reducers/trips';
 
+MapboxGL.setWellKnownTileServer('Mapbox');
 MapboxGL.setAccessToken(
   process.env.MAPBOX_PUB_KEY ||
     'pk.eyJ1IjoibWlraGFpbGFuZ2Vsb3YiLCJhIjoiY2tpa2FnbnM5MDg5ejJ3bDQybWN3eWRsdSJ9.vK_kqebrJaO7MdIg4ilaFQ',
