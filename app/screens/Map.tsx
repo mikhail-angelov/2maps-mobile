@@ -44,6 +44,7 @@ import {selectDrawingBBox} from '../reducers/drawings';
 import TripMapLayer from '../components/TripMapLayer';
 import {selectTripMarkAction} from '../actions/trips-actions';
 import {selectActiveTrip, selectActiveTripMark} from '../reducers/trips';
+import { MIN_LOCATION_ACCURACY } from '../constants/geolocation';
 
 MapboxGL.setWellKnownTileServer('Mapbox');
 MapboxGL.setAccessToken(
@@ -204,7 +205,7 @@ class Map extends Component<Props> {
   };
   onUserLocationUpdate = (location: MapboxGL.Location) => {
     console.log('update user location', location);
-    if (!location?.coords) {
+    if (!location?.coords || (!!location?.coords && !!location?.coords?.accuracy && location?.coords?.accuracy > MIN_LOCATION_ACCURACY)) {
       return;
     }
     if (this.props.tracking !== Tracking.none) {
@@ -306,6 +307,7 @@ class Map extends Component<Props> {
         />
         <MapboxGL.UserLocation
           visible={true}
+          renderMode="native"
           onUpdate={this.onUserLocationUpdate}
           showsUserHeadingIndicator={tracking !== Tracking.none}
           minDisplacement={50}
