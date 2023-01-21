@@ -59,6 +59,7 @@ export enum ActionTypeEnum {
   StartTracking = 'tracker/START_TRACKING',
   StartTrackingAndRecording = 'tracker/START_TRACKING_AND_RECORDING',
   EndTracking = 'tracker/END_TRACKING',
+  EndRecordingTracking = 'tracker/END__RECORDING_TRACKING',
   PauseTracking = 'tracker/PAUSE_TRACKING',
   ResumeTracking = 'tracker/RESUME_TRACKING',
   AddPoint = 'tracker/ADD_POINT',
@@ -105,5 +106,10 @@ export enum ActionTypeEnum {
   SetTrips = 'trips/SET_TRIPS',
   SetActiveTrip = 'trips/SET_ACTIVE_TRIP',
   SetSelectedTripBBox = 'trips/SET_SELECTED_TRIP_BBOX',
-  SetActiveTripMark = 'trips/SELECT_ACTIVE_TRIP_MARK'
+  SetActiveTripMark = 'trips/SELECT_ACTIVE_TRIP_MARK',
+  //settings
+  SetShowOSD = 'settings/SET_SHOW_OSD',
+  SetShowPaintButton = 'settings/SET_SHOW_PAINT_BUTTON',
+  SetShowWikiButton = 'settings/SET_SHOW_WIKI_BUTTON',
+  SetShowTrackButton = 'settings/SET_SHOW_TRACKING_BUTTON',
 }

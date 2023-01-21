@@ -9,6 +9,7 @@ import auth from "./auth";
 import ui from "./ui";
 import drawings from "./drawings";
 import trips from "./trips";
+import settings from "./settings";
 
 const marksPersistConfig = {
   key: 'marks',
@@ -41,6 +42,10 @@ const drawingsPersistConfig = {
   storage: AsyncStorage,
   blacklist: ['activeDrawingChunk'],
 }
+const settingsPersistConfig = {
+  key: 'settings',
+  storage: AsyncStorage,
+}
 const rootReducer = combineReducers({
   marks: persistReducer(marksPersistConfig, marks),
   tracker: persistReducer(trackerPersistConfig, tracker),
@@ -50,6 +55,7 @@ const rootReducer = combineReducers({
   ui,
   drawings: persistReducer(drawingsPersistConfig, drawings),
   trips: persistReducer(tripsPersistConfig, trips),
+  settings: persistReducer(settingsPersistConfig, settings),
 } as any);
 
 export default rootReducer;

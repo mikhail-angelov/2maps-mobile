@@ -18,11 +18,11 @@ import MapboxGL, {
   RasterSourceProps,
   RegionPayload,
 } from '@rnmapbox/maps';
+import {UserTrackingMode} from '@rnmapbox/maps/javascript/components/Camera';
 import {Feature, Point} from '@turf/helpers';
 import {checkAction} from '../actions/auth-actions';
 import {setCenterAction, setZoomAction} from '../actions/map-actions';
 import {
-  addPointAction,
   setLocationAction,
   restartTrackingAction,
 } from '../actions/tracker-actions';
@@ -44,7 +44,7 @@ import {selectDrawingBBox} from '../reducers/drawings';
 import TripMapLayer from '../components/TripMapLayer';
 import {selectTripMarkAction} from '../actions/trips-actions';
 import {selectActiveTrip, selectActiveTripMark} from '../reducers/trips';
-import { MIN_LOCATION_ACCURACY } from '../constants/geolocation';
+import {MIN_LOCATION_ACCURACY} from '../constants/geolocation';
 
 MapboxGL.setWellKnownTileServer('Mapbox');
 MapboxGL.setAccessToken(
@@ -86,7 +86,6 @@ const mapDispatchToProps = {
   setZoom: setZoomAction,
   checkAuth: checkAction,
   editMark: editMarkAction,
-  addPoint: addPointAction,
   setLocation: setLocationAction,
   restartTracking: restartTrackingAction,
   selectMark: selectMarkAction,
@@ -109,7 +108,7 @@ class Map extends Component<Props> {
     // MapboxGL.locationManager.start();
     this.interval = setInterval(() => {
       const {tracking, location} = this.props;
-      if (tracking !== Tracking.none && location) {
+      if (tracking && location) {
         this.camera?.moveTo(
           [location.coords.longitude, location.coords.latitude],
           100,
@@ -205,11 +204,13 @@ class Map extends Component<Props> {
   };
   onUserLocationUpdate = (location: MapboxGL.Location) => {
     console.log('update user location', location);
-    if (!location?.coords || (!!location?.coords && !!location?.coords?.accuracy && location?.coords?.accuracy > MIN_LOCATION_ACCURACY)) {
+    if (
+      !location?.coords ||
+      (!!location?.coords &&
+        !!location?.coords?.accuracy &&
+        location?.coords?.accuracy > MIN_LOCATION_ACCURACY)
+    ) {
       return;
-    }
-    if (this.props.tracking !== Tracking.none) {
-      this.props.addPoint(location);
     }
     this.props.setLocation(location);
   };
@@ -233,7 +234,7 @@ class Map extends Component<Props> {
     console.log('--onTouchEnd');
     this.setState({selected: undefined});
     const {tracking, restartTracking} = this.props;
-    if (tracking !== Tracking.none) {
+    if (tracking) {
       restartTracking();
     }
   };
@@ -303,13 +304,13 @@ class Map extends Component<Props> {
           ref={this.onSetCamera}
           defaultSettings={{centerCoordinate: center, zoomLevel: zoom}}
           followZoomLevel={zoom}
-          followUserMode="normal"
+          followUserMode={UserTrackingMode.Follow}
         />
         <MapboxGL.UserLocation
           visible={true}
           renderMode="native"
           onUpdate={this.onUserLocationUpdate}
-          showsUserHeadingIndicator={tracking !== Tracking.none}
+          showsUserHeadingIndicator={tracking}
           minDisplacement={50}
         />
         {secondaryMap && (

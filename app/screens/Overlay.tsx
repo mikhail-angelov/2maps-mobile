@@ -3,7 +3,7 @@ import MapboxGL from '@rnmapbox/maps';
 import {connect, ConnectedProps} from 'react-redux';
 import {minBy} from 'lodash';
 import distance from '@turf/distance';
-import {State, Mark, ModalActionType, Tracking, MarkType} from '../store/types';
+import {State, Mark, Tracking, MarkType} from '../store/types';
 import {
   selectMarks,
   selectEditedMark,
@@ -20,10 +20,10 @@ import {
   selectLocation,
   selectTracks,
   selectIsTracking,
+  selectIsRecording,
 } from '../reducers/tracker';
 import {View, StyleSheet, Text} from 'react-native';
 import {BottomSheet, ListItem} from 'react-native-elements';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import IconCommunity from 'react-native-vector-icons/MaterialCommunityIcons';
 import EditMark from '../components/EditMark';
 import Slider from '../components/Slider';
@@ -32,12 +32,12 @@ import Markers from './Markers';
 import Auth from '../components/Auth';
 import MapSettings from './MapSettings';
 import {
-  addPointAction,
-  addTrackAction,
   selectTrackAction,
   startTrackingAction,
   startTrackingAdnRecordingAction,
+  stopRecordingAction,
   stopTrackingAction,
+  setCurrentPositionOnMapAction,
 } from '../actions/tracker-actions';
 import {
   checkAction,
@@ -48,6 +48,12 @@ import {
   selectIsItTheFirstTimeAppStarted,
   selectResetToken,
 } from '../reducers/auth';
+import {
+  selectShowOSD,
+  selectShowPaintButton,
+  selectShowWikiButton,
+  selectShowTrackButton,
+} from '../reducers/settings';
 import {
   setCenterAction,
   setOpacityAction,
@@ -75,19 +81,30 @@ import {useTranslation} from 'react-i18next';
 import Account from '../components/Account';
 import About from '../components/About';
 import {purple} from '../constants/color';
-import {requestLocationPermissions} from '../utils/permissions';
 // custom font icons: https://medium.com/bam-tech/add-custom-icons-to-your-react-native-application-f039c244386c
 import {createIconSetFromIcoMoon} from 'react-native-vector-icons';
 import iconMoonConfig from '../fontConfig.json';
-import { addPointForDrawingChunkAction, finishDrawNewChunkAction, startDrawNewChunkAction, removeLastDrawingChunkAction, saveActualDrawingAction, setActualDrawingAction } from '../actions/drawing-actions';
+import {
+  addPointForDrawingChunkAction,
+  finishDrawNewChunkAction,
+  startDrawNewChunkAction,
+  removeLastDrawingChunkAction,
+  saveActualDrawingAction,
+  setActualDrawingAction,
+} from '../actions/drawing-actions';
 import Drawings from './Drawings';
-import { selectActiveDrawing } from '../reducers/drawings';
+import {selectActiveDrawing} from '../reducers/drawings';
 import Drawing from '../components/Drawing';
 import TripSelectionDialog from '../components/TripSelectionDialog';
-import Trips from './Trips'
-import { selectActiveTrip, selectActiveTripMark } from '../reducers/trips';
-import { removeActiveTripMarkAction, setActualTripAction, saveTripMarkAction } from '../actions/trips-actions';
-import { MIN_LOCATION_ACCURACY } from '../constants/geolocation';
+import Trips from './Trips';
+import Settings from './Settings';
+import {selectActiveTrip, selectActiveTripMark} from '../reducers/trips';
+import {
+  removeActiveTripMarkAction,
+  setActualTripAction,
+  saveTripMarkAction,
+} from '../actions/trips-actions';
+import dayjs from 'dayjs';
 
 const IconMoon = createIconSetFromIcoMoon(iconMoonConfig);
 
@@ -111,11 +128,11 @@ const MenuButton = ({
   color?: string;
   bgColor?: string;
 }) => (
-  <Icon.Button
+  <IconCommunity.Button
     name={icon}
     color={color || 'white'}
     backgroundColor={bgColor || '#00f5'}
-    style={{width: 48, height: 48, padding: 0, justifyContent: 'center'}}
+    style={styles.iconButton}
     iconStyle={{marginLeft: 10, width: 20}}
     borderRadius={24}
     onPress={onPress}
@@ -134,6 +151,7 @@ const mapStateToProps = (state: State) => ({
   primaryMap: selectPrimaryMap(state),
   secondaryMap: selectSecondaryMap(state),
   tracking: selectIsTracking(state),
+  isRecording: selectIsRecording(state),
   editedMark: selectEditedMark(state),
   resetToken: selectResetToken(state),
   isItTheFirstTimeAppStarted: selectIsItTheFirstTimeAppStarted(state),
@@ -143,15 +161,18 @@ const mapStateToProps = (state: State) => ({
   selectedDrawing: selectActiveDrawing(state),
   selectedActiveTrip: selectActiveTrip(state),
   selectedActiveTripMarkState: selectActiveTripMark(state),
+  showOSD: selectShowOSD(state),
+  showPaintButton: selectShowPaintButton(state),
+  showWikiButton: selectShowWikiButton(state),
+  showTrackButton: selectShowTrackButton(state),
 });
 const mapDispatchToProps = {
   removeMark: removeMarkAction,
   selectTrack: selectTrackAction,
   startTracking: startTrackingAction,
   startTrackingAdnRecording: startTrackingAdnRecordingAction,
+  stopRecording: stopRecordingAction,
   stopTracking: stopTrackingAction,
-  addPoint: addPointAction,
-  addTrack: addTrackAction,
   setCenter: setCenterAction,
   setOpacity: setOpacityAction,
   setZoom: setZoomAction,
@@ -172,9 +193,13 @@ const mapDispatchToProps = {
   setActualTrip: setActualTripAction,
   removeTripMark: removeActiveTripMarkAction,
   saveTripMark: saveTripMarkAction,
+  setCurrentPositionOnMap: setCurrentPositionOnMapAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps);
-type Props = ConnectedProps<typeof connector> & {map?: MapboxGL.MapView, camera?: MapboxGL.Camera};
+type Props = ConnectedProps<typeof connector> & {
+  map?: MapboxGL.MapView;
+  camera?: MapboxGL.Camera;
+};
 
 const getClosestMark = (location: any, marks: Mark[]) => {
   const closest = minBy(marks, mark =>
@@ -202,8 +227,10 @@ const Overlay: FC<Props> = ({
   saveMark,
   removeMark,
   tracking,
+  isRecording,
   startTracking,
   startTrackingAdnRecording,
+  stopRecording,
   stopTracking,
   showModal,
   resetToken,
@@ -224,11 +251,16 @@ const Overlay: FC<Props> = ({
   selectedActiveTripMarkState,
   removeTripMark,
   saveTripMark,
+  setCurrentPositionOnMap,
+  showOSD,
+  showPaintButton,
+  showWikiButton,
+  showTrackButton,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [showAccount, setShowAccount] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  const [showMapSettings, setShowMapSettings] = useState(false);
   const [showMarkers, setShowMarkers] = useState(false);
   const [showTracks, setShowTracks] = useState(false);
   const [showTrips, setShowTrips] = useState(false);
@@ -236,9 +268,12 @@ const Overlay: FC<Props> = ({
   const [showAbout, setShowAbout] = useState(false);
   const [activeDrawingLayout, setActiveDrawingLayout] = useState(false);
   const [showDrawings, setShowDrawings] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const {t} = useTranslation();
 
-  const selectedMark = selectedActiveTripMarkState ? selectedActiveTripMarkState : selectedMarkState
+  const selectedMark = selectedActiveTripMarkState
+    ? selectedActiveTripMarkState
+    : selectedMarkState;
 
   const menuItems: MenuItem[] = [
     {
@@ -251,7 +286,7 @@ const Overlay: FC<Props> = ({
     {
       title: 'Maps',
       onPress: () => {
-        setShowSettings(true);
+        setShowMapSettings(true);
         setShowMenu(false);
       },
     },
@@ -284,6 +319,13 @@ const Overlay: FC<Props> = ({
       },
     },
     {
+      title: 'Settings',
+      onPress: () => {
+        setShowSettings(true);
+        setShowMenu(false);
+      },
+    },
+    {
       title: 'About app',
       onPress: () => {
         setShowAbout(true);
@@ -304,51 +346,42 @@ const Overlay: FC<Props> = ({
   }
   const currentLocation = [location.coords.longitude, location.coords.latitude];
   const closest = getClosestMark(currentLocation, marks);
+  const osdText = `GPS: ${location.coords.longitude}, ${
+    location.coords.latitude
+  }\n
+  elevation: ${location.coords.altitude?.toFixed(
+    2,
+  )}, speed: ${location.coords.speed?.toFixed(2)}\n
+  acc: ${location.coords.accuracy?.toFixed(2)}\n
+  time: ${dayjs().format('HH:mm:ss')}`;
   const onOpacityChange = (value: number) => {
     console.log('setOpacityAction c', value);
     setOpacity(value);
   };
-  const toCurrentLocation = async () => {
-    console.log('-toCurrentLocation-', location);
-    try {
-      const isGranted = await requestLocationPermissions();
-      if (!isGranted) {
-        return showModal({
-          title: t('Location permission denied'),
-          text: t("Allow Location Permission otherwise tracking won't work"),
-          actions: [{text: t('Ok'), type: ModalActionType.cancel}],
-        });
-      }
-    } catch (e) {
-      return showModal({
-        title: t('Permissions error!'),
-        text: t('Check location permissions error'),
-        actions: [{text: t('Ok'), type: ModalActionType.cancel}],
-      });
+  const toCurrentLocation = () => {
+    if (camera) {
+      setCurrentPositionOnMap(camera);
     }
-    if (!location || (!!location && !!location?.coords && !!location?.coords?.accuracy && location?.coords?.accuracy > MIN_LOCATION_ACCURACY)) {
-      return;
-    }
-    camera?.moveTo([location.coords.longitude, location.coords.latitude], 100);
   };
-  let trackingColor='white';
-  if(tracking === Tracking.track){
-    trackingColor='green';
-  }else if(tracking === Tracking.trackAndRecord){
-    trackingColor='red';
+  let trackingColor = 'white';
+  if (tracking) {
+    trackingColor = 'green';
+  } 
+  if (tracking && isRecording) {
+    trackingColor = 'red';
   }
   const toggleTracking = () => {
-    if (tracking === Tracking.none) {
-      startTracking();
-    } else {
+    if (tracking) {
       stopTracking();
+    } else {
+      startTracking();
     }
   };
-  const toggleTrackingAndRecord = () => {
-    if (tracking === Tracking.none) {
-      startTrackingAdnRecording();
+  const toggleRecording = () => {
+    if (isRecording) {
+      stopRecording();
     } else {
-      stopTracking();
+      startTrackingAdnRecording();
     }
   };
   const selectMark = (mark: Mark) => {
@@ -359,39 +392,43 @@ const Overlay: FC<Props> = ({
 
   const onHideSelectedTrack = () => {
     selectTrack(undefined);
-    setActualDrawing("")
-    setActualTrip("")
+    setActualDrawing('');
+    setActualTrip('');
   };
 
   const toggleWikimapia = () => {
     setShowWikimapia(!showWikimapia);
   };
 
-  const onMarkSave = (data: {name: string; description: string; rate: number}) => {
+  const onMarkSave = (data: {
+    name: string;
+    description: string;
+    rate: number;
+  }) => {
     if (!editedMark) {
-      return
+      return;
     }
-    const newMark = {...editedMark, ...data}
+    const newMark = {...editedMark, ...data};
     if (editedMark.type === MarkType.TRIP) {
-      saveTripMark(newMark)
-      return
+      saveTripMark(newMark);
+      return;
     }
-    saveMark(newMark)
-  }
+    saveMark(newMark);
+  };
   const onMarkRemove = () => {
     if (!editedMark?.id) {
-      return
+      return;
     }
     if (editedMark.type === MarkType.TRIP) {
-      removeTripMark(editedMark.id)
-      return
+      removeTripMark(editedMark.id);
+      return;
     }
-    return editedMark.id ? removeMark(editedMark.id) : null
-  }
-  
+    return editedMark.id ? removeMark(editedMark.id) : null;
+  };
+
   useEffect(() => {
     if (isItTheFirstTimeAppStarted) {
-      setShowSettings(isItTheFirstTimeAppStarted);
+      setShowMapSettings(isItTheFirstTimeAppStarted);
       setTheFirstTimeAppStart(false);
     }
   }, []);
@@ -405,110 +442,113 @@ const Overlay: FC<Props> = ({
         </View>
       )}
       {!activeDrawingLayout && (
-        <View style={styles.buttonPanel}>
-          <View style={styles.buttonSubPanelTop}>
-            <IconCommunity.Button
-              name={showWikimapia ? 'window-close' : 'wikipedia'}
-              color="white"
-              backgroundColor="#00f5"
-              style={{
-                width: 48,
-                height: 48,
-                padding: 0,
-                justifyContent: 'center',
-              }}
-              iconStyle={{marginLeft: 10, width: 20}}
-              borderRadius={24}
-              onPress={toggleWikimapia}
-            />
-          </View>
-          <View style={styles.buttonSubPanel}>
-            {(selectedTrack || !!selectedDrawing.length || !!selectedActiveTrip) && (
-              <View style={styles.visibilityOffButton}>
-                <MenuButton icon="visibility-off" onPress={onHideSelectedTrack} />
-              </View>
+        <>
+          <View style={styles.buttonPanelLeft}>
+            {showWikiButton && (
+              <MenuButton
+                icon={showWikimapia ? 'window-close' : 'wikipedia'}
+                onPress={toggleWikimapia}
+              />
             )}
+            <View style={styles.iconButtonPadding}></View>
+            <MenuButton icon="menu" onPress={() => setShowMenu(true)} />
+          </View>
+          <View style={styles.buttonPanel}>
             <MenuButton
-              icon={awake ? 'brightness-high' : 'brightness-low'}
+              icon={awake ? 'lightbulb-on-outline' : 'lightbulb-off'}
               bgColor={awake ? '#0f0a' : '#00f5'}
               onPress={toggleAwake}
             />
-            <IconCommunity.Button
-              name="brush"
-              color="white"
-              backgroundColor="#00f5"
-              style={{
-                width: 48,
-                height: 48,
-                padding: 0,
-                justifyContent: 'center',
-              }}
-              iconStyle={{marginLeft: 10, width: 20}}
-              borderRadius={24}
-              onPress={() => setActiveDrawingLayout(true)}
-            />
-            <MenuButton icon="settings" onPress={() => setShowMenu(true)} />
-            <MenuButton
-              icon="track-changes"
-              color={trackingColor}
-              onPress={toggleTracking}
-              onLongPress={toggleTrackingAndRecord}
-            />
-          </View>
-          <View style={styles.buttonSubPanelBottom}>
-            {selectedMark && (
-              <View style={styles.navPanel}>
-                <View style={styles.navPanelRow}>
-                  <View style={styles.navPanelItem}>
-                    <IconMoon.Button
-                      name="yandex"
-                      color="white"
-                      backgroundColor="#0f05"
-                      style={{
-                        width: 48,
-                        height: 48,
-                        padding: 0,
-                        justifyContent: 'center',
-                      }}
-                      iconStyle={{marginLeft: 10, width: 20}}
-                      borderRadius={24}
-                      onPress={() =>
-                        navigateYandex(selectedMark.geometry.coordinates)
-                      }
-                    />
-                  </View>
-                  <View style={styles.navPanelItem}>
-                    <IconMoon.Button
-                      name="osmc"
-                      color="white"
-                      backgroundColor="#0f05"
-                      style={{
-                        width: 48,
-                        height: 48,
-                        padding: 0,
-                        justifyContent: 'center',
-                      }}
-                      iconStyle={{marginLeft: 10, width: 20}}
-                      borderRadius={24}
-                      onPress={() =>
-                        navigateOsm(selectedMark.geometry.coordinates)
-                      }
-                    />
-                  </View>
-                  <View style={styles.navPanelItem}>
-                    <MenuButton
-                      icon="navigation"
-                      bgColor="#0f05"
-                      onPress={() =>
-                        navigateGoogle(selectedMark.geometry.coordinates)
-                      }
-                    />
-                  </View>
-                </View>
+            {showPaintButton && (
+              <View style={styles.buttonSubPanelTop}>
+                <View style={styles.iconButtonPadding}></View>
+                <MenuButton
+                  icon="brush"
+                  color="white"
+                  onPress={() => setActiveDrawingLayout(true)}
+                />
               </View>
             )}
-            <MenuButton icon="gps-fixed" onPress={toCurrentLocation} />
+            <View style={styles.buttonSubPanel}>
+              {(selectedTrack ||
+                !!selectedDrawing.length ||
+                !!selectedActiveTrip) && (
+                <>
+                  <MenuButton icon="eye-off" onPress={onHideSelectedTrack} />
+                  <View style={styles.iconButtonPadding}></View>
+                </>
+              )}
+
+              {tracking && (
+                <>
+                  <MenuButton
+                    icon={
+                      isRecording ? 'record-circle-outline' : 'record-circle'
+                    }
+                    color={isRecording ? 'red' : 'white'}
+                    onPress={toggleRecording}
+                  />
+                  <View style={styles.iconButtonPadding}></View>
+                </>
+              )}
+              {showTrackButton && (
+                <MenuButton
+                  icon="go-kart-track"
+                  color={trackingColor}
+                  onPress={toggleTracking}
+                />
+              )}
+            </View>
+            <View style={styles.buttonSubPanelBottom}>
+              {selectedMark && (
+                <View style={styles.navPanel}>
+                  <View style={styles.navPanelRow}>
+                    <View style={styles.navPanelItem}>
+                      <IconMoon.Button
+                        name="yandex"
+                        color="white"
+                        backgroundColor="#0f05"
+                        style={styles.iconButton}
+                        iconStyle={{marginLeft: 10, width: 20}}
+                        borderRadius={24}
+                        onPress={() =>
+                          navigateYandex(selectedMark.geometry.coordinates)
+                        }
+                      />
+                    </View>
+                    <View style={styles.navPanelItem}>
+                      <IconMoon.Button
+                        name="osmc"
+                        color="white"
+                        backgroundColor="#0f05"
+                        style={styles.iconButton}
+                        iconStyle={{marginLeft: 10, width: 20}}
+                        borderRadius={24}
+                        onPress={() =>
+                          navigateOsm(selectedMark.geometry.coordinates)
+                        }
+                      />
+                    </View>
+                    <View style={styles.navPanelItem}>
+                      <MenuButton
+                        icon="navigation"
+                        bgColor="#0f05"
+                        onPress={() =>
+                          navigateGoogle(selectedMark.geometry.coordinates)
+                        }
+                      />
+                    </View>
+                  </View>
+                </View>
+              )}
+            </View>
+            <MenuButton icon="compass-rose" onPress={toCurrentLocation} />
           </View>
+        </>
+      )}
+      {showOSD && (
+        <View style={styles.osdContainer}>
+          <Text style={styles.osdText}>{osdText}</Text>
         </View>
       )}
       <View style={styles.closestMark}>
@@ -517,8 +557,7 @@ const Overlay: FC<Props> = ({
       {showMenu && (
         <BottomSheet
           isVisible={showMenu}
-          containerStyle={{backgroundColor: 'rgba(0.5, 0.25, 0, 0.2)'}}
-          modalProps={{}}>
+          containerStyle={{backgroundColor: 'rgba(0.5, 0.25, 0, 0.2)'}}>
           {menuItems.map((l, i) => (
             <ListItem
               key={i}
@@ -545,7 +584,10 @@ const Overlay: FC<Props> = ({
         />
       )}
       {markAppendedToTrip && (
-        <TripSelectionDialog markAppendedToTrip={markAppendedToTrip} onClose={() => setMarkAppendedToTrip(undefined)} />
+        <TripSelectionDialog
+          markAppendedToTrip={markAppendedToTrip}
+          onClose={() => setMarkAppendedToTrip(undefined)}
+        />
       )}
       {showTracks && <Tracks close={() => setShowTracks(false)} />}
       {showDrawings && <Drawings close={() => setShowDrawings(false)} />}
@@ -557,11 +599,11 @@ const Overlay: FC<Props> = ({
         />
       )}
       {showAuth && <Auth close={() => setShowAuth(false)} />}
-      {showSettings && (
+      {showMapSettings && (
         <MapSettings
-          close={() => setShowSettings(false)}
+          close={() => setShowMapSettings(false)}
           showAuth={() => {
-            setShowSettings(false);
+            setShowMapSettings(false);
             setShowAuth(true);
           }}
         />
@@ -581,6 +623,7 @@ const Overlay: FC<Props> = ({
       {activeDrawingLayout && (
         <Drawing setActiveDrawingLayout={setActiveDrawingLayout} map={map} />
       )}
+      {showSettings && <Settings close={() => setShowSettings(false)} />}
     </>
   );
 };
@@ -590,24 +633,36 @@ export default connector(Overlay);
 const styles = StyleSheet.create({
   buttonPanel: {
     position: 'absolute',
-    height: '100%',
     right: 10,
+    top: 90,
+    bottom: 40,
+  },
+  buttonPanelLeft: {
+    position: 'absolute',
+    left: 10,
+    top: 90,
+    bottom: 40,
+    justifyContent: 'flex-end',
   },
   buttonSubPanelTop: {
     flex: 1,
-    justifyContent: 'flex-end',
     minHeight: 90,
   },
   buttonSubPanel: {
     flexGrow: 1,
-    justifyContent: 'space-between',
+    // justifyContent: 'space-between',
     paddingTop: 90,
     position: 'relative',
     marginVertical: 20,
   },
-  visibilityOffButton: {
-    position: 'absolute',
-    top: 10,
+  iconButton: {
+    width: 48,
+    height: 48,
+    padding: 0,
+    justifyContent: 'center',
+  },
+  iconButtonPadding: {
+    height: 20,
   },
   buttonSubPanelBottom: {
     flex: 1,
@@ -641,5 +696,12 @@ const styles = StyleSheet.create({
     padding: 4,
     backgroundColor: '#fff8',
     textAlign: 'center',
-  }
+  },
+  osdContainer: {
+    position: 'absolute',
+    bottom: 90,
+    padding: 10,
+    width: '100%',
+  },
+  osdText: {},
 });

@@ -34,7 +34,6 @@ export default createReducer<TrackerState>(initialState, {
   }),
   [ActionTypeEnum.SetLocation]:
     (location: MapboxGL.Location) => (state: TrackerState) => {
-      console.log('set location', location);
       return {
         ...state,
         location,
@@ -75,6 +74,11 @@ export default createReducer<TrackerState>(initialState, {
       tracking: true,
       trackingAndRecording: true,
     }),
+  [ActionTypeEnum.EndRecordingTracking]: () => (state: TrackerState) => ({
+    ...state,
+    activeTrack: undefined,
+    trackingAndRecording: false,
+  }),
   [ActionTypeEnum.EndTracking]: () => (state: TrackerState) => ({
     ...state,
     activeTrack: undefined,
@@ -125,13 +129,10 @@ export const selectActiveTrack = createSelector(
   state => state.activeTrack,
 );
 export const selectIsTracking = createSelector(selectTrackerState, state => {
-  if (state.trackingAndRecording) {
-    return Tracking.trackAndRecord;
-  } else if (state.tracking) {
-    return Tracking.track;
-  } else {
-    return Tracking.none;
-  }
+  return state.tracking;
+});
+export const selectIsRecording = createSelector(selectTrackerState, state => {
+  return state.trackingAndRecording
 });
 export const selectSelectedTrack = createSelector(
   selectTrackerState,

@@ -1,7 +1,12 @@
 import {ActionTypeEnum, AppThunk} from '.';
 import MapboxGL from '@rnmapbox/maps';
 import {Track, ModalActionType, State, Tracking} from '../store/types';
-import {selectIsTracking, selectLocation, selectActiveTrack} from '../reducers/tracker';
+import {
+  selectIsTracking,
+  selectLocation,
+  selectActiveTrack,
+  selectIsRecording,
+} from '../reducers/tracker';
 import RNFS from 'react-native-fs';
 import DocumentPicker from 'react-native-document-picker';
 import {createKml, parseKml} from '../utils/kml';
@@ -13,16 +18,19 @@ import {
 } from '../utils/normalize';
 import {makeSvg} from '../utils/svg';
 import * as _ from 'lodash';
-import i18next from 'i18next';
+import {t} from 'i18next';
 import distance from '@turf/distance';
 import {point} from '@turf/helpers';
-import { Position } from 'geojson';
-import {requestLocationPermissions} from '../utils/permissions';
+import {Position} from 'geojson';
+import {requestLocationPermissions, requestBackgroundLocationPermissions} from '../utils/permissions';
 import {getTracksDirectoryPath} from './api';
 import {requestWriteFilePermissions} from '../utils/permissions';
 import {showModalAction} from './ui-actions';
 import {ThunkDispatch} from 'redux-thunk';
 import {Action} from 'redux';
+import {startTask, stopTask} from '../foregroundService';
+import Geolocation from 'react-native-geolocation-service';
+import {MIN_LOCATION_ACCURACY} from '../constants/geolocation';
 
 const TRACKS_EXT = '.track';
 const SVG_EXT = '.svg';
@@ -85,8 +93,8 @@ const writeTrackToFile = async (
     if (_.get(e, 'message') === 'Folder does not exist') {
       await RNFS.mkdir(path);
     } else {
-      const title = i18next.t('Can not save track!');
-      const text = `${i18next.t('Directory unreachable')}: ${path}; ${_.get(
+      const title = t('Can not save track!');
+      const text = `${t('Directory unreachable')}: ${path}; ${_.get(
         e,
         'message',
         '',
@@ -160,10 +168,8 @@ const showLocationPermissionAlert = (
 ) => {
   dispatch(
     showModalAction({
-      title: i18next.t('Location permission denied'),
-      text: i18next.t(
-        "Allow Location Permission otherwise tracking won't work",
-      ),
+      title: t('Location permission denied'),
+      text: t("Allow Location Permission otherwise tracking won't work"),
       actions: [{text: 'Ok', type: ModalActionType.cancel}],
     }),
   );
@@ -172,11 +178,11 @@ const showLocationErrorAlert = (
   dispatch: ThunkDispatch<State, unknown, Action<string>>,
   e: any,
 ) => {
-  const title = _.get(e, 'title', i18next.t('Permissions error!'));
+  const title = _.get(e, 'title', t('Permissions error!'));
   const text = _.get(
     e,
     'message',
-    i18next.t("Allow Location Permission otherwise tracking won't work"),
+    t("Allow Location Permission otherwise tracking won't work"),
   );
   dispatch(
     showModalAction({
@@ -190,10 +196,25 @@ const showLocationErrorAlert = (
 export const startTrackingAction = (): AppThunk => {
   return async (dispatch, getState) => {
     try {
-      const isGranted = await requestLocationPermissions();
+      const isGranted = await requestBackgroundLocationPermissions();
       if (!isGranted) {
         return showLocationPermissionAlert(dispatch);
       }
+      startTask(() => {
+        Geolocation.getCurrentPosition(
+          async location => {
+            const {latitude, longitude} = location.coords;
+            console.log('location :', new Date(), location);
+            dispatch(addPointAction(location))
+            dispatch(setLocationAction(location as MapboxGL.Location))
+          },
+          error => {
+            // See error code charts below.
+            console.log('location error:', error, error.message);
+          },
+          {showLocationDialog: true, distanceFilter:MIN_LOCATION_ACCURACY, timeout: 10000, maximumAge: 60000, forceRequestLocation: true, forceLocationManager: true},
+        );
+      });
       const location = selectLocation(getState());
       const startPoint = [location.coords.longitude, location.coords.latitude];
       const track: Track = {
@@ -237,25 +258,114 @@ export const startTrackingAdnRecordingAction = (): AppThunk => {
     }
   };
 };
+export const stopRecordingAction = (): AppThunk => {
+  return async (dispatch, getState) => {
+    stopTask();
+    const activeTrack = selectActiveTrack(getState());
+    const tracking = selectIsTracking(getState());
+    const recording = selectIsRecording(getState());
+    if (activeTrack && tracking && recording) {
+      try {
+        activeTrack.end = Date.now();
+        await writeTrackToFile(activeTrack, dispatch);
+      } catch (e) {
+        console.log(e);
+      }
+    }
 
-export const addPointAction = (location: MapboxGL.Location): AppThunk => {
+    dispatch({type: ActionTypeEnum.EndRecordingTracking});
+  };
+};
+
+export const addPointAction = (location: Geolocation.GeoPosition): AppThunk => {
   return async (dispatch, getState) => {
     const activeTrack = selectActiveTrack(getState());
-    if(!activeTrack) {
+    if (!activeTrack) {
       return;
     }
-    const nextPoint:Position = [location.coords.longitude, location.coords.latitude];
-    console.log('addPointAction distance1:', activeTrack.prevPosition, nextPoint);
-    if(!activeTrack.prevPosition) {
-      return dispatch({type: ActionTypeEnum.AddPoint, payload: {track:[nextPoint], prevPosition: nextPoint}});
+    const nextPoint: Position = [
+      location.coords.longitude,
+      location.coords.latitude,
+    ];
+    console.log(
+      'addPointAction distance1:',
+      activeTrack.prevPosition,
+      nextPoint,
+    );
+    if (!activeTrack.prevPosition) {
+      return dispatch({
+        type: ActionTypeEnum.AddPoint,
+        payload: {track: [nextPoint], prevPosition: nextPoint},
+      });
     }
     const d = distance(point(activeTrack.prevPosition), point(nextPoint));
     console.log('addPointAction distance:', d, activeTrack.track.length);
     if (d > 10 && activeTrack.track.length < 5) {
-      dispatch({type: ActionTypeEnum.AddPoint, payload: {track:[nextPoint], prevPosition: nextPoint}});
+      dispatch({
+        type: ActionTypeEnum.AddPoint,
+        payload: {track: [nextPoint], prevPosition: nextPoint},
+      });
     } else {
-      dispatch({type: ActionTypeEnum.AddPoint, payload: {track:[...activeTrack.track,nextPoint], prevPosition: nextPoint}});
+      dispatch({
+        type: ActionTypeEnum.AddPoint,
+        payload: {
+          track: [...activeTrack.track, nextPoint],
+          prevPosition: nextPoint,
+        },
+      });
     }
+  };
+};
+
+export const setCurrentPositionOnMapAction = (
+  camera: MapboxGL.Camera,
+): AppThunk => {
+  return async (dispatch, getState) => {
+    try {
+      const isGranted = await requestLocationPermissions();
+      if (!isGranted) {
+        return dispatch(
+          showModalAction({
+            title: t('Location permission denied'),
+            text: t("Allow Location Permission otherwise tracking won't work"),
+            actions: [{text: t('Ok'), type: ModalActionType.cancel}],
+          }),
+        );
+      }
+    } catch (e) {
+      return dispatch(
+        showModalAction({
+          title: t('Permissions error!'),
+          text: t('Check location permissions error'),
+          actions: [{text: t('Ok'), type: ModalActionType.cancel}],
+        }),
+      );
+    }
+    console.log('---------all permissions ok');
+    Geolocation.getCurrentPosition(
+      async location => {
+        const {latitude, longitude} = location.coords;
+        console.log('---------location :', new Date(), location);
+        if (
+          !location ||
+          (!!location &&
+            !!location?.coords &&
+            !!location?.coords?.accuracy &&
+            location?.coords?.accuracy > MIN_LOCATION_ACCURACY)
+        ) {
+          return;
+        }
+        camera.moveTo(
+          [location.coords.longitude, location.coords.latitude],
+          100,
+        );
+      },
+      error => {
+        // See error code charts below.
+        console.log('location error:', error, error.message);
+      },
+      {showLocationDialog: true, distanceFilter:MIN_LOCATION_ACCURACY, timeout: 10000, maximumAge: 60000, forceRequestLocation: true, forceLocationManager: true},
+    );
   };
 };
 
@@ -274,9 +384,11 @@ const renderTrackIcon = (activeTrack: Track) => {
 
 export const stopTrackingAction = (): AppThunk => {
   return async (dispatch, getState) => {
+    stopTask();
     const activeTrack = selectActiveTrack(getState());
     const tracking = selectIsTracking(getState());
-    if (activeTrack && tracking === Tracking.trackAndRecord) {
+    const recording = selectIsRecording(getState());
+    if (activeTrack && tracking && recording) {
       try {
         activeTrack.end = Date.now();
         await writeTrackToFile(activeTrack, dispatch);
@@ -351,8 +463,8 @@ export const exportTrackAction =
       await RNFS.writeFile(decodeURI(url), compiledKml.data, 'utf8');
       dispatch(
         showModalAction({
-          title: i18next.t('Track is saved'),
-          text: `${i18next.t('to')} ${url}`,
+          title: t('Track is saved'),
+          text: `${t('to')} ${url}`,
           actions: [{text: 'Ok', type: ModalActionType.cancel}],
         }),
       );
@@ -360,8 +472,8 @@ export const exportTrackAction =
       console.log('Error write to:', url, '\n', err);
       dispatch(
         showModalAction({
-          title: i18next.t('Oops'),
-          text: `${i18next.t('do not manage to save it')} ${url}`,
+          title: t('Oops'),
+          text: `${t('do not manage to save it')} ${url}`,
           actions: [{text: 'Ok', type: ModalActionType.cancel}],
         }),
       );
@@ -375,7 +487,7 @@ export const exportTrackAction =
 export const restartTrackingAction = (): AppThunk => {
   return async (dispatch, getState) => {
     const tracking = selectIsTracking(getState());
-    if (tracking !== Tracking.none) {
+    if (tracking) {
       dispatch({type: ActionTypeEnum.PauseTracking});
       setTimeout(() => dispatch({type: ActionTypeEnum.ResumeTracking}), 10000);
     }
@@ -388,7 +500,10 @@ export const importTrackAction = (): AppThunk => {
         type: [DocumentPicker.types.allFiles],
         copyTo: 'cachesDirectory',
       });
-      const data = await RNFS.readFile(decodeURI(res.fileCopyUri), 'utf8');
+      const data = await RNFS.readFile(
+        decodeURI((res as any).fileCopyUri),
+        'utf8',
+      );
       const trackFromKml = parseKml(data);
       const newTrack: Track = {
         id: uuid(),
@@ -396,7 +511,7 @@ export const importTrackAction = (): AppThunk => {
         end: trackFromKml.end,
         name: trackFromKml.name,
         track: trackFromKml.coordinates,
-        prevPosition: []
+        prevPosition: [],
       };
       await writeTrackToFile(newTrack, dispatch);
       dispatch(updateTrackListAction());
