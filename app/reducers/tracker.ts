@@ -1,7 +1,8 @@
 import {createSelector} from 'reselect';
 import MapboxGL from '@rnmapbox/maps';
 import {Position} from 'geojson';
-import {TrackerState, State, Track, Tracking} from '../store/types';
+import {v4 as uuid} from '@lukeed/uuid';
+import {TrackerState, State, Track} from '../store/types';
 import {ActionTypeEnum} from '../actions';
 import {createReducer} from './reducer-utils';
 
@@ -23,7 +24,7 @@ const initialState: TrackerState = Object.freeze({
   compass: {x: 0, y: 0, z: 0},
   tracks: [],
   tracking: false,
-  trackingAndRecording: false,
+  recording: false,
   selectedTrackBBox: [],
 });
 
@@ -66,50 +67,56 @@ export default createReducer<TrackerState>(initialState, {
       ...state,
       activeTrack,
       tracking: true,
+      recording: false,
     }),
-  [ActionTypeEnum.StartTrackingAndRecording]:
-    (activeTrack: Track) => (state: TrackerState) => ({
-      ...state,
-      activeTrack,
-      tracking: true,
-      trackingAndRecording: true,
-    }),
-  [ActionTypeEnum.EndRecordingTracking]: () => (state: TrackerState) => ({
-    ...state,
-    activeTrack: undefined,
-    trackingAndRecording: false,
-  }),
   [ActionTypeEnum.EndTracking]: () => (state: TrackerState) => ({
     ...state,
     activeTrack: undefined,
     tracking: false,
-    trackingAndRecording: false,
+    recording: false,
   }),
   [ActionTypeEnum.PauseTracking]: () => (state: TrackerState) => ({
     ...state,
     tracking: false,
-    trackingAndRecording: false,
   }),
   [ActionTypeEnum.ResumeTracking]: () => (state: TrackerState) => ({
     ...state,
     tracking: true,
   }),
-  [ActionTypeEnum.AddPoint]:
-    ({track, prevPosition}: {track: number[][]; prevPosition: Position}) =>
-    (state: TrackerState) => {
-      if (!state.activeTrack) {
-        return state;
-      }
-      return {
-        ...state,
-        activeTrack: {
-          ...state.activeTrack,
-          track,
-          prevPosition,
-          end: Date.now(),
-        },
-      };
-    },
+  [ActionTypeEnum.StartTrackRecording]: () => (state: TrackerState) => {
+    return {
+      ...state,
+      recording: true,
+      activeTrack: {
+        id: uuid(),
+        start: Date.now(),
+        end: Date.now(),
+        name: '',
+        track: [],
+      },
+    };
+  },
+  [ActionTypeEnum.EndTrackRecording]: () => (state: TrackerState) => {
+    const activeTrack = state.activeTrack;
+    return {
+      ...state,
+      recording: false,
+      activeTrack: activeTrack ? {...activeTrack, track: []} : activeTrack,
+    };
+  },
+  [ActionTypeEnum.AddPoint]: (position: Position) => (state: TrackerState) => {
+    if (!state.activeTrack) {
+      return state;
+    }
+    return {
+      ...state,
+      activeTrack: {
+        ...state.activeTrack,
+        track: [...state.activeTrack.track, position],
+        end: Date.now(),
+      },
+    };
+  },
 });
 export const selectTrackerState = (state: State) => state.tracker;
 export const selectCompass = createSelector(
@@ -132,7 +139,7 @@ export const selectIsTracking = createSelector(selectTrackerState, state => {
   return state.tracking;
 });
 export const selectIsRecording = createSelector(selectTrackerState, state => {
-  return state.trackingAndRecording
+  return state.recording;
 });
 export const selectSelectedTrack = createSelector(
   selectTrackerState,

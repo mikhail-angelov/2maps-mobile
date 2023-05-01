@@ -1,6 +1,6 @@
 import {ActionTypeEnum, AppThunk} from '.';
 import MapboxGL from '@rnmapbox/maps';
-import {Track, ModalActionType, State, Tracking} from '../store/types';
+import {Track, ModalActionType, State} from '../store/types';
 import {
   selectIsTracking,
   selectLocation,
@@ -22,7 +22,10 @@ import {t} from 'i18next';
 import distance from '@turf/distance';
 import {point} from '@turf/helpers';
 import {Position} from 'geojson';
-import {requestLocationPermissions, requestBackgroundLocationPermissions} from '../utils/permissions';
+import {
+  requestLocationPermissions,
+  requestBackgroundLocationPermissions,
+} from '../utils/permissions';
 import {getTracksDirectoryPath} from './api';
 import {requestWriteFilePermissions} from '../utils/permissions';
 import {showModalAction} from './ui-actions';
@@ -203,27 +206,38 @@ export const startTrackingAction = (): AppThunk => {
       startTask(() => {
         Geolocation.getCurrentPosition(
           async location => {
-            const {latitude, longitude} = location.coords;
             console.log('location :', new Date(), location);
-            dispatch(addPointAction(location))
-            dispatch(setLocationAction(location as MapboxGL.Location))
+            // dispatch(addPointAction(location));
+            dispatch(setLocationAction(location as MapboxGL.Location));
           },
           error => {
             // See error code charts below.
             console.log('location error:', error, error.message);
           },
-          {showLocationDialog: true, distanceFilter:MIN_LOCATION_ACCURACY, timeout: 10000, maximumAge: 60000, forceRequestLocation: true, forceLocationManager: true},
+          {
+            showLocationDialog: true,
+            distanceFilter: MIN_LOCATION_ACCURACY,
+            timeout: 1000,
+            maximumAge: 60000,
+            forceRequestLocation: true,
+            forceLocationManager: true,
+          },
         );
       });
       const location = selectLocation(getState());
-      const startPoint = [location.coords.longitude, location.coords.latitude];
+      let points: Position[] = [];
+      if (
+        !!location.coords.accuracy &&
+        location.coords.accuracy < MIN_LOCATION_ACCURACY
+      ) {
+        points = [[location.coords.longitude, location.coords.latitude]];
+      }
       const track: Track = {
         id: uuid(),
         start: Date.now(),
         end: Date.now(),
         name: '',
-        track: [],
-        prevPosition: startPoint,
+        track: points,
       };
       dispatch({type: ActionTypeEnum.StartTracking, payload: track});
     } catch (e) {
@@ -232,39 +246,13 @@ export const startTrackingAction = (): AppThunk => {
   };
 };
 
-export const startTrackingAdnRecordingAction = (): AppThunk => {
-  return async (dispatch, getState) => {
-    try {
-      const isGranted = await requestLocationPermissions();
-      if (!isGranted) {
-        return showLocationPermissionAlert(dispatch);
-      }
-      const location = selectLocation(getState());
-      const startPoint = [location.coords.longitude, location.coords.latitude];
-      const track: Track = {
-        id: uuid(),
-        start: Date.now(),
-        end: Date.now(),
-        name: '',
-        track: [],
-        prevPosition: startPoint,
-      };
-      dispatch({
-        type: ActionTypeEnum.StartTrackingAndRecording,
-        payload: track,
-      });
-    } catch (e) {
-      showLocationErrorAlert(dispatch, e);
-    }
-  };
-};
+export const startRecordingAction = () => ({type:  ActionTypeEnum.StartTrackRecording})
+
 export const stopRecordingAction = (): AppThunk => {
   return async (dispatch, getState) => {
-    stopTask();
     const activeTrack = selectActiveTrack(getState());
-    const tracking = selectIsTracking(getState());
     const recording = selectIsRecording(getState());
-    if (activeTrack && tracking && recording) {
+    if (activeTrack &&  recording) {
       try {
         activeTrack.end = Date.now();
         await writeTrackToFile(activeTrack, dispatch);
@@ -273,47 +261,37 @@ export const stopRecordingAction = (): AppThunk => {
       }
     }
 
-    dispatch({type: ActionTypeEnum.EndRecordingTracking});
+    dispatch({type: ActionTypeEnum.EndTrackRecording});
   };
 };
 
-export const addPointAction = (location: Geolocation.GeoPosition): AppThunk => {
+export const addPointAction = (location: MapboxGL.Location): AppThunk => {
   return async (dispatch, getState) => {
     const activeTrack = selectActiveTrack(getState());
-    if (!activeTrack) {
+    if (!activeTrack || (location.coords.accuracy && location.coords.accuracy > MIN_LOCATION_ACCURACY)) {
       return;
     }
     const nextPoint: Position = [
       location.coords.longitude,
       location.coords.latitude,
     ];
-    console.log(
-      'addPointAction distance1:',
-      activeTrack.prevPosition,
-      nextPoint,
-    );
-    if (!activeTrack.prevPosition) {
+    if(activeTrack.track.length===0){
       return dispatch({
         type: ActionTypeEnum.AddPoint,
-        payload: {track: [nextPoint], prevPosition: nextPoint},
+        payload: nextPoint,
       });
     }
-    const d = distance(point(activeTrack.prevPosition), point(nextPoint));
+
+    const prevPosition = activeTrack.track[activeTrack.track.length - 1];
+    const d = distance(point(prevPosition), point(nextPoint));
     console.log('addPointAction distance:', d, activeTrack.track.length);
-    if (d > 10 && activeTrack.track.length < 5) {
-      dispatch({
+    if (d > 5)  {
+      return dispatch({
         type: ActionTypeEnum.AddPoint,
-        payload: {track: [nextPoint], prevPosition: nextPoint},
-      });
-    } else {
-      dispatch({
-        type: ActionTypeEnum.AddPoint,
-        payload: {
-          track: [...activeTrack.track, nextPoint],
-          prevPosition: nextPoint,
-        },
+        payload: nextPoint,
       });
     }
+    console.log('ignore 0 distance')
   };
 };
 
@@ -341,7 +319,6 @@ export const setCurrentPositionOnMapAction = (
         }),
       );
     }
-    console.log('---------all permissions ok');
     Geolocation.getCurrentPosition(
       async location => {
         const {latitude, longitude} = location.coords;
@@ -364,7 +341,14 @@ export const setCurrentPositionOnMapAction = (
         // See error code charts below.
         console.log('location error:', error, error.message);
       },
-      {showLocationDialog: true, distanceFilter:MIN_LOCATION_ACCURACY, timeout: 10000, maximumAge: 60000, forceRequestLocation: true, forceLocationManager: true},
+      {
+        showLocationDialog: true,
+        distanceFilter: MIN_LOCATION_ACCURACY,
+        timeout: 10000,
+        maximumAge: 60000,
+        forceRequestLocation: true,
+        forceLocationManager: true,
+      },
     );
   };
 };
@@ -385,18 +369,7 @@ const renderTrackIcon = (activeTrack: Track) => {
 export const stopTrackingAction = (): AppThunk => {
   return async (dispatch, getState) => {
     stopTask();
-    const activeTrack = selectActiveTrack(getState());
-    const tracking = selectIsTracking(getState());
-    const recording = selectIsRecording(getState());
-    if (activeTrack && tracking && recording) {
-      try {
-        activeTrack.end = Date.now();
-        await writeTrackToFile(activeTrack, dispatch);
-      } catch (e) {
-        console.log(e);
-      }
-    }
-
+    dispatch(stopRecordingAction())
     dispatch({type: ActionTypeEnum.EndTracking});
   };
 };
@@ -511,7 +484,6 @@ export const importTrackAction = (): AppThunk => {
         end: trackFromKml.end,
         name: trackFromKml.name,
         track: trackFromKml.coordinates,
-        prevPosition: [],
       };
       await writeTrackToFile(newTrack, dispatch);
       dispatch(updateTrackListAction());

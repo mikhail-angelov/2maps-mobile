@@ -3,7 +3,7 @@ import MapboxGL from '@rnmapbox/maps';
 import {connect, ConnectedProps} from 'react-redux';
 import {minBy} from 'lodash';
 import distance from '@turf/distance';
-import {State, Mark, Tracking, MarkType} from '../store/types';
+import {State, Mark, MarkType} from '../store/types';
 import {
   selectMarks,
   selectEditedMark,
@@ -34,7 +34,7 @@ import MapSettings from './MapSettings';
 import {
   selectTrackAction,
   startTrackingAction,
-  startTrackingAdnRecordingAction,
+  startRecordingAction,
   stopRecordingAction,
   stopTrackingAction,
   setCurrentPositionOnMapAction,
@@ -170,7 +170,7 @@ const mapDispatchToProps = {
   removeMark: removeMarkAction,
   selectTrack: selectTrackAction,
   startTracking: startTrackingAction,
-  startTrackingAdnRecording: startTrackingAdnRecordingAction,
+  startRecording: startRecordingAction,
   stopRecording: stopRecordingAction,
   stopTracking: stopTrackingAction,
   setCenter: setCenterAction,
@@ -229,7 +229,7 @@ const Overlay: FC<Props> = ({
   tracking,
   isRecording,
   startTracking,
-  startTrackingAdnRecording,
+  startRecording,
   stopRecording,
   stopTracking,
   showModal,
@@ -381,7 +381,7 @@ const Overlay: FC<Props> = ({
     if (isRecording) {
       stopRecording();
     } else {
-      startTrackingAdnRecording();
+      startRecording();
     }
   };
   const selectMark = (mark: Mark) => {
@@ -479,7 +479,7 @@ const Overlay: FC<Props> = ({
                 </>
               )}
 
-              {tracking && (
+              {(tracking||isRecording) && (
                 <>
                   <MenuButton
                     icon={

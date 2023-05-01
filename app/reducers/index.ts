@@ -26,7 +26,7 @@ const trackerPersistConfig = {
 const mapPersistConfig = {
   key: 'map',
   storage: AsyncStorage,
-  blacklist: ['relocating', 'loading', 'relocateProgress', 'error', 'secondaryMap']
+  blacklist: ['relocating', 'relocateProgress', 'loading', 'downloading', 'downloadProgress', 'error','showWikimapia']
 }
 const authPersistConfig = {
   key: 'auth',

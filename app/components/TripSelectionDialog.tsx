@@ -72,7 +72,7 @@ const TripSelectionDialog: React.FC<Props> = ({ markAppendedToTrip, trips, onClo
                 <Button
                     icon={{ name: 'control-point', color: 'gray' }}
                     titleStyle={{ fontSize: 20 }}
-                    title={i18next.t('add a new trip')}
+                    title={i18next.t('add a new trip')||''}
                     iconPosition="top"
                     containerStyle={styles.newTripButtonContainer}
                     type="outline"

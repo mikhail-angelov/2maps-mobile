@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {StyleSheet} from 'react-native';
 import {connect, ConnectedProps} from 'react-redux';
-import {State, Tracking} from '../store/types';
+import {State} from '../store/types';
 import {
   featureToMark,
   editMarkAction,
@@ -12,6 +12,7 @@ import {
   selectIsTracking,
   selectLocation,
   selectSelectedTrackBBox,
+  selectIsRecording
 } from '../reducers/tracker';
 import MapboxGL, {
   OnPressEvent,
@@ -25,6 +26,7 @@ import {setCenterAction, setZoomAction} from '../actions/map-actions';
 import {
   setLocationAction,
   restartTrackingAction,
+  addPointAction,
 } from '../actions/tracker-actions';
 import {
   selectCenter,
@@ -80,6 +82,7 @@ const mapStateToProps = (state: State) => ({
   selectedDrawingBBox: selectDrawingBBox(state),
   selectedTripMark: selectActiveTripMark(state),
   selectedTrip: selectActiveTrip(state),
+  isRecording: selectIsRecording(state),
 });
 const mapDispatchToProps = {
   setCenter: setCenterAction,
@@ -90,6 +93,7 @@ const mapDispatchToProps = {
   restartTracking: restartTrackingAction,
   selectMark: selectMarkAction,
   selectTripMark: selectTripMarkAction,
+  addPoint: addPointAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps);
 type Props = ConnectedProps<typeof connector> & {
@@ -212,6 +216,9 @@ class Map extends Component<Props> {
     ) {
       return;
     }
+    if(this.props.isRecording){
+      this.props.addPoint(location)
+    }
     this.props.setLocation(location);
   };
   onBalloonClick = () => {
@@ -309,9 +316,9 @@ class Map extends Component<Props> {
         <MapboxGL.UserLocation
           visible={true}
           renderMode="native"
+          androidRenderMode="compass"
           onUpdate={this.onUserLocationUpdate}
-          showsUserHeadingIndicator={tracking}
-          minDisplacement={50}
+          minDisplacement={10}
         />
         {secondaryMap && (
           <MapboxGL.RasterSource
