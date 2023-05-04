@@ -12,7 +12,6 @@ import {
   selectIsTracking,
   selectLocation,
   selectSelectedTrackBBox,
-  selectIsRecording
 } from '../reducers/tracker';
 import MapboxGL, {
   OnPressEvent,
@@ -26,7 +25,6 @@ import {setCenterAction, setZoomAction} from '../actions/map-actions';
 import {
   setLocationAction,
   restartTrackingAction,
-  addPointAction,
 } from '../actions/tracker-actions';
 import {
   selectCenter,
@@ -46,7 +44,6 @@ import {selectDrawingBBox} from '../reducers/drawings';
 import TripMapLayer from '../components/TripMapLayer';
 import {selectTripMarkAction} from '../actions/trips-actions';
 import {selectActiveTrip, selectActiveTripMark} from '../reducers/trips';
-import {MIN_LOCATION_ACCURACY} from '../constants/geolocation';
 
 MapboxGL.setWellKnownTileServer('Mapbox');
 MapboxGL.setAccessToken(
@@ -82,7 +79,6 @@ const mapStateToProps = (state: State) => ({
   selectedDrawingBBox: selectDrawingBBox(state),
   selectedTripMark: selectActiveTripMark(state),
   selectedTrip: selectActiveTrip(state),
-  isRecording: selectIsRecording(state),
 });
 const mapDispatchToProps = {
   setCenter: setCenterAction,
@@ -93,7 +89,6 @@ const mapDispatchToProps = {
   restartTracking: restartTrackingAction,
   selectMark: selectMarkAction,
   selectTripMark: selectTripMarkAction,
-  addPoint: addPointAction,
 };
 const connector = connect(mapStateToProps, mapDispatchToProps);
 type Props = ConnectedProps<typeof connector> & {
@@ -207,18 +202,6 @@ class Map extends Component<Props> {
     this.props.setZoom(e.properties.zoomLevel || 15);
   };
   onUserLocationUpdate = (location: MapboxGL.Location) => {
-    console.log('update user location', location);
-    if (
-      !location?.coords ||
-      (!!location?.coords &&
-        !!location?.coords?.accuracy &&
-        location?.coords?.accuracy > MIN_LOCATION_ACCURACY)
-    ) {
-      return;
-    }
-    if(this.props.isRecording){
-      this.props.addPoint(location)
-    }
     this.props.setLocation(location);
   };
   onBalloonClick = () => {
@@ -255,7 +238,6 @@ class Map extends Component<Props> {
   };
   render() {
     const {
-      tracking,
       primaryMap,
       secondaryMap,
       opacity,
