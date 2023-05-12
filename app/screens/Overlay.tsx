@@ -443,6 +443,11 @@ const Overlay: FC<Props> = ({
       )}
       {!activeDrawingLayout && (
         <>
+          {showOSD && (
+            <View style={styles.osdContainer}>
+              <Text style={styles.osdText}>{osdText}</Text>
+            </View>
+          )}
           <View style={styles.buttonPanelLeft}>
             {showWikiButton && (
               <MenuButton
@@ -545,11 +550,6 @@ const Overlay: FC<Props> = ({
             <MenuButton icon="compass-rose" onPress={toCurrentLocation} />
           </View>
         </>
-      )}
-      {showOSD && (
-        <View style={styles.osdContainer}>
-          <Text style={styles.osdText}>{osdText}</Text>
-        </View>
       )}
       <View style={styles.closestMark}>
         <Text style={styles.markLabel}>{closest}</Text>
