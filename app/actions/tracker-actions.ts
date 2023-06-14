@@ -33,6 +33,7 @@ import {ThunkDispatch} from 'redux-thunk';
 import {Action} from 'redux';
 import {startTask, stopTask} from '../foregroundService';
 import {MIN_LOCATION_ACCURACY} from '../constants/geolocation';
+import Geolocation from 'react-native-geolocation-service';
 
 const TRACKS_EXT = '.track';
 const SVG_EXT = '.svg';
@@ -217,31 +218,6 @@ const showLocationErrorAlert = (
 export const startTrackingAction = (): AppThunk => {
   return async (dispatch, getState) => {
     try {
-      const isGranted = await requestBackgroundLocationPermissions();
-      if (!isGranted) {
-        return showLocationPermissionAlert(dispatch);
-      }
-      startTask(() => {
-        // Geolocation.getCurrentPosition(
-        //   async location => {
-        //     console.log('location :', new Date(), location);
-        //     // dispatch(addPointAction(location));
-        //     dispatch(setLocationAction(location as MapboxGL.Location));
-        //   },
-        //   error => {
-        //     // See error code charts below.
-        //     console.log('location error:', error, error.message);
-        //   },
-        //   {
-        //     showLocationDialog: true,
-        //     distanceFilter: MIN_LOCATION_ACCURACY,
-        //     timeout: 1000,
-        //     maximumAge: 60000,
-        //     forceRequestLocation: true,
-        //     forceLocationManager: true,
-        //   },
-        // );
-      });
       const location = selectLocation(getState());
       let points: Position[] = [];
       if (location) {
@@ -255,6 +231,33 @@ export const startTrackingAction = (): AppThunk => {
         track: points,
       };
       dispatch({type: ActionTypeEnum.StartTracking, payload: track});
+
+      // start background task if possible 
+      let isGranted = await requestLocationPermissions()
+      if (!isGranted) {
+        return showLocationPermissionAlert(dispatch);
+      }
+      isGranted = await requestBackgroundLocationPermissions();
+      if (!isGranted) {
+        return showLocationPermissionAlert(dispatch);
+      }
+      startTask(() => {
+        console.log('bg task call!', new Date());
+        Geolocation.getCurrentPosition(
+          async location => {
+            console.log('location :', new Date(), location);
+            dispatch(setLocationAction(location as MapboxGL.Location));
+          },
+          error => {
+            console.log('location error:', error, error.message);
+          },
+          {
+            timeout: 20000,
+            maximumAge: 10000,
+            enableHighAccuracy: true,
+          },
+        );
+      });
     } catch (e) {
       showLocationErrorAlert(dispatch, e);
     }
@@ -304,7 +307,9 @@ export const addPointAction = (location: MapboxGL.Location): AppThunk => {
     }
 
     const prevPosition = activeTrack.track[activeTrack.track.length - 1];
-    const d = distance(point(prevPosition), point(nextPoint),{units: 'meters'});
+    const d = distance(point(prevPosition), point(nextPoint), {
+      units: 'meters',
+    });
     console.log('addPointAction distance:', d, activeTrack.track.length);
     if (d > 5) {
       return dispatch({
@@ -341,41 +346,7 @@ export const setCurrentPositionOnMapAction = (
       );
     }
     const location = selectLocation(getState());
-    camera.moveTo(
-            [location.coords.longitude, location.coords.latitude],
-            100,
-          );
-    // Geolocation.getCurrentPosition(
-    //   async location => {
-    //     const {latitude, longitude} = location.coords;
-    //     console.log('---------location :', new Date(), location);
-    //     if (
-    //       !location ||
-    //       (!!location &&
-    //         !!location?.coords &&
-    //         !!location?.coords?.accuracy &&
-    //         location?.coords?.accuracy > MIN_LOCATION_ACCURACY)
-    //     ) {
-    //       return;
-    //     }
-    //     camera.moveTo(
-    //       [location.coords.longitude, location.coords.latitude],
-    //       100,
-    //     );
-    //   },
-    //   error => {
-    //     // See error code charts below.
-    //     console.log('location error:', error, error.message);
-    //   },
-    //   {
-    //     showLocationDialog: true,
-    //     distanceFilter: MIN_LOCATION_ACCURACY,
-    //     timeout: 10000,
-    //     maximumAge: 60000,
-    //     forceRequestLocation: true,
-    //     forceLocationManager: true,
-    //   },
-    // );
+    camera.moveTo([location.coords.longitude, location.coords.latitude], 100);
   };
 };
 
@@ -393,7 +364,7 @@ const renderTrackIcon = (activeTrack: Track) => {
 };
 
 export const stopTrackingAction = (): AppThunk => {
-  return async (dispatch, getState) => {
+  return async (dispatch) => {
     stopTask();
     dispatch(stopRecordingAction());
     dispatch({type: ActionTypeEnum.EndTracking});

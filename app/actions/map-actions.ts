@@ -161,11 +161,14 @@ export const getStorageMemoryInfo = async(): Promise<StorageMemory> => {
 }
 
 const createNewFileName = (name: string): string => {
+  console.log('createNewFileName', name)
   const ext = '.sqlitedb'
   const changeableName = name.replace(ext, '')
   const regex = /\((\d+)\)$/
-  const newName = changeableName.replace(regex, (str, p1)=>(`(${+p1 + 1})`))
-  return changeableName === newName ? newName + '(1)' + ext : newName + ext
+  const propName = changeableName.replace(regex, (str, p1)=>(`(${+p1 + 1})`))
+  const newName = changeableName === propName ? propName + '(1)' + ext : propName + ext
+  console.log('createNewFileName res', newName)
+  return newName
 }
 
 const findUniqName = async(path: string, fileName: string): Promise<string> => {
@@ -174,7 +177,9 @@ const findUniqName = async(path: string, fileName: string): Promise<string> => {
     if(statResult.isFile()) {
       return findUniqName(path, createNewFileName(fileName))
     }
-  }catch(e){}  
+  }catch(e){
+    console.log('findUniqName error', path, fileName, JSON.stringify(e))
+  }  
   return fileName
 }
 
@@ -188,21 +193,28 @@ export const importMapAction = (): AppThunk => {
     dispatch({ type: ActionTypeEnum.ImportMap });
     try {
       const res = await DocumentPicker.pick({
-        type: [DocumentPicker.types.allFiles]
+        type: [DocumentPicker.types.allFiles],
+        copyTo: 'documentDirectory'
       });
-      if(!isFileValid(res.name)){
-        throw new Error()
+      if(res.length === 0 || !res[0].name || !res[0].fileCopyUri){
+        dispatch({ type: ActionTypeEnum.ImportMapFailure, payload: 'invalid file selected, pick another one' });
+        return
+      }
+      if(!isFileValid(res[0].name)){
+        dispatch({ type: ActionTypeEnum.ImportMapFailure, payload: 'invalid file extension' });
+        return
       }
       const destinationPath = await getMapsDirectoryPath()
       if(!destinationPath) {
         dispatch({ type: ActionTypeEnum.ImportMapFailure, payload: 'import map failure, can not find directory path' });
         return
       }      
-      const fileName = await findUniqName(destinationPath, res.name)
-      await RNFS.copyFile(res.fileCopyUri, destinationPath + fileName)
+      const fileName = await findUniqName(destinationPath, res[0].name)
+      await RNFS.copyFile(res[0].fileCopyUri, destinationPath + fileName)
       dispatch({ type: ActionTypeEnum.ImportMapSuccess });
       dispatch(getLocalMapListAction())
     } catch (err: any) {
+      console.log('---error--', JSON.stringify(err))
       if (DocumentPicker.isCancel(err)) {
         // User cancelled the picker, exit any dialogs or menus and move on
       }

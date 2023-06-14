@@ -74,7 +74,7 @@ export const importPoisAction = (): AppThunk => {
       const res = await DocumentPicker.pick({
         type: [DocumentPicker.types.allFiles],
         copyTo: 'cachesDirectory',
-      });
+      }) as any;
       console.log(
         res.uri,
         res.type, // mime type
