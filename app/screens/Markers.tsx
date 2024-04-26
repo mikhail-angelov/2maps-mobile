@@ -66,7 +66,7 @@ const MarkersHeader: FC<MarkersHeaderProps> = ({ importPois, exportPois, removeA
             ) : (
                 <View style={styles.buttonsWithoutClose}>
                     <Icon.Button style={styles.titleButton} backgroundColor="#fff0" name="search" onPress={() => setIsFilterMarks(!isFilterMarks)} />
-                    <Menu >
+                    <Menu style={{minWidth:'80%'}}>
                         <MenuTrigger><Icon style={styles.menuMainIcon} name="menu" /></MenuTrigger>
                         <MenuOptions >
                             <MenuOption onSelect={exportPois}>

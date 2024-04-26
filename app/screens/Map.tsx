@@ -14,11 +14,12 @@ import {
   selectSelectedTrackBBox,
 } from '../reducers/tracker';
 import MapboxGL, {
+  MapState,
   OnPressEvent,
   RasterSourceProps,
   RegionPayload,
+  UserTrackingMode,
 } from '@rnmapbox/maps';
-import {UserTrackingMode} from '@rnmapbox/maps/javascript/components/Camera';
 import {Feature, Point} from '@turf/helpers';
 import {checkAction} from '../actions/auth-actions';
 import {setCenterAction, setZoomAction} from '../actions/map-actions';
@@ -45,7 +46,6 @@ import TripMapLayer from '../components/TripMapLayer';
 import {selectTripMarkAction} from '../actions/trips-actions';
 import {selectActiveTrip, selectActiveTripMark} from '../reducers/trips';
 
-MapboxGL.setWellKnownTileServer('Mapbox');
 MapboxGL.setAccessToken(
   process.env.MAPBOX_PUB_KEY ||
     'pk.eyJ1IjoibWlraGFpbGFuZ2Vsb3YiLCJhIjoiY2tpa2FnbnM5MDg5ejJ3bDQybWN3eWRsdSJ9.vK_kqebrJaO7MdIg4ilaFQ',
@@ -196,10 +196,10 @@ class Map extends Component<Props> {
     this.props.selectTripMark(selectedMark);
   };
 
-  updateCenter = (e: Feature<Point, RegionPayload>) => {
-    console.log('update center', e.properties);
-    this.props.setCenter(e.geometry.coordinates);
-    this.props.setZoom(e.properties.zoomLevel || 15);
+  updateCenter = (state: MapState) => {
+    console.log('update center', state);
+    this.props.setCenter(state.properties.center);
+    this.props.setZoom(state.properties.zoom || 15);
   };
   onUserLocationUpdate = (location: MapboxGL.Location) => {
     this.props.setLocation(location);
@@ -285,7 +285,7 @@ class Map extends Component<Props> {
         styleURL={styleURL}
         compassViewMargins={{x: 0, y: 100}}
         onLongPress={this.onAddMark}
-        onRegionDidChange={this.updateCenter}
+        onMapIdle={this.updateCenter}
         onTouchEnd={this.onTouchEnd}
         ref={this.onSetMap}
         key={mapKey}>
@@ -297,8 +297,7 @@ class Map extends Component<Props> {
         />
         <MapboxGL.UserLocation
           visible={true}
-          renderMode="native"
-          androidRenderMode="compass"
+          androidRenderMode={'compass'}
           onUpdate={this.onUserLocationUpdate}
           minDisplacement={10}
         />

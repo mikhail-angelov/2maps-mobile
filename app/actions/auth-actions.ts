@@ -4,7 +4,7 @@ import { selectToken } from '../reducers/auth'
 import { AuthParams } from '../store/types'
 import { NativeModules } from "react-native";
 
-const AUTH_URL = `${HOST}/auth/m`
+const AUTH_URL = `${HOST}/auth`
 
 export interface Credentials {
   email: string;

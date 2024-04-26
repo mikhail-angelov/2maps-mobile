@@ -10,7 +10,7 @@ import { selectToken } from '../reducers/auth'
 import { requestWriteFilePermissions } from '../utils/permissions'
 import { showModalAction } from './ui-actions'
 
-const MARKS_URL = `${HOST}/marks/m`
+const MARKS_URL = `${HOST}/marks`
 
 export const markToFeature = (mark: Mark): Feature<Point> => {
   const aFeature = feature(mark.geometry);
@@ -159,7 +159,7 @@ export const syncMarksAction = (): AppThunk => {
         ]
       }))
     } catch (err) {
-      console.log('Error write to:', err)
+      console.log('Error write to:', JSON.stringify(err))
       dispatch(showModalAction({
         title: 'Oops',
         text: 'do not manage to sync',

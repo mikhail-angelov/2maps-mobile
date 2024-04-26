@@ -46,7 +46,7 @@ export const postLarge = async ({ url, token, data }: {
     method: 'post',
     data: formData,
     headers: token ? {
-      authorization: `bearer ${token}`,
+      cookies: `mapnn=${token}`,
       'Content-Type': 'multipart/form-data',
     } : {},
   });
