@@ -15,11 +15,9 @@ import {
 } from '../reducers/tracker';
 import MapboxGL, {
   MapState,
-  OnPressEvent,
-  RasterSourceProps,
-  RegionPayload,
   UserTrackingMode,
 } from '@rnmapbox/maps';
+import { OnPressEvent } from "@rnmapbox/maps/lib/typescript/src/types/OnPressEvent";
 import {Feature, Point} from '@turf/helpers';
 import {checkAction} from '../actions/auth-actions';
 import {setCenterAction, setZoomAction} from '../actions/map-actions';
@@ -51,7 +49,7 @@ MapboxGL.setAccessToken(
     'pk.eyJ1IjoibWlraGFpbGFuZ2Vsb3YiLCJhIjoiY2tpa2FnbnM5MDg5ejJ3bDQybWN3eWRsdSJ9.vK_kqebrJaO7MdIg4ilaFQ',
 );
 
-export const rasterSourceProps: RasterSourceProps = {
+export const rasterSourceProps: any = {
   id: 'stamenWatercolorSource',
   tileUrlTemplates: ['http://localhost:5555/map/mende/{z}/{x}/{y}.png'],
   minZoomLevel: 1,

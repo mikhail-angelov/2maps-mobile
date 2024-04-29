@@ -54,5 +54,6 @@ export const requestWriteFilePermissions = async (): Promise<boolean> => {
       buttonPositive: t('OK'),
     },
   );
-  return granted === PermissionsAndroid.RESULTS.GRANTED;
+  console.log('--', granted)
+  return  granted === PermissionsAndroid.RESULTS.GRANTED;
 };

@@ -1,11 +1,12 @@
 import React, { FC, useEffect } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { State } from '../store/types'
-import MapboxGL, { CircleLayerStyle, OnPressEvent } from "@rnmapbox/maps";
+import MapboxGL, { CircleLayerStyle } from "@rnmapbox/maps";
 import { featureCollection } from '@turf/helpers';
 import { markToFeature } from "../actions/marks-actions";
 import { colorPalette } from "../constants/color";
 import { selectActiveTrip, selectActiveTripBBox } from "../reducers/trips";
+import { OnPressEvent } from "@rnmapbox/maps/lib/typescript/src/types/OnPressEvent";
 
 export const MarkStyle: CircleLayerStyle = {
     circleRadius: 14,

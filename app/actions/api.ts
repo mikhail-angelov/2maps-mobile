@@ -5,7 +5,7 @@ import RNFS from 'react-native-fs';
 
 export const HOST = 'https://2maps.xyz'
 let HOST_LOCAL = 'http://localhost:5555'
-// export const HOST = 'http://192.168.31.251:3000'
+// export const HOST = 'http://192.168.2.35:3003'
 
 export const TERMS_OF_SERVICE_RU_URL = `${HOST}/2maps-tos-ru.html`
 export const PRIVACY_POLICY_RU_URL = `${HOST}/2maps-pp-ru.html`
@@ -46,7 +46,7 @@ export const postLarge = async ({ url, token, data }: {
     method: 'post',
     data: formData,
     headers: token ? {
-      cookies: `mapnn=${token}`,
+      authorization: `bearer ${token}`,
       'Content-Type': 'multipart/form-data',
     } : {},
   });

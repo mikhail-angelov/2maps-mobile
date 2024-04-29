@@ -63,8 +63,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
-    maxWidth: '80%',
-    minWidth: '80%',
+    maxWidth: '90%',
+    minWidth: '90%',
   },
   button: {
     borderRadius: 24,

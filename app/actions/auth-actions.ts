@@ -1,10 +1,10 @@
-import { ActionTypeEnum, AppThunk } from ".";
-import { post, HOST } from "./api";
-import { selectToken } from '../reducers/auth'
-import { AuthParams } from '../store/types'
-import { NativeModules } from "react-native";
+import {ActionTypeEnum, AppThunk} from '.';
+import {post, HOST} from './api';
+import {selectToken} from '../reducers/auth';
+import {AuthParams} from '../store/types';
+import {NativeModules} from 'react-native';
 
-const AUTH_URL = `${HOST}/auth`
+const AUTH_URL = `${HOST}/auth/m`;
 
 export interface Credentials {
   email: string;
@@ -27,42 +27,42 @@ interface changePassword {
 }
 
 export const setAuthErrorAction = (error: string) => {
-  return { type: ActionTypeEnum.AuthError, payload: error }
+  return {type: ActionTypeEnum.AuthError, payload: error};
 };
 
 export const loginAction = (data: Credentials): AppThunk => {
-  return async (dispatch) => {
+  return async dispatch => {
     try {
-      dispatch({ type: ActionTypeEnum.LoginRequest });
-      console.log('loginAction',data)
-      const response = await post<AuthParams>({ url: `${AUTH_URL}/login`, data });
+      dispatch({type: ActionTypeEnum.LoginRequest});
+      console.log('loginAction', data);
+      const response = await post<AuthParams>({url: `${AUTH_URL}/login`, data});
       dispatch({
         type: ActionTypeEnum.LoginSuccess,
         payload: response.data,
       });
     } catch (e) {
-      console.log("login error", JSON.stringify(e));
+      console.log('login error', JSON.stringify(e));
       dispatch({
         type: ActionTypeEnum.LoginFailure,
-        payload: "login failure",
+        payload: 'login failure',
       });
     }
   };
 };
 export const logoutAction = (): AppThunk => {
-  return async (dispatch) => {
+  return async dispatch => {
     try {
-      dispatch({ type: ActionTypeEnum.LogoutRequest });
-      const response = await post({ url: `${AUTH_URL}/logout`, data: {} });
+      dispatch({type: ActionTypeEnum.LogoutRequest});
+      const response = await post({url: `${AUTH_URL}/logout`, data: {}});
 
       dispatch({
         type: ActionTypeEnum.LogoutSuccess,
       });
     } catch (e) {
-      console.log("logout error", e);
+      console.log('logout error', e);
       dispatch({
         type: ActionTypeEnum.LogoutFailure,
-        payload: "logout failure",
+        payload: 'logout failure',
       });
     }
   };
@@ -70,102 +70,122 @@ export const logoutAction = (): AppThunk => {
 export const checkAction = (): AppThunk => {
   return async (dispatch, getState) => {
     try {
-      const token = selectToken(getState())
+      const token = selectToken(getState());
       if (!token) {
-        throw 'logout'
+        throw 'logout';
       }
-      const response = await post<AuthParams>({ url: `${AUTH_URL}/check`, data: {}, token });
+      const response = await post<AuthParams>({
+        url: `${AUTH_URL}/check`,
+        data: {},
+        token,
+      });
       dispatch({
         type: ActionTypeEnum.LoginSuccess,
         payload: response.data,
       });
-
     } catch (e) {
-      console.log("logout check", e);
-      dispatch({ type: ActionTypeEnum.LogoutSuccess });
+      console.log('logout check', e);
+      dispatch({type: ActionTypeEnum.LogoutSuccess});
     }
   };
 };
 
 export const signUpAction = (data: SignUp): AppThunk => {
-  return async (dispatch) => {
+  return async dispatch => {
     try {
-      dispatch({ type: ActionTypeEnum.SignUpRequest });
-      const response = await post<AuthParams>({ url: `${AUTH_URL}/sign-up`, data });
+      dispatch({type: ActionTypeEnum.SignUpRequest});
+      const response = await post<AuthParams>({
+        url: `${AUTH_URL}/sign-up`,
+        data,
+      });
 
       dispatch({
         type: ActionTypeEnum.SignUpSuccess,
         payload: response.data,
       });
     } catch (e) {
-      console.log("sign up error", e);
+      console.log('sign up error', e);
       dispatch({
         type: ActionTypeEnum.SignUpFailure,
-        payload: "sign up failure",
+        payload: 'sign up failure',
       });
     }
   };
 };
 
 export const forgetPasswordAction = (data: PasswordReset): AppThunk => {
-  return async (dispatch) => {
+  return async dispatch => {
     try {
-      dispatch({ type: ActionTypeEnum.ForgetPasswordRequest });
-      await post<AuthParams>({ url: `${AUTH_URL}/forget`, data });
+      dispatch({type: ActionTypeEnum.ForgetPasswordRequest});
+      await post<AuthParams>({url: `${AUTH_URL}/forget`, data});
       dispatch({
         type: ActionTypeEnum.ForgetPasswordSuccess,
       });
     } catch (e) {
-      console.log("password reset error", e);
+      console.log('password reset error', e);
       dispatch({
         type: ActionTypeEnum.ForgetPasswordFailure,
-        payload: "password reset failure",
+        payload: 'password reset failure',
       });
     }
   };
 };
 
 export const resetPasswordAction = (data: resetPassword): AppThunk => {
-  return async (dispatch) => {
+  return async dispatch => {
     try {
-      dispatch({ type: ActionTypeEnum.ChangePasswordRequest });
-      const response = await post<AuthParams>({ url: `${AUTH_URL}/reset-password`, data });
+      dispatch({type: ActionTypeEnum.ChangePasswordRequest});
+      const response = await post<AuthParams>({
+        url: `${AUTH_URL}/reset-password`,
+        data,
+      });
       dispatch({
         type: ActionTypeEnum.ChangePasswordSuccess,
         payload: response.data,
       });
     } catch (e) {
-      console.log("password change error", e);
+      console.log('password change error', e);
       dispatch({
         type: ActionTypeEnum.ChangePasswordFailure,
-        payload: "password change failure",
+        payload: 'password change failure',
       });
     }
   };
 };
 
-export const storeResetTokenAction = (resetToken: string) => ({ type: ActionTypeEnum.StoreResetToken, payload: resetToken })
+export const storeResetTokenAction = (resetToken: string) => ({
+  type: ActionTypeEnum.StoreResetToken,
+  payload: resetToken,
+});
 
 export const changePasswordAction = (data: changePassword): AppThunk => {
   return async (dispatch, getState) => {
-    const token = selectToken(getState())
+    const token = selectToken(getState());
     try {
-      dispatch({ type: ActionTypeEnum.ChangePasswordRequest });
-      const response = await post<AuthParams>({ url: `${AUTH_URL}/change-password`, token, data });
+      dispatch({type: ActionTypeEnum.ChangePasswordRequest});
+      const response = await post<AuthParams>({
+        url: `${AUTH_URL}/change-password`,
+        token,
+        data,
+      });
       dispatch({
         type: ActionTypeEnum.ChangePasswordSuccess,
         payload: response.data,
       });
     } catch (e) {
-      console.log("password change error", e);
+      console.log('password change error', e);
       dispatch({
         type: ActionTypeEnum.ChangePasswordFailure,
-        payload: "password change failure",
+        payload: 'password change failure',
       });
     }
   };
 };
 
-export const setTheFirstTimeAppStartAction = (value: boolean) => ({type: ActionTypeEnum.TheFirstTimeAppStart, payload: value })
+export const setTheFirstTimeAppStartAction = (value: boolean) => ({
+  type: ActionTypeEnum.TheFirstTimeAppStart,
+  payload: value,
+});
 
-export const checkForTestDevice = async(): Promise<boolean> => NativeModules.MapsModule.isTestDevice()
+export const checkForTestDevice = async (): Promise<boolean> =>
+  NativeModules.MapsModule.isTestDevice();

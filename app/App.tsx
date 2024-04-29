@@ -54,8 +54,14 @@ function AppContainer(): JSX.Element {
   );
 };
 
-class App extends React.Component {
-  constructor(props) {
+interface AppState {
+  isFetchingAndroidPermission: boolean;
+  isAndroidPermissionGranted: boolean;
+  activeExample: number;
+}
+
+class App extends React.Component<any,AppState> {
+  constructor(props: any) {
     super(props);
 
     this.state = {
@@ -83,7 +89,6 @@ class App extends React.Component {
       return (
         <SafeAreaView
           style={{flex: 1, backgroundColor: blue}}
-          forceInset={{ top: 'always' }}
         >
           <View style={{flex: 1}}>
             <Text style={styles.noPermissionsText}>
