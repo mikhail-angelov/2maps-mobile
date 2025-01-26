@@ -5,6 +5,13 @@ import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactActivityDelegate;
 
+import android.os.Bundle;
+import android.view.WindowManager;
+
+import androidx.annotation.Nullable;
+
+import org.devio.rn.splashscreen.SplashScreen;
+
 public class MainActivity extends ReactActivity {
 
     /**
@@ -27,6 +34,14 @@ public class MainActivity extends ReactActivity {
             this,
             getMainComponentName(),
             // If you opted-in for the New Architecture, we enable the Fabric Renderer.
-            DefaultNewArchitectureEntryPoint.getFabricEnabled());
+            DefaultNewArchitectureEntryPoint.getFabricEnabled()){
+            @Override
+            @Nullable
+            protected void onCreate(Bundle savedInstanceState) {
+                // SplashScreen.show(this, R.style.SplashScreenTheme);
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                super.onCreate(savedInstanceState);
+            }
+        };
     }
 }

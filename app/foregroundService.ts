@@ -1,11 +1,11 @@
 import ReactNativeForegroundService from '@supersami/rn-foreground-service';
 
 const TASK_ID = '2MAPS_TASK';
-let globalForegroundCallback: ((()=>void) | null) = null;
+let globalForegroundCallback: (() => void) | null = null;
 
 const update = async () => {
   console.log('ReactNativeForegroundService on update');
-  globalForegroundCallback && globalForegroundCallback()
+  globalForegroundCallback && globalForegroundCallback();
 };
 
 export const register = () => {
@@ -18,7 +18,7 @@ export const register = () => {
   });
 };
 
-export const startTask = async (cb: ()=>void) => {
+export const startTask = async (cb: () => void) => {
   try {
     await ReactNativeForegroundService.start({
       id: 1234567,
@@ -28,13 +28,13 @@ export const startTask = async (cb: ()=>void) => {
       setOnlyAlertOnce: 'true',
       color: '#000000',
     });
-    globalForegroundCallback = cb
+    globalForegroundCallback = cb;
   } catch (e) {
-    console.log('error to star foreground task', e);
+    console.log('error to start foreground task', e);
   }
 };
 
 export const stopTask = () => {
-  globalForegroundCallback = null
+  globalForegroundCallback = null;
   ReactNativeForegroundService.stopAll();
 };

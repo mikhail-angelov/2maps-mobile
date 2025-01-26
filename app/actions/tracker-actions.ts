@@ -33,7 +33,7 @@ import {ThunkDispatch} from 'redux-thunk';
 import {Action} from 'redux';
 import {startTask, stopTask} from '../foregroundService';
 import {MIN_LOCATION_ACCURACY} from '../constants/geolocation';
-import Geolocation from 'react-native-geolocation-service';
+import Geolocation from '@react-native-community/geolocation';
 
 const TRACKS_EXT = '.track';
 const SVG_EXT = '.svg';
@@ -232,14 +232,14 @@ export const startTrackingAction = (): AppThunk => {
       };
       dispatch({type: ActionTypeEnum.StartTracking, payload: track});
 
-      // start background task if possible 
-      let isGranted = await requestLocationPermissions()
+      // Start background task if possible
+      let isGranted = await requestLocationPermissions();
       if (!isGranted) {
         return showLocationPermissionAlert(dispatch);
       }
       isGranted = await requestBackgroundLocationPermissions();
       if (!isGranted) {
-        return showLocationPermissionAlert(dispatch);
+        //return showLocationPermissionAlert(dispatch);
       }
       startTask(() => {
         console.log('bg task call!', new Date());

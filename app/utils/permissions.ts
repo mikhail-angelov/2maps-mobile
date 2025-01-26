@@ -5,15 +5,28 @@ const {ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION,ACCESS_BACKGROUND_LOCATION,W
   PermissionsAndroid.PERMISSIONS;
 
 export const requestLocationPermissions = async (): Promise<boolean> => {
-  const granted = await PermissionsAndroid.requestMultiple([
-    ACCESS_COARSE_LOCATION,
-    ACCESS_FINE_LOCATION,
-  ]);
-  return (
-    !!granted &&
-    granted[ACCESS_FINE_LOCATION] === PermissionsAndroid.RESULTS.GRANTED &&
-    granted[ACCESS_COARSE_LOCATION] === PermissionsAndroid.RESULTS.GRANTED
+  // const granted = await PermissionsAndroid.requestMultiple([
+  //   ACCESS_COARSE_LOCATION,
+  //   ACCESS_FINE_LOCATION,
+  // ]);
+  // return (
+  //   !!granted &&
+  //   granted[ACCESS_FINE_LOCATION] === PermissionsAndroid.RESULTS.GRANTED &&
+  //   granted[ACCESS_COARSE_LOCATION] === PermissionsAndroid.RESULTS.GRANTED
+  // );
+  const granted = await PermissionsAndroid.request(
+    PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+    {
+      title: t('Background Location Permission'),
+      message: t(
+        '2Maps need access to your location, so you can get live quality updates.',
+      ),
+      buttonNeutral: t('Ask Me Later') as string | undefined,
+      buttonNegative: t('Cancel') as string | undefined,
+      buttonPositive: t('OK'),
+    },
   );
+  return granted === PermissionsAndroid.RESULTS.GRANTED;
 };
 export const requestBackgroundLocationPermissions =
   async (): Promise<boolean> => {
